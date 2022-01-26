@@ -1,0 +1,46 @@
+{
+  "name": "c11",
+  "version": "0.1.0",
+  "description": "Smart Config Loader",
+  "repository": "unjs/c11",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "vitest dev",
+    "lint": "eslint --ext .ts,.js,.mjs,.cjs .",
+    "prepack": "unbuild",
+    "release": "yarn test && standard-version && git push --follow-tags && npm publish",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "defu": "^5.0.1",
+    "dotenv": "^14.3.2",
+    "jiti": "^1.12.14",
+    "mlly": "^0.4.1",
+    "pathe": "^0.2.0",
+    "rc9": "^1.2.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config-typescript": "latest",
+    "c8": "latest",
+    "eslint": "latest",
+    "standard-version": "latest",
+    "typescript": "latest",
+    "unbuild": "latest",
+    "vitest": "latest"
+  }
+}
