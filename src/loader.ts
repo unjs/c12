@@ -1,4 +1,3 @@
-import { existsSync } from 'fs'
 import { resolve } from 'pathe'
 import createJiti from 'jiti'
 import * as rc9 from 'rc9'
@@ -24,71 +23,80 @@ export interface LoadConfigOptions<T extends ConfigT=ConfigT> {
 
 export interface ResolvedConfig<T extends ConfigT=ConfigT> {
   config: T
-  meta: {
-    cwd: string,
-    configFile?: string
-    env?: Record<string, any>
-  }
+  configPath?: string
+  env?: Record<string, any>
 }
 
 export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOptions<T>): Promise<ResolvedConfig<T>> {
   // Normalize options
+  opts.cwd = resolve(process.cwd(), opts.cwd || '.')
   opts.name = opts.name || 'config'
   opts.configFile = opts.configFile ?? ((opts.name !== 'config') ? `${opts.name}.config` : 'config')
   opts.rcFile = opts.rcFile ?? (`.${opts.name}rc`)
 
   // Create context
   const ctx: ResolvedConfig<T> = {
-    config: {} as any,
-    meta: {
-      cwd: resolve(process.cwd(), opts.cwd || '.'),
-      configFile: null,
-      env: {}
-    }
+    config: {} as any
   }
-
-  // Resolve config file
-  const jiti = createJiti(ctx.meta.cwd, { cache: false, interopDefault: true })
-  const tryResolve = (id: string) => {
-    try { return jiti.resolve(id) } catch (err) {
-      if (err.code !== 'MODULE_NOT_FOUND') {
-        throw err
-      }
-      return null
-    }
-  }
-  ctx.meta.configFile = opts.configFile && tryResolve(resolve(ctx.meta.cwd, opts.configFile))
 
   // Load dotenv
   if (opts.dotenv) {
-    ctx.meta.env = await setupDotenv({
-      cwd: ctx.meta.cwd,
+    ctx.env = await setupDotenv({
+      cwd: opts.cwd,
       ...(opts.dotenv === true
         ? {}
         : opts.dotenv)
     })
   }
 
-  // Initialize with empty object
-  let config: any = {}
-
   // Load config file
-  if (ctx.meta.configFile && existsSync(ctx.meta.configFile)) {
-    config = jiti(ctx.meta.configFile)
-    if (typeof config === 'function') {
-      config = await config(opts)
+  const { config, configPath } = await loadConfigFile(opts)
+  ctx.configPath = configPath
+
+  // Load rc files
+  const configRC = {}
+  if (opts.rcFile) {
+    if (opts.globalRc) {
+      Object.assign(configRC, rc9.readUser({ name: opts.rcFile, dir: opts.cwd }))
     }
+    Object.assign(configRC, rc9.read({ name: opts.rcFile, dir: opts.cwd }))
   }
 
   // Combine sources
-  config = defu(
+  ctx.config = defu(
     opts.overrides,
     config,
-    opts.rcFile ? rc9.read({ name: opts.rcFile, dir: ctx.meta.cwd }) : {},
-    (opts.rcFile && opts.globalRc !== false) ? rc9.readUser(opts.rcFile) : {},
+    configRC,
     opts.defaults
-  )
+  ) as T
 
   // Return resolved context
   return ctx
+}
+
+const jiti = createJiti(null, { cache: false, interopDefault: true })
+
+async function loadConfigFile (opts: LoadConfigOptions) {
+  const res = {
+    configPath: null,
+    config: null
+  }
+
+  if (!opts.configFile) {
+    return res
+  }
+
+  try {
+    res.configPath = jiti.resolve(resolve(opts.cwd, opts.configFile), { paths: [opts.cwd] })
+    res.config = jiti(res.configPath)
+    if (typeof res.config === 'function') {
+      res.config = await res.config()
+    }
+  } catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') {
+      throw err
+    }
+  }
+
+  return res
 }
