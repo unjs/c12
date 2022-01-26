@@ -8,12 +8,16 @@ import { DotenvOptions, setupDotenv } from './dotenv'
 export type ConfigT = Record<string, any>
 
 export interface LoadConfigOptions<T extends ConfigT=ConfigT> {
-  cwd?: string
   name?: string
+  cwd?: string
+
   configFile?: false | string
+
   rcFile?: false | string
   globalRc?: boolean
+
   dotenv?: boolean | DotenvOptions
+
   defaults?: T
   overrides?: T
 }
@@ -33,11 +37,18 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
   opts.configFile = opts.configFile ?? ((opts.name !== 'config') ? `${opts.name}.config` : 'config')
   opts.rcFile = opts.rcFile ?? (`.${opts.name}rc`)
 
-  // Working directory
-  const cwd = resolve(process.cwd(), opts.cwd || '.')
+  // Create context
+  const ctx: ResolvedConfig<T> = {
+    config: {} as any,
+    meta: {
+      cwd: resolve(process.cwd(), opts.cwd || '.'),
+      configFile: null,
+      env: {}
+    }
+  }
 
   // Resolve config file
-  const jiti = createJiti(cwd, { cache: false, interopDefault: true })
+  const jiti = createJiti(ctx.meta.cwd, { cache: false, interopDefault: true })
   const tryResolve = (id: string) => {
     try { return jiti.resolve(id) } catch (err) {
       if (err.code !== 'MODULE_NOT_FOUND') {
@@ -46,20 +57,24 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
       return null
     }
   }
-  const configFile = opts.configFile && tryResolve(resolve(cwd, opts.configFile))
+  ctx.meta.configFile = opts.configFile && tryResolve(resolve(ctx.meta.cwd, opts.configFile))
 
   // Load dotenv
-  let env
   if (opts.dotenv) {
-    env = await setupDotenv({ cwd, ...(opts.dotenv === true ? {} : opts.dotenv) })
+    ctx.meta.env = await setupDotenv({
+      cwd: ctx.meta.cwd,
+      ...(opts.dotenv === true
+        ? {}
+        : opts.dotenv)
+    })
   }
 
   // Initialize with empty object
   let config: any = {}
 
   // Load config file
-  if (configFile && existsSync(configFile)) {
-    config = jiti(configFile)
+  if (ctx.meta.configFile && existsSync(ctx.meta.configFile)) {
+    config = jiti(ctx.meta.configFile)
     if (typeof config === 'function') {
       config = await config(opts)
     }
@@ -69,18 +84,11 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
   config = defu(
     opts.overrides,
     config,
-    opts.rcFile ? rc9.read({ name: opts.rcFile, dir: cwd }) : {},
+    opts.rcFile ? rc9.read({ name: opts.rcFile, dir: ctx.meta.cwd }) : {},
     (opts.rcFile && opts.globalRc !== false) ? rc9.readUser(opts.rcFile) : {},
     opts.defaults
   )
 
-  // Return context
-  return {
-    config,
-    meta: {
-      cwd,
-      env,
-      configFile
-    }
-  }
+  // Return resolved context
+  return ctx
 }
