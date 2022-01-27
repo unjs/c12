@@ -1,8 +1,8 @@
 {
-  "name": "c11",
+  "name": "c12",
   "version": "0.1.0",
   "description": "Smart Config Loader",
-  "repository": "unjs/c11",
+  "repository": "unjs/c12",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",

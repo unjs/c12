@@ -1,4 +1,4 @@
-# c11
+# c12
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
@@ -20,23 +20,23 @@ Install package:
 
 ```sh
 # npm
-npm install c11
+npm install c12
 
 # yarn
-yarn install c11
+yarn install c12
 
 # pnpm
-pnpm install c11
+pnpm install c12
 ```
 
 Import:
 
 ```js
 // ESM
-import { loadConfig } from 'c11'
+import { loadConfig } from 'c12'
 
 // CommonJS
-const { loadConfig } = require('c11')
+const { loadConfig } = require('c12')
 ```
 
 Load configuration:
@@ -47,7 +47,7 @@ const { config } = await loadConfig({})
 
 ## Loading priority
 
-c11 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
+c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
 
 1. config overrides passed by options
 2. config file in CWD
@@ -105,14 +105,14 @@ Specify override configuration. It has the **highest** priority.
 Made with 💛 Published under [MIT License](./LICENSE).
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/c11?style=flat-square
-[npm-version-href]: https://npmjs.com/package/c11
+[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat-square
+[npm-version-href]: https://npmjs.com/package/c12
 
-[npm-downloads-src]: https://img.shields.io/npm/dm/c11?style=flat-square
-[npm-downloads-href]: https://npmjs.com/package/c11
+[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat-square
+[npm-downloads-href]: https://npmjs.com/package/c12
 
-[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/c11/ci/main?style=flat-square
-[github-actions-href]: https://github.com/unjs/c11/actions?query=workflow%3Aci
+[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/c12/ci/main?style=flat-square
+[github-actions-href]: https://github.com/unjs/c12/actions?query=workflow%3Aci
 
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c11/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/unjs/c11
+[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/unjs/c12
