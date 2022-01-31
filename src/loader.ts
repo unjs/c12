@@ -99,7 +99,7 @@ async function extendConfig (config, configFile: string, cwd: string) {
   delete config.extends
   for (let extendSource of extendSources) {
     if (TIGED_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
-      const tmpdir = resolve(os.tmpdir(), 'c12/git', extendSource.replace(/[#]/g, '_'))
+      const tmpdir = resolve(os.tmpdir(), 'c12/git', extendSource.replace(/[#:@]/g, '_'))
       await fsp.rmdir(tmpdir, { recursive: true })
       const t = tiged(extendSource, { cache: true })
       await t.clone(tmpdir)
