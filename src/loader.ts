@@ -4,7 +4,6 @@ import { resolve, extname, dirname } from 'pathe'
 import createJiti from 'jiti'
 import * as rc9 from 'rc9'
 import defu from 'defu'
-import tiged from 'tiged'
 import { DotenvOptions, setupDotenv } from './dotenv'
 
 export interface InputConfig extends Record<string, any> {}
@@ -90,7 +89,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   return r
 }
 
-const TIGED_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
+const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 
 async function extendConfig (config, configFile: string, cwd: string) {
   config._layers = config._layers || []
@@ -98,12 +97,16 @@ async function extendConfig (config, configFile: string, cwd: string) {
   const extendSources = (Array.isArray(config.extends) ? config.extends : [config.extends]).filter(Boolean)
   delete config.extends
   for (let extendSource of extendSources) {
-    if (TIGED_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
-      const tmpdir = resolve(os.tmpdir(), 'c12/', extendSource.replace(/[#:@/\\]/g, '_'))
+    if (GIT_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
+      const url = new URL(extendSource)
+      const subPath = url.pathname.split('/').slice(2).join('/')
+      const gitRepo = url.protocol + url.pathname.split('/').slice(0, 2).join('/')
+      const tmpdir = resolve(os.tmpdir(), 'c12/', gitRepo.replace(/[#:@/\\]/g, '_'))
       await fsp.rm(tmpdir, { recursive: true }).catch(() => {})
-      const t = tiged(extendSource, { cache: true })
-      await t.clone(tmpdir)
-      extendSource = tmpdir
+      const gittar = await import('gittar').then(r => r.default || r)
+      const tarFile = await gittar.fetch(gitRepo)
+      await gittar.extract(tarFile, tmpdir)
+      extendSource = resolve(tmpdir, subPath)
     }
 
     const isDir = !extname(extendSource)
