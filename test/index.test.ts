@@ -1,15 +1,13 @@
 import { fileURLToPath } from 'url'
-import { resolve } from 'pathe'
 import { expect, it, describe } from 'vitest'
 import { loadConfig } from '../src'
 
 describe('c12', () => {
-  it('load fixture config', async () => {
-    const fixtureDir = fileURLToPath(new URL('./fixture', import.meta.url))
-    const rFixture = (...segments: string[]) => resolve(fixtureDir, ...segments)
+  const r = path => fileURLToPath(new URL(path, import.meta.url))
 
+  it('load fixture config', async () => {
     const { config, layers } = await loadConfig({
-      cwd: fixtureDir,
+      cwd: r('./fixture'),
       dotenv: true,
       overrides: {
         overriden: true
@@ -41,8 +39,8 @@ describe('c12', () => {
             secondary: 'theme_secondary'
           }
         },
-        configFile: rFixture('theme/config.ts'),
-        cwd: rFixture('theme')
+        configFile: r('./fixture/theme/config.ts'),
+        cwd: r('./fixture/theme')
       },
       {
         config: {
@@ -52,14 +50,35 @@ describe('c12', () => {
             text: 'base_text'
           }
         },
-        configFile: rFixture('base/config.ts'),
-        cwd: rFixture('base')
+        configFile: r('./fixture/base/config.ts'),
+        cwd: r('./fixture/base')
       },
       {
         config: { devConfig: true },
-        configFile: rFixture('config.dev.ts'),
-        cwd: rFixture('.')
+        configFile: r('./fixture/config.dev.ts'),
+        cwd: r('./fixture')
       }
     ])
+  })
+
+  it('extend from git repo', async () => {
+    const { config } = await loadConfig({
+      cwd: r('./fixture/new_dir'),
+      overrides: {
+        extends: ['github:unjs/c12/test/fixture']
+      }
+    })
+
+    expect(config).toMatchObject({
+      devConfig: true,
+      baseConfig: true,
+      colors: {
+        primary: 'user_primary',
+        text: 'base_text',
+        secondary: 'theme_secondary'
+      },
+      configFile: true,
+      overriden: false
+    })
   })
 })

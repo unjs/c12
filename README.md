@@ -13,7 +13,7 @@
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
-- Support extending nested configurations
+- Support extending nested configurations from multiple local or git sourecs with [tiged](https://github.com/tiged/tiged)
 
 ## Usage
 
@@ -106,6 +106,9 @@ If resolved config contains a `extends` key, it will be used to extend configura
 Extending can be nested and each layer can extend from one base or more.
 
 Final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
+
+Each item in extends, is a string that can be either an absolute or relative path to current config file pointing to a config file for extending or directory containing config file.
+If it starts with either of `github:`, `gitlab:`, `bitbucket:` or `https:`, c12 autmatically clones it with [tiged](https://github.com/tiged/tiged).
 
 For custom merging strategies, you can directly access each layer with `layers` property.
 

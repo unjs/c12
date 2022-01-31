@@ -1,7 +1,10 @@
+import { promises as fsp } from 'fs'
+import os from 'os'
 import { resolve, extname, dirname } from 'pathe'
 import createJiti from 'jiti'
 import * as rc9 from 'rc9'
 import defu from 'defu'
+import tiged from 'tiged'
 import { DotenvOptions, setupDotenv } from './dotenv'
 
 export interface InputConfig extends Record<string, any> {}
@@ -87,12 +90,22 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   return r
 }
 
+const TIGED_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
+
 async function extendConfig (config, configFile: string, cwd: string) {
   config._layers = config._layers || []
 
   const extendSources = (Array.isArray(config.extends) ? config.extends : [config.extends]).filter(Boolean)
   delete config.extends
-  for (const extendSource of extendSources) {
+  for (let extendSource of extendSources) {
+    if (TIGED_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
+      const tmpdir = resolve(os.tmpdir(), 'c12/git', extendSource.replace(/[#]/g, '_'))
+      await fsp.rmdir(tmpdir, { recursive: true })
+      const t = tiged(extendSource, { cache: true })
+      await t.clone(tmpdir)
+      extendSource = tmpdir
+    }
+
     const isDir = !extname(extendSource)
     const _cwd = resolve(cwd, isDir ? extendSource : dirname(extendSource))
     const _config = await loadConfigFile(_cwd, isDir ? configFile : extendSource)
