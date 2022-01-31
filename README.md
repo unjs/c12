@@ -5,7 +5,7 @@
 [![Github Actions][github-actions-src]][github-actions-href]
 [![Codecov][codecov-src]][codecov-href]
 
-> Smart Config Loader
+> Smart Configuration Loader
 
 ## Features
 
@@ -13,6 +13,7 @@
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
+- Support extending nested configurations
 
 ## Usage
 
@@ -42,7 +43,11 @@ const { loadConfig } = require('c12')
 Load configuration:
 
 ```js
+// Get loaded config
 const { config } = await loadConfig({})
+
+// Get resolved config and extended layers
+const { config, configFile, layers } = await loadConfig({})
 ```
 
 ## Loading priority
@@ -54,6 +59,7 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 3. RC file in CWD
 4. global RC file in user's home directory
 5. default config passed by options
+6. Extended config layers
 
 ## Options
 
@@ -92,6 +98,82 @@ Specify default configuration. It has the **lowest** priority.
 ### `overides`
 
 Specify override configuration. It has the **highest** priority.
+
+## Extending configuration
+
+If resolved config contains a `extends` key, it will be used to extend configuration.
+
+Extending can be nested and each layer can extend from one base or more.
+
+Final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
+
+For custom merging strategies, you can directly access each layer with `layers` property.
+
+**Example:**
+
+```js
+// config.ts
+export default {
+  colors: {
+    primary: 'user_primary'
+  },
+  extends: [
+    './theme',
+    './config.dev.ts'
+  ]
+}
+```
+
+```js
+// config.dev.ts
+export default {
+  dev: true
+}
+```
+
+```js
+// theme/config.ts
+export default {
+  extends: '../base',
+  colors: {
+    primary: 'theme_primary',
+    secondary: 'theme_secondary'
+  }
+}
+```
+
+```js
+// base/config.ts
+export default {
+  colors: {
+    primary: 'base_primary'
+    text: 'base_text'
+  }
+}
+```
+
+Loaded configuration would look like this:
+
+```js
+{
+  dev: true,
+  colors: {
+    primary: 'user_primary',
+    secondary: 'theme_secondary',
+    text: 'base_text'
+  }
+}
+```
+
+Layers:
+
+```js
+[
+ { config: /* theme config */, configFile: /* path/to/theme/config.ts */, cwd: /* path/to/theme */ },
+ { config: /* base  config */, configFile: /* path/to/base/config.ts  */, cwd: /* path/to/base */ },
+ { config: /* dev   config */, configFile: /* path/to/config.dev.ts  */, cwd: /* path/ */ },
+]
+```
 
 ## 💻 Development
 

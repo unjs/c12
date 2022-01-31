@@ -8,10 +8,9 @@ describe('c12', () => {
     const fixtureDir = fileURLToPath(new URL('./fixture', import.meta.url))
     const rFixture = (...segments: string[]) => resolve(fixtureDir, ...segments)
 
-    const { config } = await loadConfig({
+    const { config, layers } = await loadConfig({
       cwd: fixtureDir,
       dotenv: true,
-      name: 'foo',
       overrides: {
         overriden: true
       },
@@ -26,15 +25,41 @@ describe('c12', () => {
       defaultConfig: true,
       overriden: true,
       baseConfig: true,
-      _extends: [
-        {
-          config: { baseConfig: true },
-          meta: {
-            configPath: rFixture('base/foo.config.ts'),
-            cwd: rFixture('base')
-          }
-        }
-      ]
+      devConfig: true,
+      colors: {
+        primary: 'user_primary',
+        secondary: 'theme_secondary',
+        text: 'base_text'
+      }
     })
+
+    expect(layers).toMatchObject([
+      {
+        config: {
+          colors: {
+            primary: 'theme_primary',
+            secondary: 'theme_secondary'
+          }
+        },
+        configFile: rFixture('theme/config.ts'),
+        cwd: rFixture('theme')
+      },
+      {
+        config: {
+          baseConfig: true,
+          colors: {
+            primary: 'base_primary',
+            text: 'base_text'
+          }
+        },
+        configFile: rFixture('base/config.ts'),
+        cwd: rFixture('base')
+      },
+      {
+        config: { devConfig: true },
+        configFile: rFixture('config.dev.ts'),
+        cwd: rFixture('.')
+      }
+    ])
   })
 })

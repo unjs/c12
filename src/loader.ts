@@ -1,12 +1,19 @@
-import { resolve } from 'pathe'
+import { resolve, extname, dirname } from 'pathe'
 import createJiti from 'jiti'
 import * as rc9 from 'rc9'
 import defu from 'defu'
 import { DotenvOptions, setupDotenv } from './dotenv'
 
-export type ConfigT = Record<string, any>
+export interface InputConfig extends Record<string, any> {}
 
-export interface LoadConfigOptions<T extends ConfigT=ConfigT> {
+export interface ResolvedConfig<T extends InputConfig=InputConfig> {
+  config: T
+  cwd: string
+  configFile: string
+  layers: ResolvedConfig<T>[]
+}
+
+export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   name?: string
   cwd?: string
 
@@ -21,13 +28,7 @@ export interface LoadConfigOptions<T extends ConfigT=ConfigT> {
   overrides?: T
 }
 
-export interface ResolvedConfig<T extends ConfigT=ConfigT> {
-  config: T
-  configPath?: string
-  env?: Record<string, any>
-}
-
-export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOptions<T>): Promise<ResolvedConfig<T>> {
+export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadConfigOptions<T>): Promise<ResolvedConfig<T>> {
   // Normalize options
   opts.cwd = resolve(process.cwd(), opts.cwd || '.')
   opts.name = opts.name || 'config'
@@ -35,23 +36,26 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
   opts.rcFile = opts.rcFile ?? (`.${opts.name}rc`)
 
   // Create context
-  const ctx: ResolvedConfig<T> = {
-    config: {} as any
+  const r: ResolvedConfig<T> = {
+    config: {} as any,
+    cwd: opts.cwd,
+    configFile: resolve(opts.cwd, opts.configFile),
+    layers: []
   }
 
   // Load dotenv
   if (opts.dotenv) {
-    ctx.env = await setupDotenv({
+    await setupDotenv({
       cwd: opts.cwd,
-      ...(opts.dotenv === true
-        ? {}
-        : opts.dotenv)
+      ...(opts.dotenv === true ? {} : opts.dotenv)
     })
   }
 
   // Load config file
-  const { config, configPath } = await loadConfigFile(opts.cwd, opts.configFile)
-  ctx.configPath = configPath
+  const { config, configFile } = await loadConfigFile(opts.cwd, opts.configFile)
+  if (configFile) {
+    r.configFile = configFile
+  }
 
   // Load rc files
   const configRC = {}
@@ -63,7 +67,7 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
   }
 
   // Combine sources
-  ctx.config = defu(
+  r.config = defu(
     opts.overrides,
     config,
     configRC,
@@ -71,44 +75,46 @@ export async function loadConfig<T extends ConfigT=ConfigT> (opts: LoadConfigOpt
   ) as T
 
   // Allow extending
-  await extendConfig(ctx.config, opts.configFile!, opts.cwd)
-  ctx.config = defu(
-    ctx.config,
-    ...ctx.config._extends.map(e => e.config)
+  await extendConfig(r.config, opts.configFile!, opts.cwd)
+  r.layers = r.config._layers
+  delete r.config._layers
+  r.config = defu(
+    r.config,
+    ...r.layers.map(e => e.config)
   ) as T
 
-  // Return resolved context
-  return ctx
+  // Return resolved config
+  return r
 }
 
 async function extendConfig (config, configFile: string, cwd: string) {
-  console.log('Extending from', cwd)
-  config._extends = config._extends || []
+  config._layers = config._layers || []
 
   const extendSources = (Array.isArray(config.extends) ? config.extends : [config.extends]).filter(Boolean)
+  delete config.extends
   for (const extendSource of extendSources) {
-    // TODO: Assuming extendSource is dir
-    const _cwd = resolve(cwd, extendSource)
-    const _config = await loadConfigFile(_cwd, configFile)
+    const isDir = !extname(extendSource)
+    const _cwd = resolve(cwd, isDir ? extendSource : dirname(extendSource))
+    const _config = await loadConfigFile(_cwd, isDir ? configFile : extendSource)
+    if (!_config.config) { continue }
     await extendConfig(_config.config, configFile, _cwd)
-    delete _config.config._extends
-    config._extends.push({
+    config._layers.push({
       config: _config.config,
-      meta: {
-        cwd: _cwd,
-        configPath: _config.configPath
-      }
+      cwd: _cwd,
+      configFile: _config.configFile
     })
+    if (_config.config._layers) {
+      config._layers.push(..._config.config._layers)
+      delete _config.config._layers
+    }
   }
-
-  return config
 }
 
 const jiti = createJiti(null, { cache: false, interopDefault: true })
 
 async function loadConfigFile (cwd: string, configFile: string | false) {
   const res = {
-    configPath: null,
+    configFile: null,
     config: null
   }
 
@@ -117,8 +123,8 @@ async function loadConfigFile (cwd: string, configFile: string | false) {
   }
 
   try {
-    res.configPath = jiti.resolve(resolve(cwd, configFile), { paths: [cwd] })
-    res.config = jiti(res.configPath)
+    res.configFile = jiti.resolve(resolve(cwd, configFile), { paths: [cwd] })
+    res.config = jiti(res.configFile)
     if (typeof res.config === 'function') {
       res.config = await res.config()
     }

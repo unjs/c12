@@ -1,3 +1,3 @@
 export default {
-  baseConfig: true
+  devConfig: true
 }
