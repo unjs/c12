@@ -13,7 +13,7 @@
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
-- Support extending nested configurations from multiple local or git sourecs
+- Support extending nested configurations from multiple local or git sources
 
 ## Usage
 
