@@ -15,6 +15,10 @@ export interface ResolvedConfig<T extends InputConfig=InputConfig> {
   layers: ResolvedConfig<T>[]
 }
 
+export interface ExtendConfigOptions {
+  extendKey?: string
+}
+
 export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   name?: string
   cwd?: string
@@ -28,6 +32,8 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
 
   defaults?: T
   overrides?: T
+
+  extend?: false | ExtendConfigOptions
 }
 
 export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadConfigOptions<T>): Promise<ResolvedConfig<T>> {
@@ -36,6 +42,12 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   opts.name = opts.name || 'config'
   opts.configFile = opts.configFile ?? ((opts.name !== 'config') ? `${opts.name}.config` : 'config')
   opts.rcFile = opts.rcFile ?? (`.${opts.name}rc`)
+  if (opts.extend !== false) {
+    opts.extend = {
+      extendKey: 'extends',
+      ...opts.extend
+    }
+  }
 
   // Create context
   const r: ResolvedConfig<T> = {
@@ -77,13 +89,15 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   ) as T
 
   // Allow extending
-  await extendConfig(r.config, opts.configFile!, opts.cwd)
-  r.layers = r.config._layers
-  delete r.config._layers
-  r.config = defu(
-    r.config,
-    ...r.layers.map(e => e.config)
-  ) as T
+  if (opts.extend) {
+    await extendConfig(r.config, opts.configFile!, opts.cwd, opts.extend)
+    r.layers = r.config._layers
+    delete r.config._layers
+    r.config = defu(
+      r.config,
+      ...r.layers.map(e => e.config)
+    ) as T
+  }
 
   // Return resolved config
   return r
@@ -91,11 +105,11 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
 
 const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 
-async function extendConfig (config, configFile: string, cwd: string) {
+async function extendConfig (config, configFile: string, cwd: string, opts: ExtendConfigOptions) {
   config._layers = config._layers || []
 
-  const extendSources = (Array.isArray(config.extends) ? config.extends : [config.extends]).filter(Boolean)
-  delete config.extends
+  const extendSources = (Array.isArray(config[opts.extendKey]) ? config[opts.extendKey] : [config[opts.extendKey]]).filter(Boolean)
+  delete config[opts.extendKey]
   for (let extendSource of extendSources) {
     if (GIT_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
       const url = new URL(extendSource)
@@ -113,7 +127,7 @@ async function extendConfig (config, configFile: string, cwd: string) {
     const _cwd = resolve(cwd, isDir ? extendSource : dirname(extendSource))
     const _config = await loadConfigFile(_cwd, isDir ? configFile : extendSource)
     if (!_config.config) { continue }
-    await extendConfig(_config.config, configFile, _cwd)
+    await extendConfig(_config.config, configFile, _cwd, opts)
     config._layers.push({
       config: _config.config,
       cwd: _cwd,
