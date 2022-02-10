@@ -10,13 +10,13 @@ export interface InputConfig extends Record<string, any> {}
 
 export interface ResolvedConfig<T extends InputConfig=InputConfig> {
   config: T
-  cwd: string
-  configFile: string
-  layers: ResolvedConfig<T>[]
+  cwd?: string
+  configFile?: string
+  layers?: ResolvedConfig<T>[]
 }
 
-export interface ExtendConfigOptions {
-  extendKey?: string
+export interface ResolveConfigOptions {
+  cwd: string
 }
 
 export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
@@ -33,7 +33,11 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   defaults?: T
   overrides?: T
 
-  extend?: false | ExtendConfigOptions
+  resolve?: (id: string, opts: LoadConfigOptions) => null | ResolvedConfig | Promise<ResolvedConfig | null>
+
+  extend?: false | {
+    extendKey?: string
+  }
 }
 
 export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadConfigOptions<T>): Promise<ResolvedConfig<T>> {
@@ -66,7 +70,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   }
 
   // Load config file
-  const { config, configFile } = await loadConfigFile(opts.cwd, opts.configFile)
+  const { config, configFile } = await resolveConfig('.', opts)
   if (configFile) {
     r.configFile = configFile
   }
@@ -90,7 +94,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
 
   // Allow extending
   if (opts.extend) {
-    await extendConfig(r.config, opts.configFile!, opts.cwd, opts.extend)
+    await extendConfig(r.config, opts)
     r.layers = r.config._layers
     delete r.config._layers
     r.config = defu(
@@ -103,36 +107,21 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   return r
 }
 
-const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
-
-async function extendConfig (config, configFile: string, cwd: string, opts: ExtendConfigOptions) {
+async function extendConfig (config, opts: LoadConfigOptions) {
   config._layers = config._layers || []
-
-  const extendSources = (Array.isArray(config[opts.extendKey]) ? config[opts.extendKey] : [config[opts.extendKey]]).filter(Boolean)
-  delete config[opts.extendKey]
-  for (let extendSource of extendSources) {
-    if (GIT_PREFIXES.some(prefix => extendSource.startsWith(prefix))) {
-      const url = new URL(extendSource)
-      const subPath = url.pathname.split('/').slice(2).join('/')
-      const gitRepo = url.protocol + url.pathname.split('/').slice(0, 2).join('/')
-      const tmpdir = resolve(os.tmpdir(), 'c12/', gitRepo.replace(/[#:@/\\]/g, '_'))
-      await fsp.rm(tmpdir, { recursive: true }).catch(() => {})
-      const gittar = await import('gittar').then(r => r.default || r)
-      const tarFile = await gittar.fetch(gitRepo)
-      await gittar.extract(tarFile, tmpdir)
-      extendSource = resolve(tmpdir, subPath)
+  if (!opts.extend) {
+    return
+  }
+  const key = opts.extend.extendKey
+  const extendSources = (Array.isArray(config[key]) ? config[key] : [config[key]]).filter(Boolean)
+  delete config[key]
+  for (const extendSource of extendSources) {
+    const _config = await resolveConfig(extendSource, opts)
+    if (!_config.config) {
+      continue
     }
-
-    const isDir = !extname(extendSource)
-    const _cwd = resolve(cwd, isDir ? extendSource : dirname(extendSource))
-    const _config = await loadConfigFile(_cwd, isDir ? configFile : extendSource)
-    if (!_config.config) { continue }
-    await extendConfig(_config.config, configFile, _cwd, opts)
-    config._layers.push({
-      config: _config.config,
-      cwd: _cwd,
-      configFile: _config.configFile
-    })
+    await extendConfig(_config.config, { ...opts, cwd: _config.cwd })
+    config._layers.push(_config)
     if (_config.config._layers) {
       config._layers.push(..._config.config._layers)
       delete _config.config._layers
@@ -140,20 +129,34 @@ async function extendConfig (config, configFile: string, cwd: string, opts: Exte
   }
 }
 
+const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
+
 const jiti = createJiti(null, { cache: false, interopDefault: true })
 
-async function loadConfigFile (cwd: string, configFile: string | false) {
-  const res = {
-    configFile: null,
-    config: null
+async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
+  if (opts.resolve) {
+    const res = await opts.resolve(source, opts)
+    if (res) {
+      return res
+    }
   }
-
-  if (!configFile) {
-    return res
+  if (GIT_PREFIXES.some(prefix => source.startsWith(prefix))) {
+    const url = new URL(source)
+    const subPath = url.pathname.split('/').slice(2).join('/')
+    const gitRepo = url.protocol + url.pathname.split('/').slice(0, 2).join('/')
+    const tmpdir = resolve(os.tmpdir(), 'c12/', gitRepo.replace(/[#:@/\\]/g, '_'))
+    await fsp.rm(tmpdir, { recursive: true }).catch(() => {})
+    const gittar = await import('gittar').then(r => r.default || r)
+    const tarFile = await gittar.fetch(gitRepo)
+    await gittar.extract(tarFile, tmpdir)
+    source = resolve(tmpdir, subPath)
   }
-
+  const isDir = !extname(source)
+  const cwd = resolve(opts.cwd, isDir ? source : dirname(source))
+  if (isDir) { source = opts.configFile }
+  const res: ResolvedConfig = { config: {}, cwd }
   try {
-    res.configFile = jiti.resolve(resolve(cwd, configFile), { paths: [cwd] })
+    res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
     res.config = jiti(res.configFile)
     if (typeof res.config === 'function') {
       res.config = await res.config()
@@ -163,6 +166,5 @@ async function loadConfigFile (cwd: string, configFile: string | false) {
       throw err
     }
   }
-
   return res
 }

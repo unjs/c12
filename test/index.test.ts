@@ -9,8 +9,14 @@ describe('c12', () => {
     const { config, layers } = await loadConfig({
       cwd: r('./fixture'),
       dotenv: true,
+      resolve: (id) => {
+        if (id === 'virtual') {
+          return { config: { virtual: true } }
+        }
+      },
       overrides: {
-        overriden: true
+        overriden: true,
+        extends: ['virtual']
       },
       defaults: {
         defaultConfig: true
@@ -24,6 +30,7 @@ describe('c12', () => {
       overriden: true,
       baseConfig: true,
       devConfig: true,
+      virtual: true,
       colors: {
         primary: 'user_primary',
         secondary: 'theme_secondary',
@@ -57,6 +64,9 @@ describe('c12', () => {
         config: { devConfig: true },
         configFile: r('./fixture/config.dev.ts'),
         cwd: r('./fixture')
+      },
+      {
+        config: { virtual: true }
       }
     ])
   })
