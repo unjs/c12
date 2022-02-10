@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/unjs/c12/compare/v0.1.1...v0.1.2) (2022-02-10)
+
+
+### Features
+
+* extend options ([a76db4d](https://github.com/unjs/c12/commit/a76db4d6c363e0af7e7249f225f036117a750738))
+* support custom resolver ([bd9997b](https://github.com/unjs/c12/commit/bd9997b3e897a9312d4c1bf0862db641d1e5f18f))
+
 ### 0.1.1 (2022-01-31)
 
 
