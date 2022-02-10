@@ -88,8 +88,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   r.config = defu(
     opts.overrides,
     config,
-    configRC,
-    opts.defaults
+    configRC
   ) as T
 
   // Allow extending
@@ -101,6 +100,11 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
       r.config,
       ...r.layers.map(e => e.config)
     ) as T
+  }
+
+  // Apply defaults
+  if (opts.defaults) {
+    r.config = defu(r.config, opts.defaults) as T
   }
 
   // Return resolved config
