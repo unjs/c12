@@ -161,6 +161,7 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   const res: ResolvedConfig = { config: {}, cwd }
   try {
     res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
+    delete jiti.cache[res.configFile]
     res.config = jiti(res.configFile)
     if (typeof res.config === 'function') {
       res.config = await res.config()
