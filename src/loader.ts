@@ -135,7 +135,7 @@ async function extendConfig (config, opts: LoadConfigOptions) {
 
 const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 
-const jiti = createJiti(null, { cache: false, interopDefault: true })
+const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
   if (opts.resolve) {
@@ -161,7 +161,6 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   const res: ResolvedConfig = { config: {}, cwd }
   try {
     res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
-    delete jiti.cache[res.configFile]
     res.config = jiti(res.configFile)
     if (typeof res.config === 'function') {
       res.config = await res.config()
