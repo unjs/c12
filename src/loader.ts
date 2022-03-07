@@ -135,7 +135,7 @@ async function extendConfig (config, opts: LoadConfigOptions) {
 
 const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 
-const jiti = createJiti(null, { cache: false, interopDefault: true })
+const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
   if (opts.resolve) {
