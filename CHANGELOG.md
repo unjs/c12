@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/unjs/c12/compare/v0.1.3...v0.1.4) (2022-03-07)
+
+
+### Bug Fixes
+
+* disable `requireCache` ([#6](https://github.com/unjs/c12/issues/6)) ([1a6f7d3](https://github.com/unjs/c12/commit/1a6f7d368b643bcebfa38d160c3c31dd7339ae65))
+
 ### [0.1.3](https://github.com/unjs/c12/compare/v0.1.2...v0.1.3) (2022-02-10)
 
 
