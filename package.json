@@ -23,7 +23,7 @@
     "dev": "vitest dev",
     "lint": "eslint --ext .ts,.js,.mjs,.cjs .",
     "prepack": "unbuild",
-    "release": "yarn test && standard-version && git push --follow-tags && npm publish",
+    "release": "pnpm test && standard-version && git push --follow-tags && pnpm publish",
     "test": "vitest run --coverage"
   },
   "dependencies": {
@@ -43,5 +43,6 @@
     "typescript": "latest",
     "unbuild": "latest",
     "vitest": "latest"
-  }
+  },
+  "packageManager": "pnpm@6.32.3"
 }
