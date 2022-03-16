@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/unjs/c12/compare/v0.2.0...v0.2.1) (2022-03-16)
+
+
+### Bug Fixes
+
+* remove configFile for RC layer ([0fc44ad](https://github.com/unjs/c12/commit/0fc44ad076bb6c69a190496151f123fa3c16b147))
+
 ## [0.2.0](https://github.com/unjs/c12/compare/v0.1.4...v0.2.0) (2022-03-16)
 
 
