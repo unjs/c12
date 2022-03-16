@@ -66,7 +66,7 @@ describe('c12', () => {
       },
       {
         config: { rcFile: true },
-        configFile: '.configrc'
+        configFile: undefined
       },
       {
         config: {

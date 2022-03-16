@@ -99,7 +99,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   const baseLayers = [
     opts.overrides && { config: opts.overrides, configFile: undefined, cwd: undefined },
     { config, configFile: opts.configFile, cwd: opts.cwd },
-    opts.rcFile && { config: configRC, configFile: opts.rcFile }
+    opts.rcFile && { config: configRC, configFile: undefined }
   ].filter(l => l && l.config && Object.keys(l.config).length)
 
   // Allow extending
