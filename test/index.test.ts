@@ -41,6 +41,35 @@ describe('c12', () => {
     expect(layers).toMatchObject([
       {
         config: {
+          overriden: true,
+          extends: [
+            'virtual'
+          ]
+        },
+        configFile: undefined,
+        cwd: undefined
+      },
+      {
+        config: {
+          extends: [
+            './theme',
+            './config.dev'
+          ],
+          colors: {
+            primary: 'user_primary'
+          },
+          configFile: true,
+          overriden: false
+        },
+        configFile: 'config',
+        cwd: r('./fixture')
+      },
+      {
+        config: { rcFile: true },
+        configFile: '.configrc'
+      },
+      {
+        config: {
           colors: {
             primary: 'theme_primary',
             secondary: 'theme_secondary'

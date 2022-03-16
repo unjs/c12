@@ -8,11 +8,15 @@ import { DotenvOptions, setupDotenv } from './dotenv'
 
 export interface InputConfig extends Record<string, any> {}
 
-export interface ResolvedConfig<T extends InputConfig=InputConfig> {
+export interface ConfigLayer<T extends InputConfig=InputConfig> {
   config: T
   cwd?: string
   configFile?: string
-  layers?: ResolvedConfig<T>[]
+}
+
+export interface ResolvedConfig<T extends InputConfig=InputConfig> extends ConfigLayer<T> {
+  layers?: ConfigLayer<T>[]
+  cwd?: string
 }
 
 export interface ResolveConfigOptions {
@@ -91,10 +95,20 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
     configRC
   ) as T
 
+  // Preserve unmerged sources
+  const baseLayers = [
+    opts.overrides && { config: opts.overrides, configFile: undefined, cwd: undefined },
+    { config, configFile: opts.configFile, cwd: opts.cwd },
+    opts.rcFile && { config: configRC, configFile: opts.rcFile }
+  ].filter(l => l && l.config && Object.keys(l.config).length)
+
   // Allow extending
   if (opts.extend) {
     await extendConfig(r.config, opts)
-    r.layers = r.config._layers
+    r.layers = [
+      ...baseLayers,
+      ...r.config._layers
+    ]
     delete r.config._layers
     r.config = defu(
       r.config,
