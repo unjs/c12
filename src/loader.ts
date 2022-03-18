@@ -100,7 +100,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
     opts.overrides && { config: opts.overrides, configFile: undefined, cwd: undefined },
     { config, configFile: opts.configFile, cwd: opts.cwd },
     opts.rcFile && { config: configRC, configFile: opts.rcFile }
-  ].filter(l => l && l.config && Object.keys(l.config).length)
+  ].filter(l => l && l.config)
 
   // Allow extending
   if (opts.extend) {
