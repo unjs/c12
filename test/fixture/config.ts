@@ -7,5 +7,6 @@ export default {
     primary: 'user_primary'
   },
   configFile: true,
-  overriden: false
+  overriden: false,
+  array: ['a']
 }

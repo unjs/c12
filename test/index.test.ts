@@ -27,6 +27,10 @@ describe('c12', () => {
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
+        "array": [
+          "b",
+          "a",
+        ],
         "baseConfig": true,
         "colors": {
           "primary": "user_primary",
@@ -36,11 +40,6 @@ describe('c12', () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
-        "extends": [
-          "./theme",
-          "./config.dev",
-          "virtual",
-        ],
         "overriden": true,
         "rcFile": true,
         "virtual": true,
@@ -59,6 +58,9 @@ describe('c12', () => {
         },
         {
           "config": {
+            "array": [
+              "a",
+            ],
             "colors": {
               "primary": "user_primary",
             },
@@ -90,6 +92,9 @@ describe('c12', () => {
         },
         {
           "config": {
+            "array": [
+              "b",
+            ],
             "baseConfig": true,
             "colors": {
               "primary": "base_primary",

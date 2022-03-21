@@ -95,26 +95,27 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
     configRC
   ) as T
 
-  // Preserve unmerged sources
-  const baseLayers = [
-    opts.overrides && { config: opts.overrides, configFile: undefined, cwd: undefined },
-    { config, configFile: opts.configFile, cwd: opts.cwd },
-    opts.rcFile && { config: configRC, configFile: opts.rcFile }
-  ].filter(l => l && l.config)
-
   // Allow extending
   if (opts.extend) {
     await extendConfig(r.config, opts)
-    r.layers = [
-      ...baseLayers,
-      ...r.config._layers
-    ]
+    r.layers = r.config._layers
     delete r.config._layers
     r.config = defu(
       r.config,
       ...r.layers.map(e => e.config)
     ) as T
   }
+
+  // Preserve unmerged sources as layers
+  const baseLayers = [
+    opts.overrides && { config: opts.overrides, configFile: undefined, cwd: undefined },
+    { config, configFile: opts.configFile, cwd: opts.cwd },
+    opts.rcFile && { config: configRC, configFile: opts.rcFile }
+  ].filter(l => l && l.config) as ConfigLayer<T>[]
+  r.layers = [
+    ...baseLayers,
+    ...r.layers
+  ]
 
   // Apply defaults
   if (opts.defaults) {

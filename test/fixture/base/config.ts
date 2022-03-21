@@ -3,5 +3,6 @@ export default {
   colors: {
     primary: 'base_primary',
     text: 'base_text'
-  }
+  },
+  array: ['b']
 }
