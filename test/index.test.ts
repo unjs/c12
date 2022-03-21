@@ -5,6 +5,8 @@ import { loadConfig } from '../src'
 describe('c12', () => {
   const r = path => fileURLToPath(new URL(path, import.meta.url))
 
+  const transformPaths = obj => JSON.parse(JSON.stringify(obj).replaceAll(r('.'), '<path>/'))
+
   it('load fixture config', async () => {
     const { config, layers } = await loadConfig({
       cwd: r('./fixture'),
@@ -23,81 +25,94 @@ describe('c12', () => {
       }
     })
 
-    expect(config).toMatchObject({
-      configFile: true,
-      rcFile: true,
-      defaultConfig: true,
-      overriden: true,
-      baseConfig: true,
-      devConfig: true,
-      virtual: true,
-      colors: {
-        primary: 'user_primary',
-        secondary: 'theme_secondary',
-        text: 'base_text'
+    expect(transformPaths(config)).toMatchInlineSnapshot(`
+      {
+        "baseConfig": true,
+        "colors": {
+          "primary": "user_primary",
+          "secondary": "theme_secondary",
+          "text": "base_text",
+        },
+        "configFile": true,
+        "defaultConfig": true,
+        "devConfig": true,
+        "extends": [
+          "./theme",
+          "./config.dev",
+          "virtual",
+        ],
+        "overriden": true,
+        "rcFile": true,
+        "virtual": true,
       }
-    })
+    `)
 
-    expect(layers).toMatchObject([
-      {
-        config: {
-          overriden: true,
-          extends: [
-            'virtual'
-          ]
-        },
-        configFile: undefined,
-        cwd: undefined
-      },
-      {
-        config: {
-          extends: [
-            './theme',
-            './config.dev'
-          ],
-          colors: {
-            primary: 'user_primary'
+    expect(transformPaths(layers)).toMatchInlineSnapshot(`
+      [
+        {
+          "config": {
+            "extends": [
+              "virtual",
+            ],
+            "overriden": true,
           },
-          configFile: true,
-          overriden: false
         },
-        configFile: 'config',
-        cwd: r('./fixture')
-      },
-      {
-        config: { rcFile: true },
-        configFile: '.configrc'
-      },
-      {
-        config: {
-          colors: {
-            primary: 'theme_primary',
-            secondary: 'theme_secondary'
-          }
+        {
+          "config": {
+            "colors": {
+              "primary": "user_primary",
+            },
+            "configFile": true,
+            "extends": [
+              "./theme",
+              "./config.dev",
+            ],
+            "overriden": false,
+          },
+          "configFile": "config",
+          "cwd": "<path>/fixture",
         },
-        configFile: r('./fixture/theme/config.ts'),
-        cwd: r('./fixture/theme')
-      },
-      {
-        config: {
-          baseConfig: true,
-          colors: {
-            primary: 'base_primary',
-            text: 'base_text'
-          }
+        {
+          "config": {
+            "rcFile": true,
+          },
+          "configFile": ".configrc",
         },
-        configFile: r('./fixture/base/config.ts'),
-        cwd: r('./fixture/base')
-      },
-      {
-        config: { devConfig: true },
-        configFile: r('./fixture/config.dev.ts'),
-        cwd: r('./fixture')
-      },
-      {
-        config: { virtual: true }
-      }
-    ])
+        {
+          "config": {
+            "colors": {
+              "primary": "theme_primary",
+              "secondary": "theme_secondary",
+            },
+          },
+          "configFile": "<path>/fixture/theme/config.ts",
+          "cwd": "<path>/fixture/theme",
+        },
+        {
+          "config": {
+            "baseConfig": true,
+            "colors": {
+              "primary": "base_primary",
+              "text": "base_text",
+            },
+          },
+          "configFile": "<path>/fixture/base/config.ts",
+          "cwd": "<path>/fixture/base",
+        },
+        {
+          "config": {
+            "devConfig": true,
+          },
+          "configFile": "<path>/fixture/config.dev.ts",
+          "cwd": "<path>/fixture",
+        },
+        {
+          "config": {
+            "virtual": true,
+          },
+        },
+      ]
+    `)
   })
 
   it('extend from git repo', async () => {
