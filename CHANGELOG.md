@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/unjs/c12/compare/v0.2.3...v0.2.4) (2022-03-21)
+
+
+### Bug Fixes
+
+* avoid double merging of layers ([367cbf8](https://github.com/unjs/c12/commit/367cbf876bad7c389a462409c1cb1481c7b61804)), closes [nuxt/framework#3800](https://github.com/nuxt/framework/issues/3800)
+
 ### [0.2.3](https://github.com/unjs/c12/compare/v0.2.2...v0.2.3) (2022-03-18)
 
 
