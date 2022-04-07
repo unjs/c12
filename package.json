@@ -27,13 +27,13 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "defu": "^5.0.1",
-    "dotenv": "^14.3.2",
+    "defu": "^6.0.0",
+    "dotenv": "^16.0.0",
     "gittar": "^0.1.1",
     "jiti": "^1.12.14",
-    "mlly": "^0.4.1",
+    "mlly": "^0.5.1",
     "pathe": "^0.2.0",
-    "rc9": "^1.2.0"
+    "rc9": "^1.2.1"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",

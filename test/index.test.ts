@@ -28,8 +28,8 @@ describe('c12', () => {
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
         "array": [
-          "b",
           "a",
+          "b",
         ],
         "baseConfig": true,
         "colors": {
@@ -82,6 +82,11 @@ describe('c12', () => {
         },
         {
           "config": {
+            "virtual": true,
+          },
+        },
+        {
+          "config": {
             "colors": {
               "primary": "theme_primary",
               "secondary": "theme_secondary",
@@ -110,11 +115,6 @@ describe('c12', () => {
           },
           "configFile": "<path>/fixture/config.dev.ts",
           "cwd": "<path>/fixture",
-        },
-        {
-          "config": {
-            "virtual": true,
-          },
         },
       ]
     `)
