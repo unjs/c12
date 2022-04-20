@@ -1,4 +1,4 @@
-import { promises as fsp } from 'fs'
+import { existsSync, promises as fsp } from 'fs'
 import os from 'os'
 import { resolve, extname, dirname } from 'pathe'
 import createJiti from 'jiti'
@@ -176,18 +176,13 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   const res: ResolvedConfig = { config: {}, cwd }
   try {
     res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
-    res.config = jiti(res.configFile)
-    if (typeof res.config === 'function') {
-      res.config = await res.config()
-    }
-  } catch (err) {
-    if (
-      err.code === 'MODULE_NOT_FOUND' &&
-      String(err).includes(opts.configFile)
-    ) {
-      return res
-    }
-    throw err
+  } catch (_err) { }
+  if (!existsSync(res.configFile)) {
+    return res
+  }
+  res.config = jiti(res.configFile)
+  if (typeof res.config === 'function') {
+    res.config = await res.config()
   }
   return res
 }
