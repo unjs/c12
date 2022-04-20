@@ -181,9 +181,13 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
       res.config = await res.config()
     }
   } catch (err) {
-    if (err.code !== 'MODULE_NOT_FOUND') {
-      throw err
+    if (
+      err.code === 'MODULE_NOT_FOUND' &&
+      String(err).includes(opts.configFile)
+    ) {
+      return res
     }
+    throw err
   }
   return res
 }
