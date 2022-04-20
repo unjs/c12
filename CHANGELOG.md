@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](https://github.com/unjs/c12/compare/v0.2.5...v0.2.6) (2022-04-20)
+
+
+### Bug Fixes
+
+* only ignore `MODULE_NOT_FOUND` when message contains configFile ([e067a56](https://github.com/unjs/c12/commit/e067a56e5d47bf396b6b8abd898fff249a1037fd))
+
 ### [0.2.5](https://github.com/unjs/c12/compare/v0.2.4...v0.2.5) (2022-04-07)
 
 ### [0.2.4](https://github.com/unjs/c12/compare/v0.2.3...v0.2.4) (2022-03-21)
