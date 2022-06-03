@@ -24,7 +24,7 @@ Install package:
 npm install c12
 
 # yarn
-yarn install c12
+yarn add c12
 
 # pnpm
 pnpm install c12
