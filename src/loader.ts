@@ -1,6 +1,6 @@
 import { existsSync, promises as fsp } from 'fs'
 import os from 'os'
-import { resolve, extname, dirname } from 'pathe'
+import { resolve, extname, dirname, isAbsolute } from 'pathe'
 import createJiti from 'jiti'
 import * as rc9 from 'rc9'
 import defu from 'defu'
@@ -170,19 +170,35 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
     await gittar.extract(tarFile, tmpdir)
     source = resolve(tmpdir, subPath)
   }
-  const isDir = !extname(source)
-  const cwd = resolve(opts.cwd, isDir ? source : dirname(source))
-  if (isDir) { source = opts.configFile }
-  const res: ResolvedConfig = { config: {}, cwd }
-  try {
-    res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
-  } catch (_err) { }
-  if (!existsSync(res.configFile)) {
+
+  if (isAbsolute(source) || source.startsWith('.')) {
+    const isDir = !extname(source)
+    const cwd = resolve(opts.cwd, isDir ? source : dirname(source))
+    if (isDir) { source = opts.configFile }
+    const res: ResolvedConfig = { config: {}, cwd }
+    try {
+      res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
+    } catch (_err) { }
+    if (!existsSync(res.configFile)) {
+      return res
+    }
+    res.config = jiti(res.configFile)
+    if (typeof res.config === 'function') {
+      res.config = await res.config()
+    }
     return res
   }
-  res.config = jiti(res.configFile)
-  if (typeof res.config === 'function') {
-    res.config = await res.config()
+
+  // Fallback to a potential installed npm package (ignores `opts.configFile`, the package should specify config file in package.json `main` field)
+  try {
+    const configFile = jiti.resolve(source)
+    const config = jiti(configFile)
+    return {
+      cwd: dirname(configFile),
+      configFile,
+      config: typeof config === 'function' ? await config() : config
+    }
+  } catch (err) {
+    return { config: {}, cwd: opts.cwd }
   }
-  return res
 }
