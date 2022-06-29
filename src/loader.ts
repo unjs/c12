@@ -9,7 +9,7 @@ import { DotenvOptions, setupDotenv } from './dotenv'
 export interface InputConfig extends Record<string, any> {}
 
 export interface ConfigLayer<T extends InputConfig=InputConfig> {
-  config: T
+  config: T | null
   cwd?: string
   configFile?: string
 }
@@ -137,6 +137,9 @@ async function extendConfig (config, opts: LoadConfigOptions) {
   for (const extendSource of extendSources) {
     const _config = await resolveConfig(extendSource, opts)
     if (!_config.config) {
+      // TODO: Use error in next major versions
+      // eslint-disable-next-line no-console
+      console.warn(`Cannot extend config from ${extendSource} in ${opts.cwd}`)
       continue
     }
     await extendConfig(_config.config, { ...opts, cwd: _config.cwd })
@@ -173,7 +176,7 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   const isDir = !extname(source)
   const cwd = resolve(opts.cwd, isDir ? source : dirname(source))
   if (isDir) { source = opts.configFile }
-  const res: ResolvedConfig = { config: {}, cwd }
+  const res: ResolvedConfig = { config: null, cwd }
   try {
     res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
   } catch (_err) { }

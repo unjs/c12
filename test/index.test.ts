@@ -68,6 +68,7 @@ describe('c12', () => {
             "extends": [
               "./theme",
               "./config.dev",
+              "c12-npm-test",
             ],
             "overriden": false,
           },

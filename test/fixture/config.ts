@@ -1,7 +1,8 @@
 export default {
   extends: [
     './theme',
-    './config.dev'
+    './config.dev',
+    'c12-npm-test'
   ],
   colors: {
     primary: 'user_primary'
