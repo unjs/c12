@@ -153,15 +153,21 @@ async function extendConfig (config, opts: LoadConfigOptions) {
 
 const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 
+// https://github.com/dword-design/package-name-regex
+const NPM_PACKAGE_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
+
 const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
+  // Custom user resolver
   if (opts.resolve) {
     const res = await opts.resolve(source, opts)
     if (res) {
       return res
     }
   }
+
+  // Download git URLs and resolve to local path
   if (GIT_PREFIXES.some(prefix => source.startsWith(prefix))) {
     const url = new URL(source)
     const subPath = url.pathname.split('/').slice(2).join('/')
@@ -173,6 +179,15 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
     await gittar.extract(tarFile, tmpdir)
     source = resolve(tmpdir, subPath)
   }
+
+  // Try resolving as npm package
+  if (NPM_PACKAGE_RE.test(source)) {
+    try {
+      source = jiti.resolve(source, { paths: [opts.cwd] })
+    } catch (_err) {}
+  }
+
+  // Import from local fs
   const isDir = !extname(source)
   const cwd = resolve(opts.cwd, isDir ? source : dirname(source))
   if (isDir) { source = opts.configFile }
