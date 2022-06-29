@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.8](https://github.com/unjs/c12/compare/v0.2.7...v0.2.8) (2022-06-29)
+
+
+### Features
+
+* try resolving paths as npm package ([7c48947](https://github.com/unjs/c12/commit/7c48947754bce2f881d153eb3c490f2940814c80))
+
+
+### Bug Fixes
+
+* warn when extend layers cannot be resolved ([f6506e8](https://github.com/unjs/c12/commit/f6506e814520716908944be0d2845b489feac353))
+
 ### [0.2.7](https://github.com/unjs/c12/compare/v0.2.6...v0.2.7) (2022-04-20)
 
 
