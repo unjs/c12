@@ -9,7 +9,7 @@ specifiers:
   gittar: ^0.1.1
   jiti: ^1.14.0
   mlly: ^0.5.4
-  pathe: ^0.2.0
+  pathe: ^0.3.2
   rc9: ^1.2.2
   standard-version: latest
   typescript: latest
@@ -22,7 +22,7 @@ dependencies:
   gittar: 0.1.1
   jiti: 1.14.0
   mlly: 0.5.4
-  pathe: 0.2.0
+  pathe: 0.3.2
   rc9: 1.2.2
 
 devDependencies:
@@ -2887,7 +2887,7 @@ packages:
   /mlly/0.5.4:
     resolution: {integrity: sha512-gFlsLWCjVwu/LM/ZfYUkmnbBoz7eyBIMUwVQYDqhd8IvtNFDeZ95uwAyxHE2Xx7tQwePQaCo4fECZ9MWFEUTgQ==}
     dependencies:
-      pathe: 0.3.1
+      pathe: 0.3.2
       pkg-types: 0.3.3
 
   /modify-values/1.0.1:
@@ -3123,9 +3123,10 @@ packages:
 
   /pathe/0.2.0:
     resolution: {integrity: sha512-sTitTPYnn23esFR3RlqYBWn4c45WGeLcsKzQiUpXJAyfcWkolvlYpV8FLo7JishK946oQwMFUCHXQ9AjGPKExw==}
+    dev: true
 
-  /pathe/0.3.1:
-    resolution: {integrity: sha512-cKMVe/pikPpreoODbjoliSk0cIT66JjEOWN30akc9WTo8kUjxFPYqmXvMBVPMSAJGJlx6v/nYzqSSHkp1cfezQ==}
+  /pathe/0.3.2:
+    resolution: {integrity: sha512-qhnmX0TOqlCvdWWTkoM83wh5J8fZ2yhbDEc9MlsnAEtEc+JCwxUKEwmd6pkY9hRe6JR1Uecbc14VcAKX2yFSTA==}
 
   /pathval/1.1.1:
     resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
@@ -3155,7 +3156,7 @@ packages:
     dependencies:
       jsonc-parser: 3.0.0
       mlly: 0.5.4
-      pathe: 0.3.1
+      pathe: 0.3.2
 
   /pluralize/8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
