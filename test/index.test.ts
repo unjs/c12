@@ -40,6 +40,7 @@ describe('c12', () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "npmConfig": true,
         "overriden": true,
         "rcFile": true,
         "virtual": true,
@@ -68,6 +69,7 @@ describe('c12', () => {
             "extends": [
               "./theme",
               "./config.dev",
+              "c12-npm-test",
             ],
             "overriden": false,
           },
@@ -115,6 +117,13 @@ describe('c12', () => {
           },
           "configFile": "<path>/fixture/config.dev.ts",
           "cwd": "<path>/fixture",
+        },
+        {
+          "config": {
+            "npmConfig": true,
+          },
+          "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "cwd": "<path>/fixture/node_modules/c12-npm-test",
         },
       ]
     `)
