@@ -31,8 +31,8 @@
     "dotenv": "^16.0.1",
     "gittar": "^0.1.1",
     "jiti": "^1.14.0",
-    "mlly": "^0.5.4",
-    "pathe": "^0.3.2",
+    "mlly": "^0.5.7",
+    "pathe": "^0.3.3",
     "rc9": "^1.2.2"
   },
   "devDependencies": {
@@ -44,5 +44,5 @@
     "unbuild": "latest",
     "vitest": "latest"
   },
-  "packageManager": "pnpm@7.4.0"
+  "packageManager": "pnpm@7.8.0"
 }
