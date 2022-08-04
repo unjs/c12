@@ -156,7 +156,7 @@ const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
 
-const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false })
+const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false, esmResolve: true })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
   // Custom user resolver
