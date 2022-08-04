@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.9](https://github.com/unjs/c12/compare/v0.2.8...v0.2.9) (2022-08-04)
+
+
+### Features
+
+* use native esm resolution where possible ([#26](https://github.com/unjs/c12/issues/26)) ([9744621](https://github.com/unjs/c12/commit/97446215b1069b5f8dec68528e0cfcecdd9f5659))
+
 ### [0.2.8](https://github.com/unjs/c12/compare/v0.2.7...v0.2.8) (2022-06-29)
 
 
