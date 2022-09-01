@@ -140,16 +140,20 @@ describe('c12', () => {
       }
     })
 
-    expect(config).toMatchObject({
-      devConfig: true,
-      baseConfig: true,
-      colors: {
-        primary: 'user_primary',
-        text: 'base_text',
-        secondary: 'theme_secondary'
-      },
-      configFile: true,
-      overriden: false
-    })
+    expect(transformPaths(config)).toMatchInlineSnapshot(`
+      {
+        "array": [
+          "a",
+        ],
+        "colors": {
+          "primary": "user_primary",
+        },
+        "configFile": true,
+        "devConfig": true,
+        "npmConfig": true,
+        "overriden": false,
+        "theme": "./theme",
+      }
+    `)
   })
 })
