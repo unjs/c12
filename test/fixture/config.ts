@@ -1,6 +1,6 @@
 export default {
+  theme: './theme',
   extends: [
-    './theme',
     './config.dev',
     'c12-npm-test'
   ],

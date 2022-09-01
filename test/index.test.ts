@@ -11,6 +11,9 @@ describe('c12', () => {
     const { config, layers } = await loadConfig({
       cwd: r('./fixture'),
       dotenv: true,
+      extend: {
+        extendKey: ['theme', 'extends']
+      },
       resolve: (id) => {
         if (id === 'virtual') {
           return { config: { virtual: true } }
@@ -67,11 +70,11 @@ describe('c12', () => {
             },
             "configFile": true,
             "extends": [
-              "./theme",
               "./config.dev",
               "c12-npm-test",
             ],
             "overriden": false,
+            "theme": "./theme",
           },
           "configFile": "config",
           "cwd": "<path>/fixture",
@@ -81,11 +84,6 @@ describe('c12', () => {
             "rcFile": true,
           },
           "configFile": ".configrc",
-        },
-        {
-          "config": {
-            "virtual": true,
-          },
         },
         {
           "config": {
@@ -110,6 +108,11 @@ describe('c12', () => {
           },
           "configFile": "<path>/fixture/base/config.ts",
           "cwd": "<path>/fixture/base",
+        },
+        {
+          "config": {
+            "virtual": true,
+          },
         },
         {
           "config": {

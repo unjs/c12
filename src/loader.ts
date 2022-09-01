@@ -40,7 +40,7 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   resolve?: (id: string, opts: LoadConfigOptions) => null | ResolvedConfig | Promise<ResolvedConfig | null>
 
   extend?: false | {
-    extendKey?: string
+    extendKey?: string | string[]
   }
 }
 
@@ -128,12 +128,14 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
 
 async function extendConfig (config, opts: LoadConfigOptions) {
   config._layers = config._layers || []
-  if (!opts.extend) {
-    return
+  if (!opts.extend) { return }
+  let keys = opts.extend.extendKey
+  if (typeof keys === 'string') { keys = [keys] }
+  const extendSources = []
+  for (const key of keys) {
+    extendSources.push(...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(Boolean))
+    delete config[key]
   }
-  const key = opts.extend.extendKey
-  const extendSources = (Array.isArray(config[key]) ? config[key] : [config[key]]).filter(Boolean)
-  delete config[key]
   for (const extendSource of extendSources) {
     const _config = await resolveConfig(extendSource, opts)
     if (!_config.config) {
