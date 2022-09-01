@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.10](https://github.com/unjs/c12/compare/v0.2.9...v0.2.10) (2022-09-01)
+
+
+### Features
+
+* allow extending from multiple keys ([33cb210](https://github.com/unjs/c12/commit/33cb21032ec9d06baac4c69fc0dbf174b89b8944)), closes [#24](https://github.com/unjs/c12/issues/24)
+
 ### [0.2.9](https://github.com/unjs/c12/compare/v0.2.8...v0.2.9) (2022-08-04)
 
 
