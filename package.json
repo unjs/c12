@@ -27,12 +27,12 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "defu": "^6.0.0",
-    "dotenv": "^16.0.1",
+    "defu": "^6.1.0",
+    "dotenv": "^16.0.2",
     "gittar": "^0.1.1",
     "jiti": "^1.14.0",
-    "mlly": "^0.5.11",
-    "pathe": "^0.3.4",
+    "mlly": "^0.5.14",
+    "pathe": "^0.3.5",
     "rc9": "^1.2.2"
   },
   "devDependencies": {
@@ -44,5 +44,5 @@
     "unbuild": "latest",
     "vitest": "latest"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.10.0"
 }
