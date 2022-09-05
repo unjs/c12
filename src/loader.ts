@@ -141,7 +141,7 @@ async function extendConfig (config, opts: LoadConfigOptions) {
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
-      console.warn(`Cannot extend config from ${extendSource} in ${opts.cwd}`)
+      console.warn(`Cannot extend config from ${JSON.stringify(extendSource)} in ${opts.cwd}`)
       continue
     }
     await extendConfig(_config.config, { ...opts, cwd: _config.cwd })
