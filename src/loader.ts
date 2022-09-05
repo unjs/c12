@@ -137,11 +137,17 @@ async function extendConfig (config, opts: LoadConfigOptions) {
     delete config[key]
   }
   for (const extendSource of extendSources) {
+    if (typeof extendSource !== 'string') {
+      // TODO: Use error in next major versions
+      // eslint-disable-next-line no-console
+      console.warn(`Cannot extend config from \`${JSON.stringify(extendSource)}\` (which should be a string) in ${opts.cwd}`)
+      continue
+    }
     const _config = await resolveConfig(extendSource, opts)
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
-      console.warn(`Cannot extend config from ${JSON.stringify(extendSource)} in ${opts.cwd}`)
+      console.warn(`Cannot extend config from \`${extendSource}\` in ${opts.cwd}`)
       continue
     }
     await extendConfig(_config.config, { ...opts, cwd: _config.cwd })
@@ -161,12 +167,6 @@ const NPM_PACKAGE_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
 const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false, esmResolve: true })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
-  if (typeof source !== 'string') {
-    // TODO: Remove in next major version
-    // @ts-expect-error deliberately trigger warning in L142-144
-    return {}
-  }
-
   // Custom user resolver
   if (opts.resolve) {
     const res = await opts.resolve(source, opts)
