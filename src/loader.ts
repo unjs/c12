@@ -137,11 +137,17 @@ async function extendConfig (config, opts: LoadConfigOptions) {
     delete config[key]
   }
   for (const extendSource of extendSources) {
+    if (typeof extendSource !== 'string') {
+      // TODO: Use error in next major versions
+      // eslint-disable-next-line no-console
+      console.warn(`Cannot extend config from \`${JSON.stringify(extendSource)}\` (which should be a string) in ${opts.cwd}`)
+      continue
+    }
     const _config = await resolveConfig(extendSource, opts)
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
-      console.warn(`Cannot extend config from ${extendSource} in ${opts.cwd}`)
+      console.warn(`Cannot extend config from \`${extendSource}\` in ${opts.cwd}`)
       continue
     }
     await extendConfig(_config.config, { ...opts, cwd: _config.cwd })
