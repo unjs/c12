@@ -161,6 +161,12 @@ const NPM_PACKAGE_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
 const jiti = createJiti(null, { cache: false, interopDefault: true, requireCache: false, esmResolve: true })
 
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
+  if (typeof source !== 'string') {
+    // TODO: Remove in next major version
+    // @ts-expect-error deliberately trigger warning in L142-144
+    return {}
+  }
+
   // Custom user resolver
   if (opts.resolve) {
     const res = await opts.resolve(source, opts)
