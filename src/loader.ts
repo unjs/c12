@@ -42,7 +42,7 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   resolve?: (id: string, opts: LoadConfigOptions) => null | ResolvedConfig | Promise<ResolvedConfig | null>
 
   jiti?: JITI
-  jitiOptions: JITIOptions,
+  jitiOptions?: JITIOptions,
 
   extend?: false | {
     extendKey?: string | string[]
