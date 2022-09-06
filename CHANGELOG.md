@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.11](https://github.com/unjs/c12/compare/v0.2.10...v0.2.11) (2022-09-06)
+
+
+### Features
+
+* custom `jiti` and `jitiOptions` ([bfd1be5](https://github.com/unjs/c12/commit/bfd1be5a21556eff57c75c1a9d6bece109823923))
+* support loading rc from workspace dir in global mode ([7365a9c](https://github.com/unjs/c12/commit/7365a9cea52c6f9b7d266338bf8096c87c24b5ce))
+
+
+### Bug Fixes
+
+* `jitiOptions` is optional ([457a045](https://github.com/unjs/c12/commit/457a045683bb491bf9a42d035135b3dc7afce07b))
+* validate sources value to be string ([#32](https://github.com/unjs/c12/issues/32)) ([f97c850](https://github.com/unjs/c12/commit/f97c850e81f2049e74194b76b82c82974a775141))
+
 ### [0.2.10](https://github.com/unjs/c12/compare/v0.2.9...v0.2.10) (2022-09-01)
 
 
