@@ -4,6 +4,7 @@ import { resolve, extname, dirname } from 'pathe'
 import createJiti, { JITI } from 'jiti'
 import * as rc9 from 'rc9'
 import { defu } from 'defu'
+import { findWorkspaceDir } from 'pkg-types'
 import type { JITIOptions } from 'jiti/dist/types'
 import { DotenvOptions, setupDotenv } from './dotenv'
 
@@ -96,6 +97,10 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   if (opts.rcFile) {
     if (opts.globalRc) {
       Object.assign(configRC, rc9.readUser({ name: opts.rcFile, dir: opts.cwd }))
+      const workspaceDir = await findWorkspaceDir(opts.cwd).catch(() => null)
+      if (workspaceDir) {
+        Object.assign(configRC, rc9.read({ name: opts.rcFile, dir: workspaceDir }))
+      }
     }
     Object.assign(configRC, rc9.read({ name: opts.rcFile, dir: opts.cwd }))
   }
