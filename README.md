@@ -85,7 +85,7 @@ Set to `false` to disable loading RC config.
 
 ### `globalRC`
 
-Load RC config from the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory and user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
 ### `dotenv`
 
