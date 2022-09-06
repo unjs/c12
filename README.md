@@ -99,6 +99,14 @@ Specify default configuration. It has the **lowest** priority.
 
 Specify override configuration. It has the **highest** priority.
 
+### `jiti`
+
+Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configuration files.
+
+### `jitiOptions`
+
+Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend configuration.

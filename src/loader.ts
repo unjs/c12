@@ -1,9 +1,10 @@
 import { existsSync, promises as fsp } from 'fs'
 import os from 'os'
 import { resolve, extname, dirname } from 'pathe'
-import createJiti from 'jiti'
+import createJiti, { JITI } from 'jiti'
 import * as rc9 from 'rc9'
-import defu from 'defu'
+import { defu } from 'defu'
+import type { JITIOptions } from 'jiti/dist/types'
 import { DotenvOptions, setupDotenv } from './dotenv'
 
 export interface InputConfig extends Record<string, any> {}
@@ -39,6 +40,9 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
 
   resolve?: (id: string, opts: LoadConfigOptions) => null | ResolvedConfig | Promise<ResolvedConfig | null>
 
+  jiti?: JITI
+  jitiOptions: JITIOptions,
+
   extend?: false | {
     extendKey?: string | string[]
   }
@@ -56,6 +60,14 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
       ...opts.extend
     }
   }
+
+  // Create jiti instance
+  opts.jiti = opts.jiti || createJiti(null, {
+    interopDefault: true,
+    requireCache: false,
+    esmResolve: true,
+    ...opts.jitiOptions
+  })
 
   // Create context
   const r: ResolvedConfig<T> = {
@@ -164,8 +176,6 @@ const GIT_PREFIXES = ['github:', 'gitlab:', 'bitbucket:', 'https://']
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
 
-const jiti = createJiti(null, { interopDefault: true, requireCache: false, esmResolve: true })
-
 async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<ResolvedConfig> {
   // Custom user resolver
   if (opts.resolve) {
@@ -191,7 +201,7 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   // Try resolving as npm package
   if (NPM_PACKAGE_RE.test(source)) {
     try {
-      source = jiti.resolve(source, { paths: [opts.cwd] })
+      source = opts.jiti.resolve(source, { paths: [opts.cwd] })
     } catch (_err) {}
   }
 
@@ -201,12 +211,12 @@ async function resolveConfig (source: string, opts: LoadConfigOptions): Promise<
   if (isDir) { source = opts.configFile }
   const res: ResolvedConfig = { config: null, cwd }
   try {
-    res.configFile = jiti.resolve(resolve(cwd, source), { paths: [cwd] })
+    res.configFile = opts.jiti.resolve(resolve(cwd, source), { paths: [cwd] })
   } catch (_err) { }
   if (!existsSync(res.configFile)) {
     return res
   }
-  res.config = jiti(res.configFile)
+  res.config = opts.jiti(res.configFile)
   if (typeof res.config === 'function') {
     res.config = await res.config()
   }
