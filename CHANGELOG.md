@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.12](https://github.com/unjs/c12/compare/v0.2.11...v0.2.12) (2022-09-14)
+
+
+### Features
+
+* `defaultConfig` to be applied before extending ([1c4e898](https://github.com/unjs/c12/commit/1c4e8984e9ecacdeedfe5e2a98e5cb3991e94462))
+
 ### [0.2.11](https://github.com/unjs/c12/compare/v0.2.10...v0.2.11) (2022-09-06)
 
 
