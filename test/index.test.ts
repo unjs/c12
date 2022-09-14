@@ -21,11 +21,13 @@ describe('c12', () => {
         }
       },
       overrides: {
-        overriden: true,
-        extends: ['virtual']
+        overriden: true
       },
       defaults: {
         defaultConfig: true
+      },
+      defaultConfig: {
+        extends: ['virtual']
       }
     })
 
@@ -56,9 +58,6 @@ describe('c12', () => {
       [
         {
           "config": {
-            "extends": [
-              "virtual",
-            ],
             "overriden": true,
           },
         },
@@ -114,11 +113,6 @@ describe('c12', () => {
         },
         {
           "config": {
-            "virtual": true,
-          },
-        },
-        {
-          "config": {
             "devConfig": true,
           },
           "configFile": "<path>/fixture/config.dev.ts",
@@ -130,6 +124,11 @@ describe('c12', () => {
           },
           "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
+        },
+        {
+          "config": {
+            "virtual": true,
+          },
         },
       ]
     `)

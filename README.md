@@ -93,11 +93,15 @@ Loads `.env` file if enabled. It is disabled by default.
 
 ### `defaults`
 
-Specify default configuration. It has the **lowest** priority.
+Specify default configuration. It has the **lowest** priority and is applied **after extending** config.
+
+### `defaultConfig`
+
+Specify default configuration. It is applied **before** extending config.
 
 ### `overides`
 
-Specify override configuration. It has the **highest** priority.
+Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
 ### `jiti`
 

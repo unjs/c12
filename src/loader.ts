@@ -37,6 +37,7 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   dotenv?: boolean | DotenvOptions
 
   defaults?: T
+  defaultConfig?: T
   overrides?: T
 
   resolve?: (id: string, opts: LoadConfigOptions) => null | ResolvedConfig | Promise<ResolvedConfig | null>
@@ -109,7 +110,8 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
   r.config = defu(
     opts.overrides,
     config,
-    configRC
+    configRC,
+    opts.defaultConfig
   ) as T
 
   // Allow extending
