@@ -8,7 +8,7 @@ specifiers:
   eslint: ^8.23.1
   gittar: ^0.1.1
   jiti: ^1.16.0
-  mlly: ^0.5.14
+  mlly: ^0.5.15
   pathe: ^0.3.8
   pkg-types: ^0.3.5
   rc9: ^1.2.2
@@ -22,7 +22,7 @@ dependencies:
   dotenv: 16.0.2
   gittar: 0.1.1
   jiti: 1.16.0
-  mlly: 0.5.14
+  mlly: 0.5.15
   pathe: 0.3.8
   pkg-types: 0.3.5
   rc9: 1.2.2
@@ -3059,8 +3059,8 @@ packages:
       typescript: 4.8.3
     dev: true
 
-  /mlly/0.5.14:
-    resolution: {integrity: sha512-DgRgNUSX9NIxxCxygX4Xeg9C7GX7OUx1wuQ8cXx9o9LE0e9wrH+OZ9fcnrlEedsC/rtqry3ZhUddC759XD/L0w==}
+  /mlly/0.5.15:
+    resolution: {integrity: sha512-cA1DS4Va2t0h/1c044haUDubeWwlKrvToLbOT3Oprpr2tW5dJTObEIXDdONRN/ahKm0GWEPVeptbg0dlzl8gBQ==}
     dependencies:
       acorn: 8.8.0
       pathe: 0.3.8
@@ -3341,7 +3341,7 @@ packages:
     resolution: {integrity: sha512-VkxCBFVgQhNHYk9subx+HOhZ4jzynH11ah63LZsprTKwPCWG9pfWBlkElWFbvkP9BVR0dP1jS9xPdhaHQNK74Q==}
     dependencies:
       jsonc-parser: 3.2.0
-      mlly: 0.5.14
+      mlly: 0.5.15
       pathe: 0.3.8
 
   /pluralize/8.0.0:
@@ -3993,7 +3993,7 @@ packages:
       magic-string: 0.26.3
       mkdirp: 1.0.4
       mkdist: 0.3.13_typescript@4.8.3
-      mlly: 0.5.14
+      mlly: 0.5.15
       mri: 1.2.0
       pathe: 0.3.8
       pkg-types: 0.3.5
