@@ -9,5 +9,6 @@ export default {
   },
   configFile: true,
   overriden: false,
-  array: ['a']
+  array: ['a'],
+  overridenArray: ['a', 'b', 'c']
 }

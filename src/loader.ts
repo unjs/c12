@@ -138,7 +138,7 @@ export async function loadConfig<T extends InputConfig=InputConfig> (opts: LoadC
 
   // Apply defaults
   if (opts.defaults) {
-    r.config = defu(r.config, opts.defaults) as T
+    r.config = { ...opts.defaults, ...r.config }
   }
 
   // Return resolved config

@@ -24,7 +24,8 @@ describe('c12', () => {
         overriden: true
       },
       defaults: {
-        defaultConfig: true
+        defaultConfig: true,
+        overridenArray: [1, 2, 3]
       },
       defaultConfig: {
         extends: ['virtual']
@@ -48,6 +49,11 @@ describe('c12', () => {
         "devConfig": true,
         "npmConfig": true,
         "overriden": true,
+        "overridenArray": [
+          "a",
+          "b",
+          "c",
+        ],
         "rcFile": true,
         "testConfig": true,
         "virtual": true,
@@ -75,6 +81,11 @@ describe('c12', () => {
               "c12-npm-test",
             ],
             "overriden": false,
+            "overridenArray": [
+              "a",
+              "b",
+              "c",
+            ],
             "theme": "./theme",
           },
           "configFile": "config",
