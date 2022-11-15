@@ -33,7 +33,7 @@
     "jiti": "^1.16.0",
     "mlly": "^0.5.17",
     "pathe": "^0.3.9",
-    "pkg-types": "^0.3.6",
+    "pkg-types": "^1.0.1",
     "rc9": "^1.2.2"
   },
   "devDependencies": {
