@@ -9,7 +9,7 @@ specifiers:
   gittar: ^0.1.1
   jiti: ^1.16.0
   mlly: ^0.5.17
-  pathe: ^0.3.9
+  pathe: ^1.0.0
   pkg-types: ^0.3.6
   rc9: ^1.2.2
   standard-version: ^9.5.0
@@ -23,7 +23,7 @@ dependencies:
   gittar: 0.1.1
   jiti: 1.16.0
   mlly: 0.5.17
-  pathe: 0.3.9
+  pathe: 1.0.0
   pkg-types: 0.3.6
   rc9: 1.2.2
 
