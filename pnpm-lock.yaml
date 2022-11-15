@@ -11,7 +11,7 @@ specifiers:
   mlly: ^1.0.0
   pathe: ^1.0.0
   pkg-types: ^1.0.1
-  rc9: ^2.0.0
+  rc9: ^1.2.3
   standard-version: ^9.5.0
   typescript: ^4.8.4
   unbuild: ^0.9.4
@@ -25,7 +25,7 @@ dependencies:
   mlly: 1.0.0
   pathe: 1.0.0
   pkg-types: 1.0.1
-  rc9: 2.0.0
+  rc9: 1.2.3
 
 devDependencies:
   '@vitest/coverage-c8': 0.25.2
@@ -3407,8 +3407,9 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /rc9/2.0.0:
-    resolution: {integrity: sha512-yVeYJHOpJLOhs3V6RKwz7RPPwPurrx3JjwK264sPgvo/lFdhuUrLien7iSvAO6STVkN0gSMk/MehQNHQhflqZw==}
+  /rc9/1.2.3:
+    resolution: {integrity: sha512-nw2fMaR5c0BrQB41+mK+AB6oytKQzY9K4wkPyUeNOg6yzn0wzT01JqivtRoTT/bGduUg8R/Zx4rFEqEm0jZTZA==}
+    deprecated: includes breaking changes
     dependencies:
       defu: 6.1.1
       destr: 1.2.1
