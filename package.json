@@ -35,7 +35,7 @@
     "mlly": "^1.0.0",
     "pathe": "^1.0.0",
     "pkg-types": "^1.0.1",
-    "rc9": "^1.2.3"
+    "rc9": "^2.0.0"
   },
   "devDependencies": {
     "@vitest/coverage-c8": "^0.25.2",
