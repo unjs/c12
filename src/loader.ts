@@ -218,7 +218,7 @@ async function resolveConfig (source: string, options: LoadConfigOptions): Promi
   if (isDir) { source = options.configFile; }
   const res: ResolvedConfig = { config: undefined, cwd };
   try {
-    res.configFile = options.jiti.resolve(resolve(cwd, source), { paths: [cwd] });
+    res.configFile = resolve(options.jiti.resolve(resolve(cwd, source), { paths: [cwd] }));
   } catch {}
   if (!existsSync(res.configFile)) {
     return res;
