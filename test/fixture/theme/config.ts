@@ -1,7 +1,7 @@
 export default {
-  extends: '../base',
+  extends: "../base",
   colors: {
-    primary: 'theme_primary',
-    secondary: 'theme_secondary'
+    primary: "theme_primary",
+    secondary: "theme_secondary"
   }
-}
+};

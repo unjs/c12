@@ -1,23 +1,22 @@
-import { fileURLToPath } from 'url'
-import { expect, it, describe } from 'vitest'
-import { loadConfig } from '../src'
+import { fileURLToPath } from "node:url";
+import { expect, it, describe } from "vitest";
+import { loadConfig } from "../src";
 
-describe('c12', () => {
-  const r = path => fileURLToPath(new URL(path, import.meta.url))
+const r = path => fileURLToPath(new URL(path, import.meta.url));
+const transformPaths = object => JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
-  const transformPaths = obj => JSON.parse(JSON.stringify(obj).replaceAll(r('.'), '<path>/'))
-
-  it('load fixture config', async () => {
+describe("c12", () => {
+  it("load fixture config", async () => {
     const { config, layers } = await loadConfig({
-      cwd: r('./fixture'),
+      cwd: r("./fixture"),
       dotenv: true,
       globalRc: true,
       extend: {
-        extendKey: ['theme', 'extends']
+        extendKey: ["theme", "extends"]
       },
       resolve: (id) => {
-        if (id === 'virtual') {
-          return { config: { virtual: true } }
+        if (id === "virtual") {
+          return { config: { virtual: true } };
         }
       },
       overrides: {
@@ -27,9 +26,9 @@ describe('c12', () => {
         defaultConfig: true
       },
       defaultConfig: {
-        extends: ['virtual']
+        extends: ["virtual"]
       }
-    })
+    });
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
@@ -52,7 +51,7 @@ describe('c12', () => {
         "testConfig": true,
         "virtual": true,
       }
-    `)
+    `);
 
     expect(transformPaths(layers)).toMatchInlineSnapshot(`
       [
@@ -131,16 +130,16 @@ describe('c12', () => {
           },
         },
       ]
-    `)
-  })
+    `);
+  });
 
-  it('extend from git repo', async () => {
+  it("extend from git repo", async () => {
     const { config } = await loadConfig({
-      cwd: r('./fixture/new_dir'),
+      cwd: r("./fixture/new_dir"),
       overrides: {
-        extends: ['github:unjs/c12/test/fixture']
+        extends: ["github:unjs/c12/test/fixture"]
       }
-    })
+    });
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
@@ -156,6 +155,6 @@ describe('c12', () => {
         "overriden": false,
         "theme": "./theme",
       }
-    `)
-  })
-})
+    `);
+  });
+});

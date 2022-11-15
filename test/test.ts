@@ -1,11 +1,13 @@
-import { fileURLToPath } from 'url'
-import { loadConfig } from '../src'
+import { fileURLToPath } from "node:url";
+import { loadConfig } from "../src";
+
+const r = path => fileURLToPath(new URL(path, import.meta.url));
 
 async function main () {
-  const r = path => fileURLToPath(new URL(path, import.meta.url))
-  const fixtureDir = r('./fixture')
-  const config = await loadConfig({ cwd: fixtureDir, dotenv: true })
-  console.log(config)
+  const fixtureDir = r("./fixture");
+  const config = await loadConfig({ cwd: fixtureDir, dotenv: true });
+  console.log(config);
 }
 
-main().catch(console.error)
+// eslint-disable-next-line unicorn/prefer-top-level-await
+main().catch(console.error);
