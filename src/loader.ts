@@ -1,5 +1,5 @@
-import { existsSync, promises as fsp } from "node:fs";
-import os from "node:os";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
 import { resolve, extname, dirname } from "pathe";
 import createJiti, { JITI } from "jiti";
 import * as rc9 from "rc9";
@@ -194,15 +194,15 @@ async function resolveConfig (source: string, options: LoadConfigOptions): Promi
 
   // Download git URLs and resolve to local path
   if (GIT_PREFIXES.some(prefix => source.startsWith(prefix))) {
+    const { downloadTemplate } = await import("giget");
     const url = new URL(source);
-    const subPath = url.pathname.split("/").slice(2).join("/");
     const gitRepo = url.protocol + url.pathname.split("/").slice(0, 2).join("/");
-    const tmpdir = resolve(os.tmpdir(), "c12/", gitRepo.replace(/[#/:@\\]/g, "_"));
-    await fsp.rm(tmpdir, { recursive: true }).catch(() => {});
-    const gittar = await import("gittar").then(r => r.default || r);
-    const tarFile = await gittar.fetch(gitRepo);
-    await gittar.extract(tarFile, tmpdir);
-    source = resolve(tmpdir, subPath);
+    const name = gitRepo.replace(/[#/:@\\]/g, "_");
+    const tmpDir = process.env.XDG_CACHE_HOME
+      ? resolve(process.env.XDG_CACHE_HOME, "c12", name)
+      : resolve(homedir(), ".cache/c12", name);
+    const clonned = await downloadTemplate(source, { dir: tmpDir });
+    source = clonned.dir;
   }
 
   // Try resolving as npm package
