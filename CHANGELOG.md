@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/unjs/c12/compare/v1.0.1...v1.1.0) (2022-12-06)
+
+
+### Features
+
+* use giget to clone github urls ([4c7590a](https://github.com/unjs/c12/commit/4c7590ab94c667acd45fb1df05026d49b89431bc))
+
+
+### Bug Fixes
+
+* remove tmp dir to clone ([020e0b0](https://github.com/unjs/c12/commit/020e0b0ede67d02ce6953402201d3913c237dd1c))
+
 ### [1.0.1](https://github.com/unjs/c12/compare/v1.0.0...v1.0.1) (2022-11-15)
 
 ## [1.0.0](https://github.com/unjs/c12/compare/v0.2.13...v1.0.0) (2022-11-15)
