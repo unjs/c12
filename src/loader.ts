@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { rmdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, extname, dirname } from "pathe";
 import createJiti, { JITI } from "jiti";
@@ -201,6 +202,9 @@ async function resolveConfig (source: string, options: LoadConfigOptions): Promi
     const tmpDir = process.env.XDG_CACHE_HOME
       ? resolve(process.env.XDG_CACHE_HOME, "c12", name)
       : resolve(homedir(), ".cache/c12", name);
+    if (existsSync(tmpDir)) {
+      await rmdir(tmpDir, { recursive: true });
+    }
     const clonned = await downloadTemplate(source, { dir: tmpDir });
     source = clonned.dir;
   }
