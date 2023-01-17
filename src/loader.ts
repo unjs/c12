@@ -5,7 +5,7 @@ import { resolve, extname, dirname } from "pathe";
 import createJiti, { JITI } from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir } from "pkg-types";
+import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import type { JITIOptions } from "jiti/dist/types";
 import { DotenvOptions, setupDotenv } from "./dotenv";
 
@@ -36,6 +36,8 @@ export interface LoadConfigOptions<T extends InputConfig=InputConfig> {
   globalRc?: boolean
 
   dotenv?: boolean | DotenvOptions
+
+  pkgJson?: boolean
 
   defaults?: T
   defaultConfig?: T
@@ -107,11 +109,19 @@ export async function loadConfig<T extends InputConfig=InputConfig> (options: Lo
     Object.assign(configRC, rc9.read({ name: options.rcFile, dir: options.cwd }));
   }
 
+  // Load config from package.json
+  const pkgJson = {};
+  if (options.pkgJson) {
+    const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
+    Object.assign(pkgJson, pkgJsonFile?.[options.name] || {});
+  }
+
   // Combine sources
   r.config = defu(
     options.overrides,
     config,
     configRC,
+    pkgJson,
     options.defaultConfig
   ) as T;
 
@@ -130,7 +140,8 @@ export async function loadConfig<T extends InputConfig=InputConfig> (options: Lo
   const baseLayers = [
     options.overrides && { config: options.overrides, configFile: undefined, cwd: undefined },
     { config, configFile: options.configFile, cwd: options.cwd },
-    options.rcFile && { config: configRC, configFile: options.rcFile }
+    options.rcFile && { config: configRC, configFile: options.rcFile },
+    options.pkgJson && { config: pkgJson, configFile: "package.json" }
   ].filter(l => l && l.config) as ConfigLayer<T>[];
   r.layers = [
     ...baseLayers,
@@ -205,8 +216,8 @@ async function resolveConfig (source: string, options: LoadConfigOptions): Promi
     if (existsSync(tmpDir)) {
       await rmdir(tmpDir, { recursive: true });
     }
-    const clonned = await downloadTemplate(source, { dir: tmpDir });
-    source = clonned.dir;
+    const cloned = await downloadTemplate(source, { dir: tmpDir });
+    source = cloned.dir;
   }
 
   // Try resolving as npm package

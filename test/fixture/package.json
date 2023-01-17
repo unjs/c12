@@ -1,0 +1,6 @@
+{
+  "name": "fixture",
+  "config": {
+    "packageJSON": true
+  }
+}

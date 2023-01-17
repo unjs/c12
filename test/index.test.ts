@@ -10,6 +10,7 @@ describe("c12", () => {
     const { config, layers } = await loadConfig({
       cwd: r("./fixture"),
       dotenv: true,
+      pkgJson: true,
       globalRc: true,
       extend: {
         extendKey: ["theme", "extends"]
@@ -47,6 +48,7 @@ describe("c12", () => {
         "devConfig": true,
         "npmConfig": true,
         "overriden": true,
+        "packageJSON": true,
         "rcFile": true,
         "testConfig": true,
         "virtual": true,
@@ -85,6 +87,12 @@ describe("c12", () => {
             "testConfig": true,
           },
           "configFile": ".configrc",
+        },
+        {
+          "config": {
+            "packageJSON": true,
+          },
+          "configFile": "package.json",
         },
         {
           "config": {
