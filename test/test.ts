@@ -1,9 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "../src";
 
-const r = path => fileURLToPath(new URL(path, import.meta.url));
+const r = (path) => fileURLToPath(new URL(path, import.meta.url));
 
-async function main () {
+async function main() {
   const fixtureDir = r("./fixture");
   const config = await loadConfig({ cwd: fixtureDir, dotenv: true });
   console.log(config);

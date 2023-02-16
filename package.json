@@ -1,6 +1,6 @@
 {
   "name": "c12",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Smart Config Loader",
   "repository": "unjs/c12",
   "license": "MIT",
@@ -22,29 +22,31 @@
   "scripts": {
     "build": "unbuild",
     "dev": "vitest dev",
-    "lint": "eslint --ext .ts,.js,.mjs,.cjs .",
+    "lint": "eslint --ext .ts,.js,.mjs,.cjs . && prettier -c src test",
+    "lint:fix": "eslint --ext .ts,.js,.mjs,.cjs . --fix && prettier -w src test",
     "prepack": "unbuild",
-    "release": "pnpm test && standard-version && git push --follow-tags && pnpm publish",
+    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "defu": "^6.1.1",
+    "defu": "^6.1.2",
     "dotenv": "^16.0.3",
     "giget": "^1.0.0",
-    "jiti": "^1.16.0",
-    "mlly": "^1.0.0",
-    "pathe": "^1.0.0",
+    "jiti": "^1.17.0",
+    "mlly": "^1.1.1",
+    "pathe": "^1.1.0",
     "pkg-types": "^1.0.1",
-    "rc9": "^2.0.0"
+    "rc9": "^2.0.1"
   },
   "devDependencies": {
-    "@vitest/coverage-c8": "^0.25.2",
-    "eslint": "^8.27.0",
-    "eslint-config-unjs": "^0.0.2",
-    "standard-version": "^9.5.0",
-    "typescript": "^4.8.4",
-    "unbuild": "^0.9.4",
-    "vitest": "^0.25.2"
+    "@vitest/coverage-c8": "^0.28.5",
+    "changelogen": "^0.4.1",
+    "eslint": "^8.34.0",
+    "eslint-config-unjs": "^0.1.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5",
+    "unbuild": "^1.1.1",
+    "vitest": "^0.28.5"
   },
-  "packageManager": "pnpm@7.16.0"
+  "packageManager": "pnpm@7.27.0"
 }

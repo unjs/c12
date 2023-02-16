@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.1
+
+[compare changes](https://github.com/unjs/c12/compare/v1.1.0...v1.1.1)
+
+
+### 🏡 Chore
+
+  - Update mlly ([b085c9b](https://github.com/unjs/c12/commit/b085c9b))
+
+### 🎨 Styles
+
+  - Format with prettier ([f66ddd6](https://github.com/unjs/c12/commit/f66ddd6))
+
+### ❤️  Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+
 ## [1.1.0](https://github.com/unjs/c12/compare/v1.0.1...v1.1.0) (2022-12-06)
 
 
