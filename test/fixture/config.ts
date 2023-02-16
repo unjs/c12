@@ -1,13 +1,10 @@
 export default {
   theme: "./theme",
-  extends: [
-    "./config.dev",
-    "c12-npm-test"
-  ],
+  extends: ["./config.dev", "c12-npm-test"],
   colors: {
-    primary: "user_primary"
+    primary: "user_primary",
   },
   configFile: true,
   overriden: false,
-  array: ["a"]
+  array: ["a"],
 };
