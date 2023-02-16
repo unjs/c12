@@ -9,7 +9,7 @@ specifiers:
   eslint-config-unjs: ^0.1.0
   giget: ^1.0.0
   jiti: ^1.17.0
-  mlly: ^1.1.1
+  mlly: ^1.1.0
   pathe: ^1.1.0
   pkg-types: ^1.0.1
   prettier: ^2.8.4
