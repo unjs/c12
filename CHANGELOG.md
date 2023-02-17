@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.2
+
+[compare changes](https://github.com/unjs/c12/compare/v1.1.1...v1.1.2)
+
+
+### 🏡 Chore
+
+  - Update dependencies ([efac912](https://github.com/unjs/c12/commit/efac912))
+
+### ❤️  Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+
 ## v1.1.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.1.0...v1.1.1)
