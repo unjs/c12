@@ -5,7 +5,7 @@ import { resolve, extname, dirname } from "pathe";
 import createJiti, { JITI } from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir } from "pkg-types";
+import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import type { JITIOptions } from "jiti/dist/types";
 import { DotenvOptions, setupDotenv } from "./dotenv";
 
@@ -37,6 +37,8 @@ export interface LoadConfigOptions<T extends InputConfig = InputConfig> {
   globalRc?: boolean;
 
   dotenv?: boolean | DotenvOptions;
+
+  packageJson?: boolean | string | string[];
 
   defaults?: T;
   defaultConfig?: T;
@@ -128,11 +130,29 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     );
   }
 
+  // Load config from package.json
+  const pkgJson = {};
+  if (options.packageJson) {
+    const keys = (
+      Array.isArray(options.packageJson)
+        ? options.packageJson
+        : [
+            typeof options.packageJson === "string"
+              ? options.packageJson
+              : options.name,
+          ]
+    ).filter((t) => t && typeof t === "string");
+    const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
+    const values = keys.map((key) => pkgJsonFile?.[key]);
+    Object.assign(pkgJson, defu({}, ...values));
+  }
+
   // Combine sources
   r.config = defu(
     options.overrides,
     config,
     configRC,
+    pkgJson,
     options.defaultConfig
   ) as T;
 
@@ -153,6 +173,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     },
     { config, configFile: options.configFile, cwd: options.cwd },
     options.rcFile && { config: configRC, configFile: options.rcFile },
+    options.packageJson && { config: pkgJson, configFile: "package.json" },
   ].filter((l) => l && l.config) as ConfigLayer<T>[];
   r.layers = [...baseLayers, ...r.layers];
 
@@ -215,7 +236,8 @@ async function extendConfig(config, options: LoadConfigOptions) {
 const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
-const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
+const NPM_PACKAGE_RE =
+  /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
 async function resolveConfig(
   source: string,
@@ -242,8 +264,8 @@ async function resolveConfig(
     if (existsSync(tmpDir)) {
       await rmdir(tmpDir, { recursive: true });
     }
-    const clonned = await downloadTemplate(source, { dir: tmpDir });
-    source = clonned.dir;
+    const cloned = await downloadTemplate(source, { dir: tmpDir });
+    source = cloned.dir;
   }
 
   // Try resolving as npm package
