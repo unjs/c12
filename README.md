@@ -214,7 +214,7 @@ Made with 💛 Published under [MIT License](./LICENSE).
 [npm-version-href]: https://npmjs.com/package/c12
 [npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat-square
 [npm-downloads-href]: https://npmjs.com/package/c12
-[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/c12/ci/main?style=flat-square
+[github-actions-src]: https://img.shields.io/github/actions/workflow/status/unjs/c12/ci.yml?branch=main&style=flat-square
 [github-actions-href]: https://github.com/unjs/c12/actions?query=workflow%3Aci
 [codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat-square
 [codecov-href]: https://codecov.io/gh/unjs/c12
