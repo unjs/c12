@@ -215,7 +215,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
 const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
-const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*/;
+const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
 async function resolveConfig(
   source: string,
