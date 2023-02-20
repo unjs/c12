@@ -3,8 +3,9 @@ import { expect, it, describe } from "vitest";
 import { resolve } from "pathe";
 import { loadConfig } from "../src";
 
-const r = path => resolve(fileURLToPath(new URL(path, import.meta.url)));
-const transformPaths = object => JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>"));
+const r = (path) => resolve(fileURLToPath(new URL(path, import.meta.url)));
+const transformPaths = (object) =>
+  JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>"));
 
 describe("c12", () => {
   it("load fixture config", async () => {
@@ -13,7 +14,7 @@ describe("c12", () => {
       dotenv: true,
       globalRc: true,
       extend: {
-        extendKey: ["theme", "extends"]
+        extendKey: ["theme", "extends"],
       },
       resolve: (id) => {
         if (id === "virtual") {
@@ -21,14 +22,14 @@ describe("c12", () => {
         }
       },
       overrides: {
-        overriden: true
+        overriden: true,
       },
       defaults: {
-        defaultConfig: true
+        defaultConfig: true,
       },
       defaultConfig: {
-        extends: ["virtual"]
-      }
+        extends: ["virtual"],
+      },
     });
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
@@ -138,8 +139,8 @@ describe("c12", () => {
     const { config } = await loadConfig({
       cwd: r("./fixture/new_dir"),
       overrides: {
-        extends: ["github:unjs/c12/test/fixture"]
-      }
+        extends: ["github:unjs/c12/test/fixture"],
+      },
     });
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
