@@ -95,7 +95,7 @@ Loads `.env` file if enabled. It is disabled by default.
 
 ### `packageJson`
 
-Loads config from nearest `package.json` file. It is dsisabled by default.
+Loads config from nearest `package.json` file. It is disabled by default.
 
 If `true` value is passed, C12 uses `name` field from `package.json`.
 
