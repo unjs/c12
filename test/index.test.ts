@@ -92,6 +92,13 @@ describe("c12", () => {
         },
         {
           "config": {
+            "packageJSON": true,
+            "packageJSON2": true,
+          },
+          "configFile": "package.json",
+        },
+        {
+          "config": {
             "colors": {
               "primary": "theme_primary",
               "secondary": "theme_secondary",

@@ -173,7 +173,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     },
     { config, configFile: options.configFile, cwd: options.cwd },
     options.rcFile && { config: configRC, configFile: options.rcFile },
-    options.packageJSON && { config: pkgJson, configFile: "package.json" },
+    options.packageJson && { config: pkgJson, configFile: "package.json" },
   ].filter((l) => l && l.config) as ConfigLayer<T>[];
   r.layers = [...baseLayers, ...r.layers];
 
