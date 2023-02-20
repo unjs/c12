@@ -1,6 +1,6 @@
 {
   "name": "c12",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Smart Config Loader",
   "repository": "unjs/c12",
   "license": "MIT",
@@ -25,17 +25,17 @@
     "lint": "eslint --ext .ts,.js,.mjs,.cjs . && prettier -c src test",
     "lint:fix": "eslint --ext .ts,.js,.mjs,.cjs . --fix && prettier -w src test",
     "prepack": "unbuild",
-    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
+    "release": "changelogen --release && npm publish && git push --follow-tags",
     "test": "vitest run --coverage"
   },
   "dependencies": {
     "defu": "^6.1.2",
     "dotenv": "^16.0.3",
-    "giget": "^1.0.0",
-    "jiti": "^1.17.0",
+    "giget": "^1.1.2",
+    "jiti": "^1.17.1",
     "mlly": "^1.1.1",
     "pathe": "^1.1.0",
-    "pkg-types": "^1.0.1",
+    "pkg-types": "^1.0.2",
     "rc9": "^2.0.1"
   },
   "devDependencies": {
@@ -45,8 +45,8 @@
     "eslint-config-unjs": "^0.1.0",
     "prettier": "^2.8.4",
     "typescript": "^4.9.5",
-    "unbuild": "^1.1.1",
+    "unbuild": "^1.1.2",
     "vitest": "^0.28.5"
   },
-  "packageManager": "pnpm@7.27.0"
+  "packageManager": "pnpm@7.27.1"
 }
