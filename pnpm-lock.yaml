@@ -7,7 +7,7 @@ specifiers:
   dotenv: ^16.0.3
   eslint: ^8.34.0
   eslint-config-unjs: ^0.1.0
-  giget: ^1.1.0
+  giget: ^1.1.2
   jiti: ^1.17.1
   mlly: ^1.1.1
   pathe: ^1.1.0
@@ -15,13 +15,13 @@ specifiers:
   prettier: ^2.8.4
   rc9: ^2.0.1
   typescript: ^4.9.5
-  unbuild: ^1.1.1
+  unbuild: ^1.1.2
   vitest: ^0.28.5
 
 dependencies:
   defu: 6.1.2
   dotenv: 16.0.3
-  giget: 1.1.0
+  giget: 1.1.2
   jiti: 1.17.1
   mlly: 1.1.1
   pathe: 1.1.0
@@ -35,7 +35,7 @@ devDependencies:
   eslint-config-unjs: 0.1.0_7kw3g6rralp5ps6mg3uyzz6azm
   prettier: 2.8.4
   typescript: 4.9.5
-  unbuild: 1.1.1
+  unbuild: 1.1.2
   vitest: 0.28.5
 
 packages:
@@ -1249,7 +1249,7 @@ packages:
     dependencies:
       defu: 6.1.2
       dotenv: 16.0.3
-      giget: 1.1.0
+      giget: 1.1.2
       jiti: 1.17.1
       mlly: 1.1.1
       pathe: 1.1.0
@@ -2246,8 +2246,8 @@ packages:
     resolution: {integrity: sha512-0Gdjo/9+FzsYhXCEFueo2aY1z1tpXrxWZzP7k8ul9qt1U5o8rYJwTJYmaeHdrVosYIVYkOy2iwCJ9FdpocJhPQ==}
     dev: true
 
-  /giget/1.1.0:
-    resolution: {integrity: sha512-UA0Cz2/9Mo6ftSpGctnzsZcUsTLA+vEVJug/NZsH1CMZqbGvrN8h5Wl2O1BoHDjbYXqSjm82K7NaMZ0oT5p5LQ==}
+  /giget/1.1.2:
+    resolution: {integrity: sha512-HsLoS07HiQ5oqvObOI+Qb2tyZH4Gj5nYGfF9qQcZNrPw+uEFhdXtgJr01aO2pWadGHucajYDLxxbtQkm97ON2A==}
     hasBin: true
     dependencies:
       colorette: 2.0.19
@@ -3652,8 +3652,8 @@ packages:
       which-boxed-primitive: 1.0.2
     dev: true
 
-  /unbuild/1.1.1:
-    resolution: {integrity: sha512-HlhHj6cUPBQJmhoczQoU6dzdTFO0Jr9EiGWEZ1EwHGXlGRR6LXcKyfX3PMrkM48uWJjBWiCgTQdkFOAk3tlK6Q==}
+  /unbuild/1.1.2:
+    resolution: {integrity: sha512-EK5LeABThyn5KbX0eo5c7xKRQhnHVxKN8/e5Y+YQEf4ZobJB6OZ766756wbVqzIY/G/MvAfLbc6EwFPdSNnlpA==}
     hasBin: true
     dependencies:
       '@rollup/plugin-alias': 4.0.3_rollup@3.15.0
@@ -3665,12 +3665,11 @@ packages:
       chalk: 5.2.0
       consola: 2.15.3
       defu: 6.1.2
-      esbuild: 0.16.17
+      esbuild: 0.17.8
       globby: 13.1.3
       hookable: 5.4.2
       jiti: 1.17.1
-      magic-string: 0.27.0
-      mkdirp: 1.0.4
+      magic-string: 0.29.0
       mkdist: 1.1.1_typescript@4.9.5
       mlly: 1.1.1
       mri: 1.2.0
