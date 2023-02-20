@@ -1,6 +1,9 @@
 {
   "name": "fixture",
-  "config": {
+  "c12": {
     "packageJSON": true
+  },
+  "c12-alt": {
+    "packageJSON2": true
   }
 }

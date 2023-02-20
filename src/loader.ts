@@ -38,7 +38,7 @@ export interface LoadConfigOptions<T extends InputConfig = InputConfig> {
 
   dotenv?: boolean | DotenvOptions;
 
-  pkgJson?: boolean
+  packageJson?: boolean | string | string[];
 
   defaults?: T;
   defaultConfig?: T;
@@ -132,9 +132,19 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
 
   // Load config from package.json
   const pkgJson = {};
-  if (options.pkgJson) {
+  if (options.packageJson) {
+    const keys = (
+      Array.isArray(options.packageJson)
+        ? options.packageJson
+        : [
+            typeof options.packageJson === "string"
+              ? options.packageJson
+              : options.name,
+          ]
+    ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
-    Object.assign(pkgJson, pkgJsonFile?.[options.name] || {});
+    const values = keys.map((key) => pkgJsonFile?.[key]);
+    Object.assign(pkgJson, defu({}, ...values));
   }
 
   // Combine sources
@@ -163,7 +173,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     },
     { config, configFile: options.configFile, cwd: options.cwd },
     options.rcFile && { config: configRC, configFile: options.rcFile },
-    options.pkgJson && { config: pkgJson, configFile: "package.json" }
+    options.packageJSON && { config: pkgJson, configFile: "package.json" },
   ].filter((l) => l && l.config) as ConfigLayer<T>[];
   r.layers = [...baseLayers, ...r.layers];
 
@@ -226,7 +236,8 @@ async function extendConfig(config, options: LoadConfigOptions) {
 const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
-const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
+const NPM_PACKAGE_RE =
+  /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
 async function resolveConfig(
   source: string,
