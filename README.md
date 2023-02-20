@@ -13,6 +13,7 @@
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
+- Support reading config from nearest `package.json` file
 - Support extending nested configurations from multiple local or git sources
 
 ## Usage
@@ -34,32 +35,33 @@ Import:
 
 ```js
 // ESM
-import { loadConfig } from 'c12'
+import { loadConfig } from "c12";
 
 // CommonJS
-const { loadConfig } = require('c12')
+const { loadConfig } = require("c12");
 ```
 
 Load configuration:
 
 ```js
 // Get loaded config
-const { config } = await loadConfig({})
+const { config } = await loadConfig({});
 
 // Get resolved config and extended layers
-const { config, configFile, layers } = await loadConfig({})
+const { config, configFile, layers } = await loadConfig({});
 ```
 
 ## Loading priority
 
 c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
 
-1. config overrides passed by options
-2. config file in CWD
+1. Config overrides passed by options
+2. Config file in CWD
 3. RC file in CWD
-4. global RC file in user's home directory
-5. default config passed by options
-6. Extended config layers
+4. Global RC file in user's home directory
+5. Config from `package.json`
+6. Default config passed by options
+7. Extended config layers
 
 ## Options
 
@@ -90,6 +92,14 @@ Load RC config from the workspace directory and user's home directory. Only enab
 ### `dotenv`
 
 Loads `.env` file if enabled. It is disabled by default.
+
+### `packageJson`
+
+Loads config from nearest `package.json` file. It is dsisabled by default.
+
+If `true` value is passed, C12 uses `name` field from `package.json`.
+
+You can also pass either a string or an array of strings as value to use those fields.
 
 ### `defaults`
 
@@ -130,31 +140,28 @@ For custom merging strategies, you can directly access each layer with `layers` 
 // config.ts
 export default {
   colors: {
-    primary: 'user_primary'
+    primary: "user_primary",
   },
-  extends: [
-    './theme',
-    './config.dev.ts'
-  ]
-}
+  extends: ["./theme", "./config.dev.ts"],
+};
 ```
 
 ```js
 // config.dev.ts
 export default {
-  dev: true
-}
+  dev: true,
+};
 ```
 
 ```js
 // theme/config.ts
 export default {
-  extends: '../base',
+  extends: "../base",
   colors: {
-    primary: 'theme_primary',
-    secondary: 'theme_secondary'
-  }
-}
+    primary: "theme_primary",
+    secondary: "theme_secondary",
+  },
+};
 ```
 
 ```js
@@ -202,14 +209,12 @@ Layers:
 Made with 💛 Published under [MIT License](./LICENSE).
 
 <!-- Badges -->
+
 [npm-version-src]: https://img.shields.io/npm/v/c12?style=flat-square
 [npm-version-href]: https://npmjs.com/package/c12
-
 [npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat-square
 [npm-downloads-href]: https://npmjs.com/package/c12
-
 [github-actions-src]: https://img.shields.io/github/workflow/status/unjs/c12/ci/main?style=flat-square
 [github-actions-href]: https://github.com/unjs/c12/actions?query=workflow%3Aci
-
 [codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat-square
 [codecov-href]: https://codecov.io/gh/unjs/c12
