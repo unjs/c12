@@ -262,12 +262,14 @@ async function resolveConfig(
   }
   const res: ResolvedConfig = { config: undefined, cwd };
   try {
-    res.configFile = resolve(
-      options.jiti.resolve(resolve(cwd, source), {
-        paths: [cwd],
-      })
-    );
+    res.configFile = options.jiti.resolve(resolve(cwd, source), {
+      paths: [cwd],
+    });
   } catch {}
+
+  // Always normalize path
+  res.configFile = resolve(res.configFile);
+
   if (!existsSync(res.configFile)) {
     return res;
   }
