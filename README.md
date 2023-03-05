@@ -109,7 +109,7 @@ Specify default configuration. It has the **lowest** priority and is applied **a
 
 Specify default configuration. It is applied **before** extending config.
 
-### `overides`
+### `overrides`
 
 Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
