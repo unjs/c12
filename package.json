@@ -32,7 +32,7 @@
     "defu": "^6.1.2",
     "dotenv": "^16.0.3",
     "giget": "^1.1.2",
-    "jiti": "^1.17.1",
+    "jiti": "^1.17.2",
     "mlly": "^1.1.1",
     "pathe": "^1.1.0",
     "pkg-types": "^1.0.2",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-c8": "^0.29.2",
-    "changelogen": "^0.4.1",
+    "changelogen": "^0.5.1",
     "eslint": "^8.35.0",
     "eslint-config-unjs": "^0.1.0",
     "prettier": "^2.8.4",
@@ -48,5 +48,5 @@
     "unbuild": "^1.1.2",
     "vitest": "^0.29.2"
   },
-  "packageManager": "pnpm@7.28.0"
+  "packageManager": "pnpm@7.29.1"
 }
