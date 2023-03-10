@@ -97,7 +97,7 @@ Loads `.env` file if enabled. It is disabled by default.
 
 Loads config from nearest `package.json` file. It is disabled by default.
 
-If `true` value is passed, C12 uses `name` field from `package.json`.
+If `true` value is passed, c12 uses `name` field from `package.json`.
 
 You can also pass either a string or an array of strings as value to use those fields.
 
@@ -195,6 +195,38 @@ Layers:
  { config: /* base  config */, configFile: /* path/to/base/config.ts  */, cwd: /* path/to/base */ },
  { config: /* dev   config */, configFile: /* path/to/config.dev.ts  */, cwd: /* path/ */ },
 ]
+```
+
+## Environment specific configuration
+
+Users can define environment specific configuration using those config keys:
+- `$test: {...}`
+- `$development: {...}`
+- `$production: {...}`
+- `$env: { [env]: {...} }`
+
+c12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it.
+
+**Note:** Environment will be applied when extending each configuration layer. Layers can provide environment specific configuration but you cannot conditionally extend a layer from env.
+
+**Example:**
+
+```js
+{
+  // default is NODE_ENV
+  // $envName: 'development'
+
+  // Default configuration
+  logLevel: 'info',
+
+  // Environment overrides
+  $test: { logLevel: 'silent' },
+  $development: { logLevel: 'warning' },
+  $production: { logLevel: 'error' },
+  $env: {
+    staging: { logLevel: 'debug' }
+  }
+}
 ```
 
 ## 💻 Development

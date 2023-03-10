@@ -9,7 +9,18 @@ import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import type { JITIOptions } from "jiti/dist/types";
 import { DotenvOptions, setupDotenv } from "./dotenv";
 
-export interface InputConfig extends Record<string, any> {}
+export type UserInputConfig = Record<string, any>;
+
+export interface C12InputConfig {
+  extends?: string | string[];
+  $envName?: string;
+  $test?: UserInputConfig;
+  $development?: UserInputConfig;
+  $production?: UserInputConfig;
+  $env?: Record<string, UserInputConfig>;
+}
+
+export interface InputConfig extends C12InputConfig, UserInputConfig {}
 
 export interface ConfigLayer<T extends InputConfig = InputConfig> {
   config: T | null;
@@ -291,8 +302,19 @@ async function resolveConfig(
     return res;
   }
   res.config = options.jiti(res.configFile);
-  if (typeof res.config === "function") {
+  if (res.config instanceof Function) {
     res.config = await res.config();
   }
+
+  // Extend env specific config
+  const envName = res.config.$envName || process.env.NODE_ENV || "default";
+  const envConfig = {
+    ...res.config["$" + envName],
+    ...res.config.$env?.[envName],
+  };
+  if (Object.keys(envConfig).length > 0) {
+    res.config = defu(envConfig, res.config);
+  }
+
   return res;
 }

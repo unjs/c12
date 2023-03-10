@@ -34,11 +34,20 @@ describe("c12", () => {
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
+        "$env": {
+          "test": {
+            "baseEnvConfig": true,
+          },
+        },
+        "$test": {
+          "envConfig": true,
+        },
         "array": [
           "a",
           "b",
         ],
         "baseConfig": true,
+        "baseEnvConfig": true,
         "colors": {
           "primary": "user_primary",
           "secondary": "theme_secondary",
@@ -47,6 +56,7 @@ describe("c12", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "envConfig": true,
         "npmConfig": true,
         "overriden": true,
         "packageJSON": true,
@@ -66,6 +76,9 @@ describe("c12", () => {
         },
         {
           "config": {
+            "$test": {
+              "envConfig": true,
+            },
             "array": [
               "a",
             ],
@@ -73,6 +86,7 @@ describe("c12", () => {
               "primary": "user_primary",
             },
             "configFile": true,
+            "envConfig": true,
             "extends": [
               "./config.dev",
               "c12-npm-test",
@@ -109,10 +123,16 @@ describe("c12", () => {
         },
         {
           "config": {
+            "$env": {
+              "test": {
+                "baseEnvConfig": true,
+              },
+            },
             "array": [
               "b",
             ],
             "baseConfig": true,
+            "baseEnvConfig": true,
             "colors": {
               "primary": "base_primary",
               "text": "base_text",
