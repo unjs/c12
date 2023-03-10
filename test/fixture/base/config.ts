@@ -5,7 +5,7 @@ export default {
     text: "base_text",
   },
   array: ["b"],
-  $envConfig: {
+  $env: {
     test: { baseTestConfig: true },
   },
 };

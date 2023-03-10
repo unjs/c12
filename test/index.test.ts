@@ -34,7 +34,7 @@ describe("c12", () => {
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
-        "$envConfig": {
+        "$env": {
           "test": {
             "baseTestConfig": true,
           },
@@ -123,7 +123,7 @@ describe("c12", () => {
         },
         {
           "config": {
-            "$envConfig": {
+            "$env": {
               "test": {
                 "baseTestConfig": true,
               },

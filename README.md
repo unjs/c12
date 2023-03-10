@@ -199,7 +199,7 @@ Layers:
 
 ## Environment specific configuration
 
-Users can define environment specific configuration using `$test: {...}`, `$development: {...}`, `$production: {...}` or `$envConfig: { [env]: {...} }` config keys.
+Users can define environment specific configuration using `$test: {...}`, `$development: {...}`, `$production: {...}` or `$env: { [env]: {...} }` config keys.
 
 C12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it. (after extending from layers)
 
@@ -207,7 +207,8 @@ C12 matches `$envName` or `NODE_ENV` environment variable to the env config and 
 
 ```js
 {
-  // $envName: 'development' // default is NODE_ENV
+   // default is NODE_ENV
+  // $envName: 'development'
 
   // Default configuration
   logLevel: 'info',
@@ -216,7 +217,7 @@ C12 matches `$envName` or `NODE_ENV` environment variable to the env config and 
   $test: { logLevel: 'silent' },
   $development: { logLevel: 'warning' },
   $production: { logLevel: 'error' },
-  $envConfig: {
+  $env: {
     staging: { logLevel: 'debug' }
   }
 }
