@@ -41,6 +41,9 @@ describe("c12", () => {
         },
         "$test": {
           "envConfig": true,
+          "extends": [
+            "./config.dev",
+          ],
         },
         "array": [
           "a",
@@ -78,6 +81,9 @@ describe("c12", () => {
           "config": {
             "$test": {
               "envConfig": true,
+              "extends": [
+                "./config.dev",
+              ],
             },
             "array": [
               "a",
@@ -174,6 +180,9 @@ describe("c12", () => {
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
+        "$test": {
+          "envConfig": true,
+        },
         "array": [
           "a",
         ],
@@ -182,6 +191,7 @@ describe("c12", () => {
         },
         "configFile": true,
         "devConfig": true,
+        "envConfig": true,
         "npmConfig": true,
         "overriden": false,
         "theme": "./theme",
