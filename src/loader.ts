@@ -12,9 +12,9 @@ import { DotenvOptions, setupDotenv } from "./dotenv";
 export type UserInputConfig = Record<string, any>;
 
 export interface C12InputConfig {
-  extends: string | string[];
+  extends?: string | string[];
   $envName?: string;
-  $test: UserInputConfig;
+  $test?: UserInputConfig;
   $development?: UserInputConfig;
   $production?: UserInputConfig;
   $env?: Record<string, UserInputConfig>;
