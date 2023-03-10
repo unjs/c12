@@ -182,6 +182,9 @@ describe("c12", () => {
       {
         "$test": {
           "envConfig": true,
+          "extends": [
+            "./config.dev",
+          ],
         },
         "array": [
           "a",
