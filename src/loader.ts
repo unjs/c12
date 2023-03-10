@@ -11,6 +11,11 @@ import { DotenvOptions, setupDotenv } from "./dotenv";
 
 export type UserInputConfig = Record<string, any>;
 
+export interface ConfigLayerMeta {
+  name?: string;
+  [key: string]: any;
+}
+
 export interface C12InputConfig {
   extends?: string | string[];
   $envName?: string;
@@ -18,12 +23,14 @@ export interface C12InputConfig {
   $development?: UserInputConfig;
   $production?: UserInputConfig;
   $env?: Record<string, UserInputConfig>;
+  $layer?: ConfigLayerMeta;
 }
 
 export interface InputConfig extends C12InputConfig, UserInputConfig {}
 
 export interface ConfigLayer<T extends InputConfig = InputConfig> {
   config: T | null;
+  meta?: ConfigLayerMeta;
   cwd?: string;
   configFile?: string;
 }
@@ -215,18 +222,27 @@ async function extendConfig(config, options: LoadConfigOptions) {
     );
     delete config[key];
   }
-  for (const extendSource of extendSources) {
+  for (let extendSource of extendSources) {
+    let layerMeta = {};
+    if (extendSource.source) {
+      layerMeta = extendSource.meta || {};
+      extendSource = extendSource.source;
+    }
+    if (Array.isArray(extendSource)) {
+      layerMeta = extendSource[1] || {};
+      extendSource = extendSource[0];
+    }
     if (typeof extendSource !== "string") {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
           extendSource
-        )}\` (which should be a string) in ${options.cwd}`
+        )}\` (which should be a string or an array) in ${options.cwd}`
       );
       continue;
     }
-    const _config = await resolveConfig(extendSource, options);
+    const _config = await resolveConfig(extendSource, options, layerMeta);
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
@@ -252,7 +268,8 @@ const NPM_PACKAGE_RE =
 
 async function resolveConfig(
   source: string,
-  options: LoadConfigOptions
+  options: LoadConfigOptions,
+  meta: ConfigLayerMeta = {}
 ): Promise<ResolvedConfig> {
   // Custom user resolver
   if (options.resolve) {
@@ -292,7 +309,7 @@ async function resolveConfig(
   if (isDir) {
     source = options.configFile;
   }
-  const res: ResolvedConfig = { config: undefined, cwd };
+  const res: ResolvedConfig = { config: undefined, meta, cwd };
   try {
     res.configFile = options.jiti.resolve(resolve(cwd, source), {
       paths: [cwd],
@@ -314,6 +331,12 @@ async function resolveConfig(
   };
   if (Object.keys(envConfig).length > 0) {
     res.config = defu(envConfig, res.config);
+  }
+
+  // Meta
+  if (res.config.$layer) {
+    res.meta = defu(res.meta, res.config.$layer);
+    delete res.config.$layer;
   }
 
   return res;

@@ -1,4 +1,8 @@
 export default {
+  $layer: {
+    name: "base",
+    version: "1.0.0",
+  },
   baseConfig: true,
   colors: {
     primary: "base_primary",

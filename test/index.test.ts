@@ -95,7 +95,12 @@ describe("c12", () => {
             "envConfig": true,
             "extends": [
               "./config.dev",
-              "c12-npm-test",
+              [
+                "c12-npm-test",
+                {
+                  "userMeta": 123,
+                },
+              ],
             ],
             "overriden": false,
             "theme": "./theme",
@@ -126,6 +131,7 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/theme/config.ts",
           "cwd": "<path>/fixture/theme",
+          "meta": {},
         },
         {
           "config": {
@@ -146,6 +152,10 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/base/config.ts",
           "cwd": "<path>/fixture/base",
+          "meta": {
+            "name": "base",
+            "version": "1.0.0",
+          },
         },
         {
           "config": {
@@ -153,6 +163,7 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/config.dev.ts",
           "cwd": "<path>/fixture",
+          "meta": {},
         },
         {
           "config": {
@@ -160,6 +171,9 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
+          "meta": {
+            "userMeta": 123,
+          },
         },
         {
           "config": {
