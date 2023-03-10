@@ -197,6 +197,32 @@ Layers:
 ]
 ```
 
+## Environment specific configuration
+
+Users can define environment specific configuration using `$test: {...}`, `$development: {...}`, `$production: {...}` or `$envConfig: { [env]: {...} }` config keys.
+
+C12 uses to override and merge specified environment cofiguration matching `$envName` or `NODE_ENV` environment variable.
+
+**Example:**
+
+```js
+{
+  // Default is NODE_ENV
+  // $envName: 'test'
+
+  // Default configuration
+  logLevel: 'info',
+
+  // Environment overrides
+  $test: { logLevel: 'silent' },
+  $development: { logLevel: 'warning' },
+  $production: { logLevel: 'error' },
+  $envConfig: {
+    staging: { logLevel: 'debug' }
+  }
+}
+```
+
 ## 💻 Development
 
 - Clone this repository

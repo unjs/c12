@@ -9,7 +9,18 @@ import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import type { JITIOptions } from "jiti/dist/types";
 import { DotenvOptions, setupDotenv } from "./dotenv";
 
-export interface InputConfig extends Record<string, any> {}
+export type UserInputConfig = Record<string, any>;
+
+export interface C12InputConfig {
+  extends: string | string[];
+  $envName?: string;
+  $test: UserInputConfig;
+  $dev?: UserInputConfig;
+  $prod?: UserInputConfig;
+  $envConfig?: Record<string, UserInputConfig>;
+}
+
+export interface InputConfig extends C12InputConfig, UserInputConfig {}
 
 export interface ConfigLayer<T extends InputConfig = InputConfig> {
   config: T | null;
@@ -176,6 +187,17 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     options.packageJson && { config: pkgJson, configFile: "package.json" },
   ].filter((l) => l && l.config) as ConfigLayer<T>[];
   r.layers = [...baseLayers, ...r.layers];
+
+  // Extend env specific config
+  const envName = r.config.$envName || process.env.NODE_ENV || "default";
+  const envAliases = { development: "dev", production: "prod" };
+  const envConfig =
+    r.config.$envConfig?.[envName] ||
+    r.config["$" + envName] ||
+    (envAliases[envName] ? r.config["$" + envAliases[envName]] : undefined);
+  if (envConfig) {
+    r.config = defu(envConfig, r.config) as T;
+  }
 
   // Apply defaults
   if (options.defaults) {

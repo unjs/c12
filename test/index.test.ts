@@ -34,11 +34,22 @@ describe("c12", () => {
 
     expect(transformPaths(config)).toMatchInlineSnapshot(`
       {
+        "$envConfig": {
+          "test": {
+            "baseTestConfig": true,
+          },
+        },
+        "$test": {
+          "extends": [
+            "./config.test",
+          ],
+        },
         "array": [
           "a",
           "b",
         ],
         "baseConfig": true,
+        "baseTestConfig": true,
         "colors": {
           "primary": "user_primary",
           "secondary": "theme_secondary",
@@ -46,7 +57,6 @@ describe("c12", () => {
         },
         "configFile": true,
         "defaultConfig": true,
-        "devConfig": true,
         "npmConfig": true,
         "overriden": true,
         "packageJSON": true,
@@ -66,6 +76,11 @@ describe("c12", () => {
         },
         {
           "config": {
+            "$test": {
+              "extends": [
+                "./config.test",
+              ],
+            },
             "array": [
               "a",
             ],
@@ -74,7 +89,6 @@ describe("c12", () => {
             },
             "configFile": true,
             "extends": [
-              "./config.dev",
               "c12-npm-test",
             ],
             "overriden": false,
@@ -109,6 +123,11 @@ describe("c12", () => {
         },
         {
           "config": {
+            "$envConfig": {
+              "test": {
+                "baseTestConfig": true,
+              },
+            },
             "array": [
               "b",
             ],
@@ -120,13 +139,6 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/base/config.ts",
           "cwd": "<path>/fixture/base",
-        },
-        {
-          "config": {
-            "devConfig": true,
-          },
-          "configFile": "<path>/fixture/config.dev.ts",
-          "cwd": "<path>/fixture",
         },
         {
           "config": {
