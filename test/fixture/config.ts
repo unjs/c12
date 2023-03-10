@@ -1,6 +1,6 @@
 export default {
   theme: "./theme",
-  extends: ["c12-npm-test"],
+  extends: ["./config.dev", "c12-npm-test"],
   $test: {
     envConfig: true,
   },

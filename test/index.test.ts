@@ -55,6 +55,7 @@ describe("c12", () => {
         },
         "configFile": true,
         "defaultConfig": true,
+        "devConfig": true,
         "npmConfig": true,
         "overriden": true,
         "packageJSON": true,
@@ -85,6 +86,7 @@ describe("c12", () => {
             },
             "configFile": true,
             "extends": [
+              "./config.dev",
               "c12-npm-test",
             ],
             "overriden": false,
@@ -135,6 +137,13 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/base/config.ts",
           "cwd": "<path>/fixture/base",
+        },
+        {
+          "config": {
+            "devConfig": true,
+          },
+          "configFile": "<path>/fixture/config.dev.ts",
+          "cwd": "<path>/fixture",
         },
         {
           "config": {
