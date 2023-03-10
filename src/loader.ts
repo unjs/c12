@@ -223,6 +223,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
     delete config[key];
   }
   for (let extendSource of extendSources) {
+    const originalExtendSource = extendSource;
     let layerMeta = {};
     if (extendSource.source) {
       layerMeta = extendSource.meta || {};
@@ -237,8 +238,10 @@ async function extendConfig(config, options: LoadConfigOptions) {
       // eslint-disable-next-line no-console
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
-          extendSource
-        )}\` (which should be a string or an array) in ${options.cwd}`
+          originalExtendSource
+        )}\` (which should be a string or { source, meta?> } or [source, meta] format) in ${
+          options.cwd
+        }`
       );
       continue;
     }
