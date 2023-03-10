@@ -188,16 +188,6 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   ].filter((l) => l && l.config) as ConfigLayer<T>[];
   r.layers = [...baseLayers, ...r.layers];
 
-  // Extend env specific config
-  const envName = r.config.$envName || process.env.NODE_ENV || "default";
-  const envConfig = {
-    ...r.config["$" + envName],
-    ...r.config.$env?.[envName],
-  };
-  if (Object.keys(envConfig).length > 0) {
-    r.config = defu(envConfig, r.config) as T;
-  }
-
   // Apply defaults
   if (options.defaults) {
     r.config = defu(r.config, options.defaults) as T;
@@ -315,5 +305,16 @@ async function resolveConfig(
   if (res.config instanceof Function) {
     res.config = await res.config();
   }
+
+  // Extend env specific config
+  const envName = res.config.$envName || process.env.NODE_ENV || "default";
+  const envConfig = {
+    ...res.config["$" + envName],
+    ...res.config.$env?.[envName],
+  };
+  if (Object.keys(envConfig).length > 0) {
+    res.config = defu(envConfig, res.config);
+  }
+
   return res;
 }

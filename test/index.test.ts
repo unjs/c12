@@ -86,6 +86,7 @@ describe("c12", () => {
               "primary": "user_primary",
             },
             "configFile": true,
+            "envConfig": true,
             "extends": [
               "./config.dev",
               "c12-npm-test",
@@ -131,6 +132,7 @@ describe("c12", () => {
               "b",
             ],
             "baseConfig": true,
+            "baseEnvConfig": true,
             "colors": {
               "primary": "base_primary",
               "text": "base_text",
