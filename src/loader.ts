@@ -23,7 +23,7 @@ export interface C12InputConfig {
   $development?: UserInputConfig;
   $production?: UserInputConfig;
   $env?: Record<string, UserInputConfig>;
-  $layer?: ConfigLayerMeta;
+  $meta?: ConfigLayerMeta;
 }
 
 export interface InputConfig extends C12InputConfig, UserInputConfig {}
@@ -337,9 +337,9 @@ async function resolveConfig(
   }
 
   // Meta
-  if (res.config.$layer) {
-    res.meta = defu(res.meta, res.config.$layer);
-    delete res.config.$layer;
+  if (res.config.$meta) {
+    res.meta = defu(res.meta, res.config.$meta);
+    delete res.config.$meta;
   }
 
   return res;

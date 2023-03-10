@@ -1,5 +1,5 @@
 export default {
-  $layer: {
+  $meta: {
     name: "base",
     version: "1.0.0",
   },
