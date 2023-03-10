@@ -233,7 +233,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
     const originalExtendSource = extendSource;
     let sourceOptions = {};
     if (extendSource.source) {
-      sourceOptions = extendSource.meta || {};
+      sourceOptions = extendSource.options || {};
       extendSource = extendSource.source;
     }
     if (Array.isArray(extendSource)) {
