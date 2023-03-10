@@ -28,8 +28,15 @@ export interface C12InputConfig {
 
 export interface InputConfig extends C12InputConfig, UserInputConfig {}
 
+export interface SourceOptions {
+  meta?: ConfigLayerMeta;
+  [key: string]: any;
+}
+
 export interface ConfigLayer<T extends InputConfig = InputConfig> {
   config: T | null;
+  source?: string;
+  sourceOptions?: SourceOptions;
   meta?: ConfigLayerMeta;
   cwd?: string;
   configFile?: string;
@@ -224,13 +231,13 @@ async function extendConfig(config, options: LoadConfigOptions) {
   }
   for (let extendSource of extendSources) {
     const originalExtendSource = extendSource;
-    let layerMeta = {};
+    let sourceOptions = {};
     if (extendSource.source) {
-      layerMeta = extendSource.meta || {};
+      sourceOptions = extendSource.meta || {};
       extendSource = extendSource.source;
     }
     if (Array.isArray(extendSource)) {
-      layerMeta = extendSource[1] || {};
+      sourceOptions = extendSource[1] || {};
       extendSource = extendSource[0];
     }
     if (typeof extendSource !== "string") {
@@ -245,7 +252,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
       );
       continue;
     }
-    const _config = await resolveConfig(extendSource, options, layerMeta);
+    const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
@@ -272,7 +279,7 @@ const NPM_PACKAGE_RE =
 async function resolveConfig(
   source: string,
   options: LoadConfigOptions,
-  meta: ConfigLayerMeta = {}
+  sourceOptions: SourceOptions = {}
 ): Promise<ResolvedConfig> {
   // Custom user resolver
   if (options.resolve) {
@@ -312,7 +319,7 @@ async function resolveConfig(
   if (isDir) {
     source = options.configFile;
   }
-  const res: ResolvedConfig = { config: undefined, meta, cwd };
+  const res: ResolvedConfig = { config: undefined, cwd, source, sourceOptions };
   try {
     res.configFile = options.jiti.resolve(resolve(cwd, source), {
       paths: [cwd],
@@ -337,10 +344,8 @@ async function resolveConfig(
   }
 
   // Meta
-  if (res.config.$meta) {
-    res.meta = defu(res.meta, res.config.$meta);
-    delete res.config.$meta;
-  }
+  res.meta = defu(res.sourceOptions.meta, res.config.$meta);
+  delete res.config.$meta;
 
   return res;
 }

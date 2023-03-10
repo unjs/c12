@@ -132,6 +132,8 @@ describe("c12", () => {
           "configFile": "<path>/fixture/theme/config.ts",
           "cwd": "<path>/fixture/theme",
           "meta": {},
+          "source": "config",
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -156,6 +158,8 @@ describe("c12", () => {
             "name": "base",
             "version": "1.0.0",
           },
+          "source": "config",
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -164,6 +168,8 @@ describe("c12", () => {
           "configFile": "<path>/fixture/config.dev.ts",
           "cwd": "<path>/fixture",
           "meta": {},
+          "source": "./config.dev",
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -171,7 +177,9 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
-          "meta": {
+          "meta": {},
+          "source": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "sourceOptions": {
             "userMeta": 123,
           },
         },
