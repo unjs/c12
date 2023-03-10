@@ -6,6 +6,6 @@ export default {
   },
   array: ["b"],
   $env: {
-    test: { baseTestConfig: true },
+    test: { baseEnvConfig: true },
   },
 };

@@ -36,7 +36,7 @@ describe("c12", () => {
       {
         "$env": {
           "test": {
-            "baseTestConfig": true,
+            "baseEnvConfig": true,
           },
         },
         "$test": {
@@ -47,7 +47,7 @@ describe("c12", () => {
           "b",
         ],
         "baseConfig": true,
-        "baseTestConfig": true,
+        "baseEnvConfig": true,
         "colors": {
           "primary": "user_primary",
           "secondary": "theme_secondary",
@@ -124,7 +124,7 @@ describe("c12", () => {
           "config": {
             "$env": {
               "test": {
-                "baseTestConfig": true,
+                "baseEnvConfig": true,
               },
             },
             "array": [
