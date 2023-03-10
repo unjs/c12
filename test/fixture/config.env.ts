@@ -1,3 +1,3 @@
 export default {
-  testConfig: true,
+  envConfig: true,
 };

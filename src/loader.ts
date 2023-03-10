@@ -15,8 +15,8 @@ export interface C12InputConfig {
   extends: string | string[];
   $envName?: string;
   $test: UserInputConfig;
-  $dev?: UserInputConfig;
-  $prod?: UserInputConfig;
+  $development?: UserInputConfig;
+  $production?: UserInputConfig;
   $envConfig?: Record<string, UserInputConfig>;
 }
 
@@ -190,11 +190,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
 
   // Extend env specific config
   const envName = r.config.$envName || process.env.NODE_ENV || "default";
-  const envAliases = { development: "dev", production: "prod" };
-  const envConfig =
-    r.config.$envConfig?.[envName] ||
-    r.config["$" + envName] ||
-    (envAliases[envName] ? r.config["$" + envAliases[envName]] : undefined);
+  const envConfig = r.config.$envConfig?.[envName] || r.config["$" + envName];
   if (envConfig) {
     r.config = defu(envConfig, r.config) as T;
   }
