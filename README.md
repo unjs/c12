@@ -199,7 +199,11 @@ Layers:
 
 ## Environment specific configuration
 
-Users can define environment specific configuration using `$test: {...}`, `$development: {...}`, `$production: {...}` or `$env: { [env]: {...} }` config keys.
+Users can define environment specific configuration using those config keys:
+- `$test: {...}`
+-`$development: {...}`
+-`$production: {...}`
+- `$env: { [env]: {...} }`
 
 c12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it.
 
