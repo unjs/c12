@@ -200,6 +200,7 @@ Layers:
 ## Environment specific configuration
 
 Users can define environment specific configuration using those config keys:
+
 - `$test: {...}`
 - `$development: {...}`
 - `$production: {...}`
@@ -207,7 +208,7 @@ Users can define environment specific configuration using those config keys:
 
 c12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it.
 
-**Note:** Environment will be applied when extending each configuration layer. Layers can provide environment specific configuration but you cannot conditionally extend a layer from env.
+**Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment specific configuration.
 
 **Example:**
 
