@@ -201,7 +201,9 @@ Layers:
 
 Users can define environment specific configuration using `$test: {...}`, `$development: {...}`, `$production: {...}` or `$env: { [env]: {...} }` config keys.
 
-C12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it. (after extending from layers)
+C12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it.
+
+**Note:** Environment will be applied **after** extending configuration layers. Layers can provide environment specific configuration but you cannot conditionally extend a layer from env.
 
 **Example:**
 

@@ -2,7 +2,7 @@ export default {
   theme: "./theme",
   extends: ["c12-npm-test"],
   $test: {
-    extends: ["./config.env"],
+    envConfig: true,
   },
   colors: {
     primary: "user_primary",

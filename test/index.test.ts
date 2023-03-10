@@ -40,9 +40,7 @@ describe("c12", () => {
           },
         },
         "$test": {
-          "extends": [
-            "./config.env",
-          ],
+          "envConfig": true,
         },
         "array": [
           "a",
@@ -77,9 +75,7 @@ describe("c12", () => {
         {
           "config": {
             "$test": {
-              "extends": [
-                "./config.env",
-              ],
+              "envConfig": true,
             },
             "array": [
               "a",
