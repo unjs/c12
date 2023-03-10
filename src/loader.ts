@@ -312,7 +312,7 @@ async function resolveConfig(
     return res;
   }
   res.config = options.jiti(res.configFile);
-  if (typeof res.config === "function") {
+  if (res.config instanceof Function) {
     res.config = await res.config();
   }
   return res;
