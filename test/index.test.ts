@@ -56,6 +56,7 @@ describe("c12", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "envConfig": true,
         "npmConfig": true,
         "overriden": true,
         "packageJSON": true,

@@ -190,8 +190,11 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
 
   // Extend env specific config
   const envName = r.config.$envName || process.env.NODE_ENV || "default";
-  const envConfig = r.config.$env?.[envName] || r.config["$" + envName];
-  if (envConfig) {
+  const envConfig = {
+    ...r.config["$" + envName],
+    ...r.config.$env?.[envName],
+  };
+  if (Object.keys(envConfig).length > 0) {
     r.config = defu(envConfig, r.config) as T;
   }
 
