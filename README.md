@@ -209,7 +209,7 @@ c12 matches `$envName` or `NODE_ENV` environment variable to the env config and 
 
 ```js
 {
-   // default is NODE_ENV
+  // default is NODE_ENV
   // $envName: 'development'
 
   // Default configuration
