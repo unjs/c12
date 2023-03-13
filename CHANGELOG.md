@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.2.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.1.2...v1.2.0)
+
+
+### 🚀 Enhancements
+
+  - Load config from `package.json` ([#52](https://github.com/unjs/c12/pull/52))
+  - Environment specific configuration ([#61](https://github.com/unjs/c12/pull/61))
+  - Layer meta and source options ([#62](https://github.com/unjs/c12/pull/62))
+  - `envName` config ([4a0227d](https://github.com/unjs/c12/commit/4a0227d))
+
+### 🩹 Fixes
+
+  - Allow extending from npm packages with subpath ([#54](https://github.com/unjs/c12/pull/54))
+
+### 📖 Documentation
+
+  - Fix grammer and typos ([3e8436c](https://github.com/unjs/c12/commit/3e8436c))
+  - Don't mention unsupported usage ([ea7ac6e](https://github.com/unjs/c12/commit/ea7ac6e))
+
+### 🏡 Chore
+
+  - Update badge ([b0c78e2](https://github.com/unjs/c12/commit/b0c78e2))
+  - Update readme ([8480e41](https://github.com/unjs/c12/commit/8480e41))
+  - Update mlly ([cf6ef84](https://github.com/unjs/c12/commit/cf6ef84))
+
+### ✅ Tests
+
+  - Update test for env extends ([f363687](https://github.com/unjs/c12/commit/f363687))
+  - Update snapshot ([071180f](https://github.com/unjs/c12/commit/071180f))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+- Guillaume Chau ([@Akryum](http://github.com/Akryum))
+
 ## v1.1.2
 
 [compare changes](https://github.com/unjs/c12/compare/v1.1.1...v1.1.2)
