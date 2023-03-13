@@ -2,10 +2,10 @@
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![Github Actions][github-actions-src]][github-actions-href]
 [![Codecov][codecov-src]][codecov-href]
+[![License][license-src]][license-href]
 
-> Smart Configuration Loader
+Smart Configuration Loader.
 
 ## Features
 
@@ -13,8 +13,9 @@
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
-- Support reading config from the nearest `package.json` file
-- Support extending nested configurations from multiple local or git sources
+- Reads config from the nearest `package.json` file
+- [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
+- Overwrite with [environment-specific configuration](#environment-specific-configuration)
 
 ## Usage
 
@@ -246,11 +247,11 @@ Made with 💛 Published under [MIT License](./LICENSE).
 
 <!-- Badges -->
 
-[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat-square
+[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-version-href]: https://npmjs.com/package/c12
-[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat-square
+[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-downloads-href]: https://npmjs.com/package/c12
-[github-actions-src]: https://img.shields.io/github/actions/workflow/status/unjs/c12/ci.yml?branch=main&style=flat-square
-[github-actions-href]: https://github.com/unjs/c12/actions?query=workflow%3Aci
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat-square
+[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat&colorA=18181B&colorB=F0DB4F
 [codecov-href]: https://codecov.io/gh/unjs/c12
+[license-src]: https://img.shields.io/github/license/unjs/c12.svg?style=flat&colorA=18181B&colorB=F0DB4F
+[license-href]: https://github.com/unjs/c12/blob/main/LICENSE
