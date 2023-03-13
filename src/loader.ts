@@ -17,7 +17,6 @@ export interface ConfigLayerMeta {
 }
 
 export interface C12InputConfig {
-  extends?: string | string[];
   $envName?: string;
   $test?: UserInputConfig;
   $development?: UserInputConfig;
