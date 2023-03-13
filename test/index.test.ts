@@ -13,6 +13,7 @@ describe("c12", () => {
       dotenv: true,
       packageJson: ["c12", "c12-alt"],
       globalRc: true,
+      envName: "test",
       extend: {
         extendKey: ["theme", "extends"],
       },

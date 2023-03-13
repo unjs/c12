@@ -17,7 +17,6 @@ export interface ConfigLayerMeta {
 }
 
 export interface C12InputConfig {
-  $envName?: string;
   $test?: UserInputConfig;
   $development?: UserInputConfig;
   $production?: UserInputConfig;
@@ -63,6 +62,8 @@ export interface LoadConfigOptions<T extends InputConfig = InputConfig> {
 
   dotenv?: boolean | DotenvOptions;
 
+  envName?: string | false;
+
   packageJson?: boolean | string | string[];
 
   defaults?: T;
@@ -90,6 +91,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
+  options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
     options.configFile ??
     (options.name !== "config" ? `${options.name}.config` : "config");
@@ -332,13 +334,14 @@ async function resolveConfig(
   }
 
   // Extend env specific config
-  const envName = res.config.$envName || process.env.NODE_ENV || "default";
-  const envConfig = {
-    ...res.config["$" + envName],
-    ...res.config.$env?.[envName],
-  };
-  if (Object.keys(envConfig).length > 0) {
-    res.config = defu(envConfig, res.config);
+  if (options.envName) {
+    const envConfig = {
+      ...res.config["$" + options.envName],
+      ...res.config.$env?.[options.envName],
+    };
+    if (Object.keys(envConfig).length > 0) {
+      res.config = defu(envConfig, res.config);
+    }
   }
 
   // Meta

@@ -121,6 +121,12 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configu
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
 
+### `envName`
+
+Environment name used for [environment specific configuration](#environment-specific-configuration).
+
+Default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend configuration.
@@ -206,7 +212,7 @@ Users can define environment specific configuration using those config keys:
 - `$production: {...}`
 - `$env: { [env]: {...} }`
 
-c12 matches `$envName` or `NODE_ENV` environment variable to the env config and overrides it.
+c12 matches [`envName`](#envname) confi the env config and overrides it.
 
 **Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment specific configuration.
 
