@@ -148,7 +148,7 @@ export default {
   colors: {
     primary: "user_primary",
   },
-  extends: ["./theme", "./config.dev.ts"],
+  extends: ["./theme"],
 };
 ```
 
