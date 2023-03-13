@@ -245,9 +245,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
           originalExtendSource
-        )}\` (which should be a string or { source, meta?> } or [source, meta] format) in ${
-          options.cwd
-        }`
+        )}\` in ${options.cwd}`
       );
       continue;
     }
