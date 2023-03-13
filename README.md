@@ -9,11 +9,11 @@
 
 ## Features
 
-- JSON, CJS, Typescript and ESM config loader with [unjs/jiti](https://github.com/unjs/jiti)
+- JSON, CJS, Typescript, and ESM config loader with [unjs/jiti](https://github.com/unjs/jiti)
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
-- Support reading config from nearest `package.json` file
+- Support reading config from the nearest `package.json` file
 - Support extending nested configurations from multiple local or git sources
 
 ## Usage
@@ -67,17 +67,17 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 
 ### `cwd`
 
-Resolve configuration from this working directory. Default is `process.cwd()`
+Resolve configuration from this working directory. The default is `process.cwd()`
 
 ### `name`
 
-Configuration base name. Default is `config`.
+Configuration base name. The default is `config`.
 
 ### `configName`
 
-Configuration file name without extension . Default is generated from `name` (name=foo => `foo.config`).
+Configuration file name without extension. Default is generated from `name` (name=foo => `foo.config`).
 
-Set to `false` to avoid loading config file.
+Set to `false` to avoid loading the config file.
 
 ### `rcFile`
 
@@ -87,7 +87,7 @@ Set to `false` to disable loading RC config.
 
 ### `globalRC`
 
-Load RC config from the workspace directory and user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
 ### `dotenv`
 
@@ -99,7 +99,7 @@ Loads config from nearest `package.json` file. It is disabled by default.
 
 If `true` value is passed, c12 uses `name` field from `package.json`.
 
-You can also pass either a string or an array of strings as value to use those fields.
+You can also pass either a string or an array of strings as a value to use those fields.
 
 ### `defaults`
 
@@ -125,18 +125,18 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration
 
 Environment name used for [environment specific configuration](#environment-specific-configuration).
 
-Default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
+The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
 ## Extending configuration
 
-If resolved config contains a `extends` key, it will be used to extend configuration.
+If resolved config contains a `extends` key, it will be used to extend the configuration.
 
 Extending can be nested and each layer can extend from one base or more.
 
-Final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
+The final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
 
-Each item in extends, is a string that can be either an absolute or relative path to current config file pointing to a config file for extending or directory containing config file.
-If it starts with either of `github:`, `gitlab:`, `bitbucket:` or `https:`, c12 autmatically clones it.
+Each item in extends is a string that can be either an absolute or relative path to the current config file pointing to a config file for extending or the directory containing the config file.
+If it starts with either `github:`, `gitlab:`, `bitbucket:`, or `https:`, c12 automatically clones it.
 
 For custom merging strategies, you can directly access each layer with `layers` property.
 
@@ -180,7 +180,7 @@ export default {
 }
 ```
 
-Loaded configuration would look like this:
+The loaded configuration would look like this:
 
 ```js
 {
@@ -203,26 +203,23 @@ Layers:
 ]
 ```
 
-## Environment specific configuration
+## Environment-specific configuration
 
-Users can define environment specific configuration using those config keys:
+Users can define environment-specific configuration using these config keys:
 
 - `$test: {...}`
 - `$development: {...}`
 - `$production: {...}`
 - `$env: { [env]: {...} }`
 
-c12 matches [`envName`](#envname) confi the env config and overrides it.
+c12 tries to match [`envName`](#envname) and override environment config if specified.
 
-**Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment specific configuration.
+**Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment-specific configuration.
 
 **Example:**
 
 ```js
 {
-  // default is NODE_ENV
-  // $envName: 'development'
-
   // Default configuration
   logLevel: 'info',
 
