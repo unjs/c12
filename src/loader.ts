@@ -29,6 +29,7 @@ export interface InputConfig extends C12InputConfig, UserInputConfig {}
 
 export interface SourceOptions {
   meta?: ConfigLayerMeta;
+  overrides?: UserInputConfig;
   [key: string]: any;
 }
 
@@ -343,6 +344,11 @@ async function resolveConfig(
   // Meta
   res.meta = defu(res.sourceOptions.meta, res.config.$meta);
   delete res.config.$meta;
+
+  // Overrides
+  if (res.sourceOptions.overrides) {
+    res.config = defu(res.sourceOptions.overrides, res.config);
+  }
 
   return res;
 }
