@@ -94,3 +94,15 @@ export interface LoadConfigOptions<
         extendKey?: string | string[];
       };
 }
+
+export type DefineConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta
+> = (input: InputConfig<T, MT>) => InputConfig<T, MT>;
+
+export function createDefineConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta
+>(): DefineConfig<T, MT> {
+  return (input: InputConfig<T, MT>) => input;
+}

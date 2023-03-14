@@ -1,5 +1,5 @@
 import { expectTypeOf } from "expect-type";
-import { loadConfig, InputConfig } from "../src";
+import { loadConfig, InputConfig, createDefineConfig } from "../src";
 
 interface MyConfig {
   foo: string;
@@ -9,9 +9,9 @@ interface MyMeta {
   metaFoo: string;
 }
 
-type UserConfig = InputConfig<MyConfig, MyMeta>;
+const defineMyConfig = createDefineConfig<MyConfig, MyMeta>();
 
-const userConfig: UserConfig = {
+const userConfig = defineMyConfig({
   foo: "bar",
   $meta: {
     metaFoo: "bar",
@@ -19,7 +19,7 @@ const userConfig: UserConfig = {
   $development: {
     foo: "bar",
   },
-};
+});
 
 expectTypeOf(userConfig.$production!.foo).toEqualTypeOf<string>();
 expectTypeOf(userConfig.$meta!.metaFoo).toEqualTypeOf<string>();
