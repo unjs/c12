@@ -2,92 +2,26 @@ import { existsSync } from "node:fs";
 import { rmdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, extname, dirname } from "pathe";
-import createJiti, { JITI } from "jiti";
+import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
-import type { JITIOptions } from "jiti/dist/types";
-import { DotenvOptions, setupDotenv } from "./dotenv";
+import { setupDotenv } from "./dotenv";
 
-export type UserInputConfig = Record<string, any>;
+import type {
+  UserInputConfig,
+  ConfigLayerMeta,
+  LoadConfigOptions,
+  ResolvedConfig,
+  ConfigLayer,
+  SourceOptions,
+  InputConfig,
+} from "./types";
 
-export interface ConfigLayerMeta {
-  name?: string;
-  [key: string]: any;
-}
-
-export interface C12InputConfig {
-  $test?: UserInputConfig;
-  $development?: UserInputConfig;
-  $production?: UserInputConfig;
-  $env?: Record<string, UserInputConfig>;
-  $meta?: ConfigLayerMeta;
-}
-
-export interface InputConfig extends C12InputConfig, UserInputConfig {}
-
-export interface SourceOptions {
-  meta?: ConfigLayerMeta;
-  overrides?: UserInputConfig;
-  [key: string]: any;
-}
-
-export interface ConfigLayer<T extends InputConfig = InputConfig> {
-  config: T | null;
-  source?: string;
-  sourceOptions?: SourceOptions;
-  meta?: ConfigLayerMeta;
-  cwd?: string;
-  configFile?: string;
-}
-
-export interface ResolvedConfig<T extends InputConfig = InputConfig>
-  extends ConfigLayer<T> {
-  layers?: ConfigLayer<T>[];
-  cwd?: string;
-}
-
-export interface ResolveConfigOptions {
-  cwd: string;
-}
-
-export interface LoadConfigOptions<T extends InputConfig = InputConfig> {
-  name?: string;
-  cwd?: string;
-
-  configFile?: string;
-
-  rcFile?: false | string;
-  globalRc?: boolean;
-
-  dotenv?: boolean | DotenvOptions;
-
-  envName?: string | false;
-
-  packageJson?: boolean | string | string[];
-
-  defaults?: T;
-  defaultConfig?: T;
-  overrides?: T;
-
-  resolve?: (
-    id: string,
-    options: LoadConfigOptions
-  ) => null | ResolvedConfig | Promise<ResolvedConfig | null>;
-
-  jiti?: JITI;
-  jitiOptions?: JITIOptions;
-
-  extend?:
-    | false
-    | {
-        extendKey?: string | string[];
-      };
-}
-
-export async function loadConfig<T extends InputConfig = InputConfig>(
-  options: LoadConfigOptions<T>
-): Promise<ResolvedConfig<T>> {
+export async function loadConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta
+>(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
@@ -106,7 +40,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   // Create jiti instance
   options.jiti =
     options.jiti ||
-    createJiti(undefined, {
+    createJiti(undefined as unknown as string, {
       interopDefault: true,
       requireCache: false,
       esmResolve: true,
@@ -114,7 +48,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     });
 
   // Create context
-  const r: ResolvedConfig<T> = {
+  const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
     configFile: resolve(options.cwd, options.configFile),
@@ -188,7 +122,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     await extendConfig(r.config, options);
     r.layers = r.config._layers;
     delete r.config._layers;
-    r.config = defu(r.config, ...r.layers.map((e) => e.config)) as T;
+    r.config = defu(r.config, ...r.layers!.map((e) => e.config)) as T;
   }
 
   // Preserve unmerged sources as layers
@@ -201,8 +135,9 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     { config, configFile: options.configFile, cwd: options.cwd },
     options.rcFile && { config: configRC, configFile: options.rcFile },
     options.packageJson && { config: pkgJson, configFile: "package.json" },
-  ].filter((l) => l && l.config) as ConfigLayer<T>[];
-  r.layers = [...baseLayers, ...r.layers];
+  ].filter((l) => l && l.config) as ConfigLayer<T, MT>[];
+
+  r.layers = [...baseLayers, ...r.layers!];
 
   // Apply defaults
   if (options.defaults) {
@@ -213,8 +148,11 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   return r;
 }
 
-async function extendConfig(config, options: LoadConfigOptions) {
-  config._layers = config._layers || [];
+async function extendConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta
+>(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
+  (config as any)._layers = config._layers || [];
   if (!options.extend) {
     return;
   }
@@ -223,7 +161,7 @@ async function extendConfig(config, options: LoadConfigOptions) {
     keys = [keys];
   }
   const extendSources = [];
-  for (const key of keys) {
+  for (const key of keys as string[]) {
     extendSources.push(
       ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(
         Boolean
@@ -276,11 +214,14 @@ const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
 const NPM_PACKAGE_RE =
   /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
-async function resolveConfig(
+async function resolveConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta
+>(
   source: string,
-  options: LoadConfigOptions,
-  sourceOptions: SourceOptions = {}
-): Promise<ResolvedConfig> {
+  options: LoadConfigOptions<T, MT>,
+  sourceOptions: SourceOptions<T, MT> = {}
+): Promise<ResolvedConfig<T, MT>> {
   // Custom user resolver
   if (options.resolve) {
     const res = await options.resolve(source, options);
@@ -309,26 +250,31 @@ async function resolveConfig(
   // Try resolving as npm package
   if (NPM_PACKAGE_RE.test(source)) {
     try {
-      source = options.jiti.resolve(source, { paths: [options.cwd] });
+      source = options.jiti!.resolve(source, { paths: [options.cwd!] });
     } catch {}
   }
 
   // Import from local fs
   const isDir = !extname(source);
-  const cwd = resolve(options.cwd, isDir ? source : dirname(source));
+  const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
-    source = options.configFile;
+    source = options.configFile!;
   }
-  const res: ResolvedConfig = { config: undefined, cwd, source, sourceOptions };
+  const res: ResolvedConfig<T, MT> = {
+    config: undefined as unknown as T,
+    cwd,
+    source,
+    sourceOptions,
+  };
   try {
-    res.configFile = options.jiti.resolve(resolve(cwd, source), {
+    res.configFile = options.jiti!.resolve(resolve(cwd, source), {
       paths: [cwd],
     });
   } catch {}
-  if (!existsSync(res.configFile)) {
+  if (!existsSync(res.configFile!)) {
     return res;
   }
-  res.config = options.jiti(res.configFile);
+  res.config = options.jiti!(res.configFile!);
   if (res.config instanceof Function) {
     res.config = await res.config();
   }
@@ -336,8 +282,8 @@ async function resolveConfig(
   // Extend env specific config
   if (options.envName) {
     const envConfig = {
-      ...res.config["$" + options.envName],
-      ...res.config.$env?.[options.envName],
+      ...res.config!["$" + options.envName],
+      ...res.config!.$env?.[options.envName],
     };
     if (Object.keys(envConfig).length > 0) {
       res.config = defu(envConfig, res.config);
@@ -345,12 +291,12 @@ async function resolveConfig(
   }
 
   // Meta
-  res.meta = defu(res.sourceOptions.meta, res.config.$meta);
-  delete res.config.$meta;
+  res.meta = defu(res.sourceOptions!.meta, res.config!.$meta) as MT;
+  delete res.config!.$meta;
 
   // Overrides
-  if (res.sourceOptions.overrides) {
-    res.config = defu(res.sourceOptions.overrides, res.config);
+  if (res.sourceOptions!.overrides) {
+    res.config = defu(res.sourceOptions!.overrides, res.config) as T;
   }
 
   return res;

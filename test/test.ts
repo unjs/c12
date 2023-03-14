@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "../src";
 
-const r = (path) => fileURLToPath(new URL(path, import.meta.url));
+const r = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 async function main() {
   const fixtureDir = r("./fixture");

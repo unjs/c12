@@ -2,13 +2,19 @@ import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
 import { loadConfig } from "../src";
 
-const r = (path) => fileURLToPath(new URL(path, import.meta.url));
-const transformPaths = (object) =>
+const r = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
 describe("c12", () => {
   it("load fixture config", async () => {
-    const { config, layers } = await loadConfig({
+    type UserConfig = Partial<{
+      virtual: boolean;
+      overriden: boolean;
+      defaultConfig: boolean;
+      extends: string[];
+    }>;
+    const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
       dotenv: true,
       packageJson: ["c12", "c12-alt"],
@@ -33,7 +39,7 @@ describe("c12", () => {
       },
     });
 
-    expect(transformPaths(config)).toMatchInlineSnapshot(`
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
       {
         "$env": {
           "test": {
@@ -71,7 +77,7 @@ describe("c12", () => {
       }
     `);
 
-    expect(transformPaths(layers)).toMatchInlineSnapshot(`
+    expect(transformPaths(layers!)).toMatchInlineSnapshot(`
       [
         {
           "config": {
@@ -201,7 +207,7 @@ describe("c12", () => {
       },
     });
 
-    expect(transformPaths(config)).toMatchInlineSnapshot(`
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
       {
         "$test": {
           "envConfig": true,

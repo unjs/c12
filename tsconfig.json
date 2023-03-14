@@ -3,10 +3,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strict": true
   },
-  "include": [
-    "src",
-    "test"
-  ]
+  "include": ["src", "test"],
+  "exclude": ["node_modules"]
 }
