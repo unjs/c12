@@ -65,7 +65,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
 
-  const dotenvFile = resolve(options.cwd, options.fileName);
+  const dotenvFile = resolve(options.cwd, options.fileName!);
 
   if (existsSync(dotenvFile)) {
     const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
@@ -73,7 +73,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Apply process.env
-  if (!options.env._applied) {
+  if (!options.env?._applied) {
     Object.assign(environment, options.env);
     environment._applied = true;
   }
@@ -97,7 +97,7 @@ function interpolate(
     return source[key] !== undefined ? source[key] : target[key];
   }
 
-  function interpolate(value: unknown, parents: string[] = []) {
+  function interpolate(value: unknown, parents: string[] = []): any {
     if (typeof value !== "string") {
       return value;
     }
@@ -105,17 +105,17 @@ function interpolate(
     return parse(
       // eslint-disable-next-line unicorn/no-array-reduce
       matches.reduce((newValue, match) => {
-        const parts = /(.?)\${?([\w:]+)?}?/g.exec(match);
+        const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
         const prefix = parts[1];
 
         let value, replacePart: string;
 
         if (prefix === "\\") {
-          replacePart = parts[0];
+          replacePart = parts[0] || "";
           value = replacePart.replace("\\$", "$");
         } else {
           const key = parts[2];
-          replacePart = parts[0].slice(prefix.length);
+          replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion
           if (parents.includes(key)) {
