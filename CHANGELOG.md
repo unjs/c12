@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.3.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.2.0...v1.3.0)
+
+
+### 🚀 Enhancements
+
+  - Generic types support ([#64](https://github.com/unjs/c12/pull/64))
+
+### 🩹 Fixes
+
+  - Use `rm` instead of `rmdir` for recursive remove ([#69](https://github.com/unjs/c12/pull/69))
+
+### 🏡 Chore
+
+  - **readme:** Update badges ([ff08ce2](https://github.com/unjs/c12/commit/ff08ce2))
+  - **readme:** Add emoji ([9df0498](https://github.com/unjs/c12/commit/9df0498))
+  - Update to pnpm 8 ([ecec1f2](https://github.com/unjs/c12/commit/ecec1f2))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Daniel Roe <daniel@roe.dev>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.2.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.1.2...v1.2.0)
