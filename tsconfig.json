@@ -6,6 +6,5 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["src", "test"],
   "exclude": ["node_modules"]
 }
