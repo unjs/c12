@@ -14,13 +14,24 @@ async function main() {
     extend: {
       extendKey: ["theme", "extends"],
     },
-    onChange: ({ config, path, type }) => {
-      console.log("[watcher]", type, path);
+    onWatch: (event) => {
+      console.log("[watcher]", event.type, event.path);
       console.log(config.config);
     },
+    acceptHMR({ oldConfig, newConfig, getDiff }) {
+      const diff = getDiff();
+      if (diff.length === 0) {
+        console.log("No config changed detected!");
+        return true; // No changes!
+      }
+    },
+    onUpdate({ oldConfig, newConfig, getDiff }) {
+      const diff = getDiff();
+      console.log("Config updated:\n" + diff.map((i) => i.toJSON()).join("\n"));
+    },
   });
-  console.log("initial config", config.config, config.layers);
   console.log("watching config files:", config.watchingFiles);
+  console.log("initial config", config.config);
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await

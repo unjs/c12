@@ -10,5 +10,7 @@ export default {
   },
   configFile: true,
   overriden: false,
+  // foo: "bar",
+  // x: "123",
   array: ["a"],
 };

@@ -1,6 +1,7 @@
 import { watch, WatchOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
+import { diff } from "ohash";
 import type {
   UserInputConfig,
   ConfigLayerMeta,
@@ -17,19 +18,30 @@ export type ConfigWatcher<
   unwatch: () => Promise<void>;
 };
 
-export type WatchConfigOptions<
+export interface WatchConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta
-> = {
+> extends LoadConfigOptions<T, MT> {
   chokidarOptions?: WatchOptions;
   debounce?: false | number;
-  onChange?: (payload: {
+
+  onWatch?: (event: {
     type: "created" | "updated" | "removed";
     path: string;
-    config: ResolvedConfig<T, MT>;
+  }) => void | Promise<void>;
+
+  acceptHMR?: (context: {
+    getDiff: () => any[];
+    newConfig: ResolvedConfig<T, MT>;
     oldConfig: ResolvedConfig<T, MT>;
-  }) => void;
-};
+  }) => void | boolean | Promise<void | boolean>;
+
+  onUpdate?: (context: {
+    getDiff: () => any[];
+    newConfig: ResolvedConfig<T, MT>;
+    oldConfig: ResolvedConfig<T, MT>;
+  }) => void | Promise<void>;
+}
 
 const eventMap = {
   add: "created",
@@ -40,9 +52,7 @@ const eventMap = {
 export async function watchConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta
->(
-  options: LoadConfigOptions<T, MT> & WatchConfigOptions
-): Promise<ConfigWatcher<T, MT>> {
+>(options: WatchConfigOptions<T, MT>): Promise<ConfigWatcher<T, MT>> {
   let config = await loadConfig<T, MT>(options);
 
   const configName = options.name || "config";
@@ -79,10 +89,28 @@ export async function watchConfig<
     if (!type) {
       return;
     }
+    if (options.onWatch) {
+      await options.onWatch({
+        type,
+        path,
+      });
+    }
     const oldConfig = config;
-    config = await loadConfig(options);
-    if (options.onChange) {
-      options.onChange({ type, path, config, oldConfig });
+    const newConfig = await loadConfig(options);
+    config = newConfig;
+    const changeCtx = {
+      newConfig,
+      oldConfig,
+      getDiff: () => diff(oldConfig.config, config.config),
+    };
+    if (options.acceptHMR) {
+      const changeHandled = await options.acceptHMR(changeCtx);
+      if (changeHandled) {
+        return;
+      }
+    }
+    if (options.onUpdate) {
+      await options.onUpdate(changeCtx);
     }
   };
 

@@ -16,7 +16,7 @@ Smart Configuration Loader.
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
-- Config watcher with auto reload
+- Config watcher with auto reload and HMR support
 
 ## Usage
 
@@ -237,7 +237,13 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
 
 ## Watching Configuration
 
-you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config,
+you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
+
+### Lifecycle hooks
+
+- `onWatch`: This function is always called when a config is updated, added or removed before attempting to reload config.
+- `acceptHMR`: By implementing this function, you can compare old and new function and return `true` if a full reload is not needed.
+- `onUpdate`: This function is always called after new config is updated. If ``acceptHMR` returns true, it will be skipped.
 
 ```ts
 import { watchConfig } from "c12";
@@ -246,16 +252,28 @@ const config = watchConfig({
   cwd: ".",
   // chokidarOptions: {}, // Default is { ignoreInitial: true }
   // debounce: 200 // Default is 100. You can set to fale to disable debounced watcher
-  onChange: ({ config, oldConfig, path, type }) => {
-    console.log("[watcher]", type, path);
+  onWatch: (event) => {
+    console.log("[watcher]", event.type, event.path);
+    console.log(config.config);
+  },
+  acceptHMR({ oldConfig, newConfig, getDiff }) {
+    const diff = getDiff();
+    if (diff.length === 0) {
+      console.log("No config changed detected!");
+      return true; // No changes!
+    }
+  },
+  onUpdate({ oldConfig, newConfig, getDiff }) {
+    const diff = getDiff();
+    console.log("Config updated:\n" + diff.map((i) => i.toJSON()).join("\n"));
   },
 });
 
-console.log("initial config", config.config, config.layers);
 console.log("watching config files:", config.watchingFiles);
+console.log("initial config", config.config);
 
-// When exiting process
-await config.unwatch();
+// Stop watcher when not needed anymore
+// await config.unwatch();
 ```
 
 ## 💻 Development
