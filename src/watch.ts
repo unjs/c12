@@ -56,13 +56,16 @@ export async function watchConfig<
   let config = await loadConfig<T, MT>(options);
 
   const configName = options.name || "config";
+  const configFileName =
+    options.configFile ??
+    (options.name !== "config" ? `${options.name}.config` : "config");
   const watchingFiles = [
     ...new Set(
       (config.layers || [])
         .filter((l) => l.cwd)
         .flatMap((l) => [
           ...["ts", "js", "mjs", "cjs", "cts", "mts", "json"].map((ext) =>
-            resolve(l.cwd!, (options.name || "config") + "." + ext)
+            resolve(l.cwd!, configFileName + "." + ext)
           ),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
@@ -115,7 +118,7 @@ export async function watchConfig<
   };
 
   if (options.debounce !== false) {
-    _fswatcher.on("all", debounce(onChange, options.debounce));
+    _fswatcher.on("all", debounce(onChange, options.debounce ?? 100));
   } else {
     _fswatcher.on("all", onChange);
   }
