@@ -31,13 +31,13 @@ export interface WatchConfigOptions<
   }) => void | Promise<void>;
 
   acceptHMR?: (context: {
-    getDiff: () => any[];
+    getDiff: () => ReturnType<typeof diff>;
     newConfig: ResolvedConfig<T, MT>;
     oldConfig: ResolvedConfig<T, MT>;
   }) => void | boolean | Promise<void | boolean>;
 
   onUpdate?: (context: {
-    getDiff: () => any[];
+    getDiff: () => ReturnType<typeof diff>;
     newConfig: ResolvedConfig<T, MT>;
     oldConfig: ResolvedConfig<T, MT>;
   }) => void | Promise<void>;

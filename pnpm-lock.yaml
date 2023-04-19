@@ -20,8 +20,8 @@ dependencies:
     specifier: ^1.2.0
     version: 1.2.0
   ohash:
-    specifier: ^1.1.0
-    version: 1.1.0
+    specifier: ^1.1.1
+    version: 1.1.1
   pathe:
     specifier: ^1.1.0
     version: 1.1.0
@@ -2953,8 +2953,8 @@ packages:
       ufo: 1.1.1
     dev: true
 
-  /ohash@1.1.0:
-    resolution: {integrity: sha512-KNKg5q7wmG6YG46AoWvO2tJoNxcVLuhnn+f0UnoTNuBUpH7tPAOES+R3ptnHw4QpEee4zutsMznAvTZj6eQoLg==}
+  /ohash@1.1.1:
+    resolution: {integrity: sha512-N9UDJn2IV6oO6pNclJ80tRXraNNJqw/asscr3Lu7+ibRQdEswejJuuXNclMQTJVTsVhQs+ZJThVziy6t2v2KXA==}
     dev: false
 
   /once@1.4.0:
