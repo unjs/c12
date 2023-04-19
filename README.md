@@ -16,6 +16,7 @@ Smart Configuration Loader.
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
+- Config watching utility
 
 ## Usage
 
@@ -36,10 +37,10 @@ Import:
 
 ```js
 // ESM
-import { loadConfig } from "c12";
+import { loadConfig, watchConfig } from "c12";
 
 // CommonJS
-const { loadConfig } = require("c12");
+const { loadConfig, watchConfig } = require("c12");
 ```
 
 Load configuration:
@@ -232,6 +233,29 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
     staging: { logLevel: 'debug' }
   }
 }
+```
+
+## Watching Configuration
+
+you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config,
+
+```ts
+import { watchConfig } from "c12";
+
+const config = watchConfig({
+  cwd: ".",
+  // chokidarOptions: {}, // Default is { ignoreInitial: true }
+  // debounce: 200 // Default is 100. You can set to fale to disable debounced watcher
+  onChange: ({ config, path, type }) => {
+    console.log("[watcher]", type, path);
+  },
+});
+
+console.log("initial config", config.config, config.layers);
+console.log("watching config files:", config.watchingFiles);
+
+// When exiting process
+await config.unwatch();
 ```
 
 ## 💻 Development
