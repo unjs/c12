@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.4.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.3.0...v1.4.0)
+
+
+### 🚀 Enhancements
+
+  - `watchConfig` utility ([#77](https://github.com/unjs/c12/pull/77))
+  - **watchConfig:** Support hmr ([#78](https://github.com/unjs/c12/pull/78))
+
+### 📖 Documentation
+
+  - Fix small grammer issues ([5f2b3a1](https://github.com/unjs/c12/commit/5f2b3a1))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.3.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.2.0...v1.3.0)
