@@ -1,5 +1,5 @@
 import { watch, WatchOptions } from "chokidar";
-import { debounce, DebounceOptions } from "perfect-debounce";
+import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
 import type {
   UserInputConfig,
@@ -27,6 +27,7 @@ export type WatchConfigOptions<
     type: "created" | "updated" | "removed";
     path: string;
     config: ResolvedConfig<T, MT>;
+    oldConfig: ResolvedConfig<T, MT>;
   }) => void;
 };
 
@@ -78,9 +79,10 @@ export async function watchConfig<
     if (!type) {
       return;
     }
+    const oldConfig = config;
     config = await loadConfig(options);
     if (options.onChange) {
-      options.onChange({ type, path, config });
+      options.onChange({ type, path, config, oldConfig });
     }
   };
 

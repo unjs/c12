@@ -246,7 +246,7 @@ const config = watchConfig({
   cwd: ".",
   // chokidarOptions: {}, // Default is { ignoreInitial: true }
   // debounce: 200 // Default is 100. You can set to fale to disable debounced watcher
-  onChange: ({ config, path, type }) => {
+  onChange: ({ config, oldConfig, path, type }) => {
     console.log("[watcher]", type, path);
   },
 });
