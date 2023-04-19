@@ -16,7 +16,7 @@ Smart Configuration Loader.
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
-- Config watcher with auto reload and HMR support
+- Config watcher with auto-reload and HMR support
 
 ## Usage
 
@@ -60,7 +60,7 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 1. Config overrides passed by options
 2. Config file in CWD
 3. RC file in CWD
-4. Global RC file in user's home directory
+4. Global RC file in the user's home directory
 5. Config from `package.json`
 6. Default config passed by options
 7. Extended config layers
@@ -241,9 +241,9 @@ you can use `watchConfig` instead of `loadConfig` to load config and watch for c
 
 ### Lifecycle hooks
 
-- `onWatch`: This function is always called when a config is updated, added or removed before attempting to reload config.
-- `acceptHMR`: By implementing this function, you can compare old and new function and return `true` if a full reload is not needed.
-- `onUpdate`: This function is always called after new config is updated. If `acceptHMR` returns true, it will be skipped.
+- `onWatch`: This function is always called when config is updated, added, or removed before attempting to reload the config.
+- `acceptHMR`: By implementing this function, you can compare old and new functions and return `true` if a full reload is not needed.
+- `onUpdate`: This function is always called after the new config is updated. If `acceptHMR` returns true, it will be skipped.
 
 ```ts
 import { watchConfig } from "c12";
@@ -251,7 +251,7 @@ import { watchConfig } from "c12";
 const config = watchConfig({
   cwd: ".",
   // chokidarOptions: {}, // Default is { ignoreInitial: true }
-  // debounce: 200 // Default is 100. You can set to fale to disable debounced watcher
+  // debounce: 200 // Default is 100. You can set it to false to disable debounced watcher
   onWatch: (event) => {
     console.log("[watcher]", event.type, event.path);
   },
