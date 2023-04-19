@@ -254,7 +254,6 @@ const config = watchConfig({
   // debounce: 200 // Default is 100. You can set to fale to disable debounced watcher
   onWatch: (event) => {
     console.log("[watcher]", event.type, event.path);
-    console.log(config.config);
   },
   acceptHMR({ oldConfig, newConfig, getDiff }) {
     const diff = getDiff();

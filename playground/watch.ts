@@ -16,7 +16,6 @@ async function main() {
     },
     onWatch: (event) => {
       console.log("[watcher]", event.type, event.path);
-      console.log(config.config);
     },
     acceptHMR({ oldConfig, newConfig, getDiff }) {
       const diff = getDiff();
