@@ -16,7 +16,7 @@ Smart Configuration Loader.
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
-- Config watching utility
+- Config watcher with auto reload
 
 ## Usage
 
