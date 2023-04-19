@@ -243,7 +243,7 @@ you can use `watchConfig` instead of `loadConfig` to load config and watch for c
 
 - `onWatch`: This function is always called when a config is updated, added or removed before attempting to reload config.
 - `acceptHMR`: By implementing this function, you can compare old and new function and return `true` if a full reload is not needed.
-- `onUpdate`: This function is always called after new config is updated. If ``acceptHMR` returns true, it will be skipped.
+- `onUpdate`: This function is always called after new config is updated. If `acceptHMR` returns true, it will be skipped.
 
 ```ts
 import { watchConfig } from "c12";
