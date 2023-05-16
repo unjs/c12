@@ -75,9 +75,9 @@ Resolve configuration from this working directory. The default is `process.cwd()
 
 Configuration base name. The default is `config`.
 
-### `configName`
+### `configFile`
 
-Configuration file name without extension. Default is generated from `name` (name=foo => `foo.config`).
+Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).
 
 Set to `false` to avoid loading the config file.
 
