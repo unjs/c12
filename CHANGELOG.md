@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.4.2
+
+[compare changes](https://github.com/unjs/c12/compare/v1.4.1...v1.4.2)
+
+
+### 🩹 Fixes
+
+  - Allow extends dir to start with dot ([#71](https://github.com/unjs/c12/pull/71))
+
+### 📖 Documentation
+
+  - Fix typo for `configFile` ([#83](https://github.com/unjs/c12/pull/83))
+
+### 🏡 Chore
+
+  - **release:** V1.4.1 ([2b87193](https://github.com/unjs/c12/commit/2b87193))
+  - Update dependencies ([309454a](https://github.com/unjs/c12/commit/309454a))
+  - Lint project ([a102400](https://github.com/unjs/c12/commit/a102400))
+  - Lint ([e19a6ff](https://github.com/unjs/c12/commit/e19a6ff))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Rijk Van Zanten ([@rijkvanzanten](http://github.com/rijkvanzanten))
+
 ## v1.4.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.4.0...v1.4.1)
