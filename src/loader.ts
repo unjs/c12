@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname } from "pathe";
+import { resolve, extname, dirname, basename } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
@@ -255,7 +255,8 @@ async function resolveConfig<
   }
 
   // Import from local fs
-  const isDir = !extname(source);
+  const ext = extname(source);
+  const isDir = !ext || ext === basename(source) /* #71 */;
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
     source = options.configFile!;

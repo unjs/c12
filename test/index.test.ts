@@ -159,8 +159,8 @@ describe("c12", () => {
               "text": "base_text",
             },
           },
-          "configFile": "<path>/fixture/base/config.ts",
-          "cwd": "<path>/fixture/base",
+          "configFile": "<path>/fixture/.base/config.ts",
+          "cwd": "<path>/fixture/.base",
           "meta": {
             "name": "base",
             "version": "1.0.0",
