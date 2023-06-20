@@ -1,5 +1,5 @@
 import { expectTypeOf } from "expect-type";
-import { loadConfig, InputConfig, createDefineConfig } from "../src";
+import { loadConfig, createDefineConfig } from "../src";
 
 interface MyConfig {
   foo: string;
@@ -24,6 +24,7 @@ const userConfig = defineMyConfig({
 expectTypeOf(userConfig.$production!.foo).toEqualTypeOf<string>();
 expectTypeOf(userConfig.$meta!.metaFoo).toEqualTypeOf<string>();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function main() {
   const config = await loadConfig<MyConfig, MyMeta>({});
   expectTypeOf(config.config!.foo).toEqualTypeOf<string>();

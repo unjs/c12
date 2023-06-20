@@ -94,7 +94,7 @@ function interpolate(
 ) {
   function getValue(key: string) {
     // Source value 'wins' over target value
-    return source[key] !== undefined ? source[key] : target[key];
+    return source[key] === undefined ? target[key] : source[key];
   }
 
   function interpolate(value: unknown, parents: string[] = []): any {
@@ -134,9 +134,9 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value !== undefined
-          ? newValue.replace(replacePart, value)
-          : newValue;
+        return value === undefined
+          ? newValue
+          : newValue.replace(replacePart, value);
       }, value)
     );
   }

@@ -17,14 +17,14 @@ async function main() {
     onWatch: (event) => {
       console.log("[watcher]", event.type, event.path);
     },
-    acceptHMR({ oldConfig, newConfig, getDiff }) {
+    acceptHMR({ getDiff }) {
       const diff = getDiff();
       if (diff.length === 0) {
         console.log("No config changed detected!");
         return true; // No changes!
       }
     },
-    onUpdate({ oldConfig, newConfig, getDiff }) {
+    onUpdate({ getDiff }) {
       const diff = getDiff();
       console.log("Config updated:\n" + diff.map((i) => i.toJSON()).join("\n"));
     },

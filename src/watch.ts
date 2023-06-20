@@ -58,7 +58,7 @@ export async function watchConfig<
   const configName = options.name || "config";
   const configFileName =
     options.configFile ??
-    (options.name !== "config" ? `${options.name}.config` : "config");
+    (options.name === "config" ? "config" : `${options.name}.config`);
   const watchingFiles = [
     ...new Set(
       (config.layers || [])
@@ -117,10 +117,10 @@ export async function watchConfig<
     }
   };
 
-  if (options.debounce !== false) {
-    _fswatcher.on("all", debounce(onChange, options.debounce ?? 100));
-  } else {
+  if (options.debounce === false) {
     _fswatcher.on("all", onChange);
+  } else {
+    _fswatcher.on("all", debounce(onChange, options.debounce ?? 100));
   }
 
   const utils: Partial<ConfigWatcher<T, MT>> = {

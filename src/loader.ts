@@ -28,7 +28,7 @@ export async function loadConfig<
   options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
     options.configFile ??
-    (options.name !== "config" ? `${options.name}.config` : "config");
+    (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
   if (options.extend !== false) {
     options.extend = {

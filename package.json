@@ -26,7 +26,7 @@
     "lint:fix": "eslint --ext .ts,.js,.mjs,.cjs . --fix && prettier -w src test",
     "prepack": "unbuild",
     "release": "changelogen --release && npm publish && git push --follow-tags",
-    "test": "vitest run --coverage && pnpm test:types",
+    "test": "pnpm lint && vitest run --coverage && pnpm test:types",
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
