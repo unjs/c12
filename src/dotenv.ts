@@ -113,6 +113,7 @@ function interpolate(
         if (prefix === "\\") {
           replacePart = parts[0] || "";
           value = replacePart.replace("\\$", "$");
+          return value;
         } else {
           const key = parts[2];
           replacePart = (parts[0] || "").slice(prefix.length);
