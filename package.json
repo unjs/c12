@@ -34,7 +34,7 @@
     "defu": "^6.1.2",
     "dotenv": "^16.3.1",
     "giget": "^1.1.2",
-    "jiti": "^1.18.2",
+    "jiti": "^1.19.1",
     "mlly": "^1.4.0",
     "ohash": "^1.1.2",
     "pathe": "^1.1.1",
@@ -43,15 +43,15 @@
     "rc9": "^2.1.1"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^0.32.2",
-    "changelogen": "^0.5.3",
-    "eslint": "^8.43.0",
+    "@vitest/coverage-v8": "^0.33.0",
+    "changelogen": "^0.5.4",
+    "eslint": "^8.44.0",
     "eslint-config-unjs": "^0.2.1",
     "expect-type": "^0.16.0",
     "prettier": "^2.8.8",
     "typescript": "^5.1.6",
     "unbuild": "^1.2.1",
-    "vitest": "^0.32.2"
+    "vitest": "^0.33.0"
   },
-  "packageManager": "pnpm@8.6.5"
+  "packageManager": "pnpm@8.6.6"
 }
