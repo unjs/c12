@@ -76,6 +76,8 @@ export interface LoadConfigOptions<
   defaultConfig?: T;
   overrides?: T;
 
+  verbose?: boolean;
+
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>
