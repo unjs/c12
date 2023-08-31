@@ -1,6 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
-import { loadConfig } from "../src";
+import {
+  ConfigLayer,
+  ConfigLayerMeta,
+  UserInputConfig,
+  loadConfig,
+} from "../src";
 
 const r = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 const transformPaths = (object: object) =>
@@ -229,5 +234,37 @@ describe("c12", () => {
         "theme": "./theme",
       }
     `);
+  });
+
+  it("should opt-out environment-specific and built-in keys start with $", async () => {
+    const { config, layers } = await loadConfig({
+      cwd: r("./fixture"),
+      envName: "test",
+      verbose: false,
+      extend: {
+        extendKey: ["theme", "extends"],
+      },
+    });
+
+    const resolvedConfigKeys = Object.keys(config!);
+
+    expect(resolvedConfigKeys).not.toContain("$env");
+    expect(resolvedConfigKeys).not.toContain("$meta");
+    expect(resolvedConfigKeys).not.toContain("$test");
+
+    const transformdLayers = transformPaths(layers!) as ConfigLayer<
+      UserInputConfig,
+      ConfigLayerMeta
+    >[];
+
+    const configLayer = transformdLayers.find(
+      (layer) => layer.configFile === "config"
+    )!;
+    expect(Object.keys(configLayer.config!)).toContain("$test");
+
+    const baseConfigLay = transformdLayers.find(
+      (layer) => layer.configFile === "<path>/fixture/.base/config.ts"
+    )!;
+    expect(Object.keys(baseConfigLay.config!)).toContain("$env");
   });
 });
