@@ -115,6 +115,10 @@ Specify default configuration. It is applied **before** extending config.
 
 Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
+### `verbose`
+
+Include environment-specific and built-in keys start with `$` in the resolved config. The default is `true`.
+
 ### `jiti`
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configuration files.
