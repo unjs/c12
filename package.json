@@ -50,7 +50,7 @@
     "expect-type": "^0.16.0",
     "prettier": "^2.8.8",
     "typescript": "^5.2.2",
-    "unbuild": "^1.2.1",
+    "unbuild": "^2.0.0",
     "vitest": "^0.34.5"
   },
   "packageManager": "pnpm@8.7.6"
