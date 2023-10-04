@@ -90,7 +90,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 function interpolate(
   target: Record<string, any>,
   source: Record<string, any> = {},
-  parse = (v: any) => v
+  parse = (v: any) => v,
 ) {
   function getValue(key: string) {
     // Source value 'wins' over target value
@@ -122,8 +122,8 @@ function interpolate(
             // eslint-disable-next-line no-console
             console.warn(
               `Please avoid recursive environment variables ( loop: ${parents.join(
-                " > "
-              )} > ${key} )`
+                " > ",
+              )} > ${key} )`,
             );
             return "";
           }
@@ -137,7 +137,7 @@ function interpolate(
         return value === undefined
           ? newValue
           : newValue.replace(replacePart, value);
-      }, value)
+      }, value),
     );
   }
 
