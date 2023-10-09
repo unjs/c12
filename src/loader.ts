@@ -1,10 +1,11 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname, basename } from "pathe";
+import { resolve, extname, dirname, basename, join } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
+import { hash } from "ohash";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
 
@@ -208,7 +209,7 @@ async function extendConfig<
   }
 }
 
-const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
+const GIT_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE =
@@ -233,17 +234,28 @@ async function resolveConfig<
   // Download git URLs and resolve to local path
   if (GIT_PREFIXES.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
-    const url = new URL(source);
-    const gitRepo =
-      url.protocol + url.pathname.split("/").slice(0, 2).join("/");
-    const name = gitRepo.replace(/[#/:@\\]/g, "_");
-    const tmpDir = process.env.XDG_CACHE_HOME
-      ? resolve(process.env.XDG_CACHE_HOME, "c12", name)
-      : resolve(homedir(), ".cache/c12", name);
-    if (existsSync(tmpDir)) {
-      await rm(tmpDir, { recursive: true });
+
+    const cloneName =
+      source.replace(/\W+/g, "_").split("_").splice(0, 3).join("_") +
+      "_" +
+      hash(source);
+
+    let cloneDir: string;
+
+    const localNodeModules = resolve(options.cwd!, "node_modules");
+
+    if (existsSync(localNodeModules)) {
+      cloneDir = join(localNodeModules, ".c12", cloneName);
+    } else {
+      cloneDir = process.env.XDG_CACHE_HOME
+        ? resolve(process.env.XDG_CACHE_HOME, "c12", cloneName)
+        : resolve(homedir(), ".cache/c12", cloneName);
     }
-    const cloned = await downloadTemplate(source, { dir: tmpDir });
+
+    if (existsSync(cloneDir)) {
+      await rm(cloneDir, { recursive: true });
+    }
+    const cloned = await downloadTemplate(source, { dir: cloneDir });
     source = cloned.dir;
   }
 
