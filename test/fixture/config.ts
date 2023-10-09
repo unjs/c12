@@ -1,6 +1,6 @@
 export default {
   theme: "./theme",
-  extends: [["c12-npm-test", { userMeta: 123 }]],
+  extends: [["gh:unjs/c12/test/fixture#main", { userMeta: 123 }]],
   $test: {
     extends: ["./config.dev"],
     envConfig: true,
