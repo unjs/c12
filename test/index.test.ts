@@ -110,7 +110,7 @@ describe("c12", () => {
                 },
               ],
               [
-                "gh:unjs/c12/test/fixture/_github#feat/clone-fixes",
+                "gh:unjs/c12/test/fixture/_github#main",
                 {
                   "userMeta": 123,
                 },
@@ -201,8 +201,8 @@ describe("c12", () => {
           "config": {
             "githubLayer": true,
           },
-          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_JtzxmAv2Dh/config.ts",
-          "cwd": "<path>/fixture/node_modules/.c12/gh_unjs_c12_JtzxmAv2Dh",
+          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/config.ts",
+          "cwd": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo",
           "meta": {},
           "source": "config",
           "sourceOptions": {
@@ -243,6 +243,7 @@ describe("c12", () => {
         "configFile": true,
         "devConfig": true,
         "envConfig": true,
+        "githubLayer": true,
         "npmConfig": true,
         "overriden": false,
         "theme": "./theme",
