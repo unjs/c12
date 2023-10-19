@@ -220,7 +220,7 @@ In the repo, there should be a `config.ts` (or `config.{name}.ts`) file to be co
 ```js
 // config.ts
 export default {
-  extends: "gh:repo/owner",
+  extends: "gh:user/repo",
 };
 ```
 
@@ -229,18 +229,20 @@ export default {
 ```js
 // config.ts
 export default {
-  extends: "gh:repo/owner/theme#dev",
+  extends: "gh:user/repo/theme#dev",
 };
 ```
 
-**Example:** Extend with custom configuration ([giget](https://github.com/unjs/giget) options)
+**Example:** Extend with clone configuration
 
 ```js
 // config.ts
 export default {
-  extends: ["gh:repo/owner", { giget: { auth: process.env.GITHUB_TOKEN } }],
+  extends: ["gh:user/repo", { giget: { auth: process.env.GITHUB_TOKEN } }],
 };
 ```
+
+Refer to [unjs/giget](https://giget.unjs.io) for more information.
 
 ## Environment-specific configuration
 
