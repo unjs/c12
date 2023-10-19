@@ -109,9 +109,7 @@ describe("c12", () => {
               [
                 "gh:unjs/c12/test/fixture/_github#main",
                 {
-                  "giget": {
-                    "registry": "x",
-                  },
+                  "giget": {},
                 },
               ],
             ],
@@ -203,9 +201,7 @@ describe("c12", () => {
           "meta": {},
           "source": "config",
           "sourceOptions": {
-            "giget": {
-              "registry": "x",
-            },
+            "giget": {},
           },
         },
         {
