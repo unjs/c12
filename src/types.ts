@@ -90,7 +90,7 @@ export interface LoadConfigOptions<
   jiti?: JITI;
   jitiOptions?: JITIOptions;
 
-  giget: DownloadTemplateOptions;
+  giget?: DownloadTemplateOptions;
 
   extend?:
     | false
