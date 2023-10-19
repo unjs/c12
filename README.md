@@ -123,6 +123,10 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configu
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
 
+### `giget`
+
+Options passed to [unjs/giget](https://github.com/unjs/giget) when extending layer from git source.
+
 ### `envName`
 
 Environment name used for [environment specific configuration](#environment-specific-configuration).
@@ -203,6 +207,39 @@ Layers:
  { config: /* base  config */, configFile: /* path/to/base/config.ts  */, cwd: /* path/to/base */ },
  { config: /* dev   config */, configFile: /* path/to/config.dev.ts  */, cwd: /* path/ */ },
 ]
+```
+
+## Extending Config Layer from Remote Sources
+
+You can also extend configuration from remote sources such as npm or github.
+
+In the repo, there should be a `config.ts` (or `config.{name}.ts`) file to be considered as a valid config layer.
+
+**Example:** Extend from a github repository
+
+```js
+// config.ts
+export default {
+  extends: "gh:repo/owner",
+};
+```
+
+**Example:** Extend from a github repository with branch and subpath
+
+```js
+// config.ts
+export default {
+  extends: "gh:repo/owner/theme#dev",
+};
+```
+
+**Example:** Extend with custom configuration ([giget](https://github.com/unjs/giget) options)
+
+```js
+// config.ts
+export default {
+  extends: ["gh:repo/owner", { giget: { auth: process.env.GITHUB_TOKEN } }],
+};
 ```
 
 ## Environment-specific configuration

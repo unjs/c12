@@ -105,14 +105,11 @@ describe("c12", () => {
               "./config.dev",
               [
                 "c12-npm-test",
-                {
-                  "userMeta": 123,
-                },
               ],
               [
                 "gh:unjs/c12/test/fixture/_github#main",
                 {
-                  "userMeta": 123,
+                  "giget": {},
                 },
               ],
             ],
@@ -193,9 +190,7 @@ describe("c12", () => {
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
           "meta": {},
           "source": "<path>/fixture/node_modules/c12-npm-test/config.ts",
-          "sourceOptions": {
-            "userMeta": 123,
-          },
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -206,7 +201,7 @@ describe("c12", () => {
           "meta": {},
           "source": "config",
           "sourceOptions": {
-            "userMeta": 123,
+            "giget": {},
           },
         },
         {
