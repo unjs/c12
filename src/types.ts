@@ -1,5 +1,6 @@
 import type { JITI } from "jiti";
 import type { JITIOptions } from "jiti/dist/types";
+import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv";
 
 export interface ConfigLayerMeta {
@@ -30,6 +31,7 @@ export interface SourceOptions<
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
   meta?: MT;
+  giget?: DownloadTemplateOptions;
   overrides?: T;
   [key: string]: any;
 }
@@ -87,6 +89,8 @@ export interface LoadConfigOptions<
 
   jiti?: JITI;
   jitiOptions?: JITIOptions;
+
+  giget: DownloadTemplateOptions;
 
   extend?:
     | false

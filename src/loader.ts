@@ -255,7 +255,11 @@ async function resolveConfig<
     if (existsSync(cloneDir)) {
       await rm(cloneDir, { recursive: true });
     }
-    const cloned = await downloadTemplate(source, { dir: cloneDir });
+    const cloned = await downloadTemplate(source, {
+      dir: cloneDir,
+      ...options.giget,
+      ...sourceOptions.giget,
+    });
     source = cloned.dir;
   }
 
