@@ -229,7 +229,7 @@ export default {
 ```js
 // config.ts
 export default {
-  extends: "gh:repo/owner/test/fixture/_github#main",
+  extends: "gh:repo/owner/theme#dev",
 };
 ```
 
