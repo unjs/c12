@@ -220,7 +220,15 @@ async function extendConfig<
   }
 }
 
-const GIT_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://"];
+// TODO: Either expose from giget directly or redirect all non file:// protocols to giget
+const GIGET_PREFIXES = [
+  "gh:",
+  "github:",
+  "gitlab:",
+  "bitbucket:",
+  "https://",
+  "http://",
+];
 
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE =
@@ -242,8 +250,8 @@ async function resolveConfig<
     }
   }
 
-  // Download git URLs and resolve to local path
-  if (GIT_PREFIXES.some((prefix) => source.startsWith(prefix))) {
+  // Download giget URIs and resolve to local path
+  if (GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
 
     const cloneName =
