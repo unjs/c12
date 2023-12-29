@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname, basename, join, normalize } from "pathe";
+import { resolve, extname, dirname, basename, join } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
@@ -18,6 +18,8 @@ import type {
   SourceOptions,
   InputConfig,
 } from "./types";
+
+const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
@@ -318,7 +320,6 @@ async function resolveConfig<
   }
 
   // Always windows paths
-  const _normalize = (p?: string) => p?.replace(/\\/g, "/");
   res.configFile = _normalize(res.configFile);
   res.source = _normalize(res.source);
 
