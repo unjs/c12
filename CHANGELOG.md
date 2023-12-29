@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.6.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.5.1...v1.6.0)
+
+### 🚀 Enhancements
+
+- Option to omit $ keys from resolved config ([#100](https://github.com/unjs/c12/pull/100))
+- Support `install` for source options ([#126](https://github.com/unjs/c12/pull/126))
+
+### 🩹 Fixes
+
+- Normalize windows backslash for `configFile` and `source` ([#48](https://github.com/unjs/c12/pull/48))
+- Clone sub layers into `node_modules/.c12` ([#125](https://github.com/unjs/c12/pull/125))
+- Handle `http://` prefixes with giget as well ([6c09735](https://github.com/unjs/c12/commit/6c09735))
+
+### 📖 Documentation
+
+- Add package pronunciation ([#118](https://github.com/unjs/c12/pull/118))
+
+### 🏡 Chore
+
+- Update docs ([54ed82b](https://github.com/unjs/c12/commit/54ed82b))
+- Update lockfile and vitest ([fecad1a](https://github.com/unjs/c12/commit/fecad1a))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Lo ([@LoTwT](http://github.com/LoTwT))
+- Alex Kozack 
+- Nozomu Ikuta
+
 ## v1.5.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.4.2...v1.5.1)
