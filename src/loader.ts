@@ -1,71 +1,35 @@
 import { existsSync } from "node:fs";
-import { rmdir } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname } from "pathe";
-import createJiti, { JITI } from "jiti";
+import { resolve, extname, dirname, basename, join } from "pathe";
+import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir } from "pkg-types";
-import type { JITIOptions } from "jiti/dist/types";
-import { DotenvOptions, setupDotenv } from "./dotenv";
+import { hash } from "ohash";
+import { findWorkspaceDir, readPackageJSON } from "pkg-types";
+import { setupDotenv } from "./dotenv";
 
-export interface InputConfig extends Record<string, any> {}
+import type {
+  UserInputConfig,
+  ConfigLayerMeta,
+  LoadConfigOptions,
+  ResolvedConfig,
+  ConfigLayer,
+  SourceOptions,
+  InputConfig,
+} from "./types";
 
-export interface ConfigLayer<T extends InputConfig = InputConfig> {
-  config: T | null;
-  cwd?: string;
-  configFile?: string;
-}
-
-export interface ResolvedConfig<T extends InputConfig = InputConfig>
-  extends ConfigLayer<T> {
-  layers?: ConfigLayer<T>[];
-  cwd?: string;
-}
-
-export interface ResolveConfigOptions {
-  cwd: string;
-}
-
-export interface LoadConfigOptions<T extends InputConfig = InputConfig> {
-  name?: string;
-  cwd?: string;
-
-  configFile?: string;
-
-  rcFile?: false | string;
-  globalRc?: boolean;
-
-  dotenv?: boolean | DotenvOptions;
-
-  defaults?: T;
-  defaultConfig?: T;
-  overrides?: T;
-
-  resolve?: (
-    id: string,
-    options: LoadConfigOptions
-  ) => null | ResolvedConfig | Promise<ResolvedConfig | null>;
-
-  jiti?: JITI;
-  jitiOptions?: JITIOptions;
-
-  extend?:
-    | false
-    | {
-        extendKey?: string | string[];
-      };
-}
-
-export async function loadConfig<T extends InputConfig = InputConfig>(
-  options: LoadConfigOptions<T>
-): Promise<ResolvedConfig<T>> {
+export async function loadConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
+  options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
     options.configFile ??
-    (options.name !== "config" ? `${options.name}.config` : "config");
+    (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
   if (options.extend !== false) {
     options.extend = {
@@ -77,7 +41,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   // Create jiti instance
   options.jiti =
     options.jiti ||
-    createJiti(undefined, {
+    createJiti(undefined as unknown as string, {
       interopDefault: true,
       requireCache: false,
       esmResolve: true,
@@ -85,7 +49,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     });
 
   // Create context
-  const r: ResolvedConfig<T> = {
+  const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
     configFile: resolve(options.cwd, options.configFile),
@@ -112,20 +76,37 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     if (options.globalRc) {
       Object.assign(
         configRC,
-        rc9.readUser({ name: options.rcFile, dir: options.cwd })
+        rc9.readUser({ name: options.rcFile, dir: options.cwd }),
       );
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
         Object.assign(
           configRC,
-          rc9.read({ name: options.rcFile, dir: workspaceDir })
+          rc9.read({ name: options.rcFile, dir: workspaceDir }),
         );
       }
     }
     Object.assign(
       configRC,
-      rc9.read({ name: options.rcFile, dir: options.cwd })
+      rc9.read({ name: options.rcFile, dir: options.cwd }),
     );
+  }
+
+  // Load config from package.json
+  const pkgJson = {};
+  if (options.packageJson) {
+    const keys = (
+      Array.isArray(options.packageJson)
+        ? options.packageJson
+        : [
+            typeof options.packageJson === "string"
+              ? options.packageJson
+              : options.name,
+          ]
+    ).filter((t) => t && typeof t === "string");
+    const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
+    const values = keys.map((key) => pkgJsonFile?.[key]);
+    Object.assign(pkgJson, defu({}, ...values));
   }
 
   // Combine sources
@@ -133,7 +114,8 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     options.overrides,
     config,
     configRC,
-    options.defaultConfig
+    pkgJson,
+    options.defaultConfig,
   ) as T;
 
   // Allow extending
@@ -141,7 +123,7 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     await extendConfig(r.config, options);
     r.layers = r.config._layers;
     delete r.config._layers;
-    r.config = defu(r.config, ...r.layers.map((e) => e.config)) as T;
+    r.config = defu(r.config, ...r.layers!.map((e) => e.config)) as T;
   }
 
   // Preserve unmerged sources as layers
@@ -153,8 +135,10 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
     },
     { config, configFile: options.configFile, cwd: options.cwd },
     options.rcFile && { config: configRC, configFile: options.rcFile },
-  ].filter((l) => l && l.config) as ConfigLayer<T>[];
-  r.layers = [...baseLayers, ...r.layers];
+    options.packageJson && { config: pkgJson, configFile: "package.json" },
+  ].filter((l) => l && l.config) as ConfigLayer<T, MT>[];
+
+  r.layers = [...baseLayers, ...r.layers!];
 
   // Apply defaults
   if (options.defaults) {
@@ -165,8 +149,11 @@ export async function loadConfig<T extends InputConfig = InputConfig>(
   return r;
 }
 
-async function extendConfig(config, options: LoadConfigOptions) {
-  config._layers = config._layers || [];
+async function extendConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
+  (config as any)._layers = config._layers || [];
   if (!options.extend) {
     return;
   }
@@ -175,31 +162,41 @@ async function extendConfig(config, options: LoadConfigOptions) {
     keys = [keys];
   }
   const extendSources = [];
-  for (const key of keys) {
+  for (const key of keys as string[]) {
     extendSources.push(
       ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(
-        Boolean
-      )
+        Boolean,
+      ),
     );
     delete config[key];
   }
-  for (const extendSource of extendSources) {
+  for (let extendSource of extendSources) {
+    const originalExtendSource = extendSource;
+    let sourceOptions = {};
+    if (extendSource.source) {
+      sourceOptions = extendSource.options || {};
+      extendSource = extendSource.source;
+    }
+    if (Array.isArray(extendSource)) {
+      sourceOptions = extendSource[1] || {};
+      extendSource = extendSource[0];
+    }
     if (typeof extendSource !== "string") {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
-          extendSource
-        )}\` (which should be a string) in ${options.cwd}`
+          originalExtendSource,
+        )}\` in ${options.cwd}`,
       );
       continue;
     }
-    const _config = await resolveConfig(extendSource, options);
+    const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
       console.warn(
-        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`
+        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`,
       );
       continue;
     }
@@ -212,16 +209,20 @@ async function extendConfig(config, options: LoadConfigOptions) {
   }
 }
 
-const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
+const GIT_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE =
   /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
-async function resolveConfig(
+async function resolveConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(
   source: string,
-  options: LoadConfigOptions
-): Promise<ResolvedConfig> {
+  options: LoadConfigOptions<T, MT>,
+  sourceOptions: SourceOptions<T, MT> = {},
+): Promise<ResolvedConfig<T, MT>> {
   // Custom user resolver
   if (options.resolve) {
     const res = await options.resolve(source, options);
@@ -233,49 +234,91 @@ async function resolveConfig(
   // Download git URLs and resolve to local path
   if (GIT_PREFIXES.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
-    const url = new URL(source);
-    const gitRepo =
-      url.protocol + url.pathname.split("/").slice(0, 2).join("/");
-    const name = gitRepo.replace(/[#/:@\\]/g, "_");
-    const tmpDir = process.env.XDG_CACHE_HOME
-      ? resolve(process.env.XDG_CACHE_HOME, "c12", name)
-      : resolve(homedir(), ".cache/c12", name);
-    if (existsSync(tmpDir)) {
-      await rmdir(tmpDir, { recursive: true });
+
+    const cloneName =
+      source.replace(/\W+/g, "_").split("_").splice(0, 3).join("_") +
+      "_" +
+      hash(source);
+
+    let cloneDir: string;
+
+    const localNodeModules = resolve(options.cwd!, "node_modules");
+
+    if (existsSync(localNodeModules)) {
+      cloneDir = join(localNodeModules, ".c12", cloneName);
+    } else {
+      cloneDir = process.env.XDG_CACHE_HOME
+        ? resolve(process.env.XDG_CACHE_HOME, "c12", cloneName)
+        : resolve(homedir(), ".cache/c12", cloneName);
     }
-    const clonned = await downloadTemplate(source, { dir: tmpDir });
-    source = clonned.dir;
+
+    if (existsSync(cloneDir)) {
+      await rm(cloneDir, { recursive: true });
+    }
+    const cloned = await downloadTemplate(source, {
+      dir: cloneDir,
+      ...options.giget,
+      ...sourceOptions.giget,
+    });
+    source = cloned.dir;
   }
 
   // Try resolving as npm package
   if (NPM_PACKAGE_RE.test(source)) {
     try {
-      source = options.jiti.resolve(source, { paths: [options.cwd] });
+      source = options.jiti!.resolve(source, { paths: [options.cwd!] });
     } catch {}
   }
 
   // Import from local fs
-  const isDir = !extname(source);
-  const cwd = resolve(options.cwd, isDir ? source : dirname(source));
+  const ext = extname(source);
+  const isDir = !ext || ext === basename(source); /* #71 */
+  const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
-    source = options.configFile;
+    source = options.configFile!;
   }
-  const res: ResolvedConfig = { config: undefined, cwd };
+  const res: ResolvedConfig<T, MT> = {
+    config: undefined as unknown as T,
+    cwd,
+    source,
+    sourceOptions,
+  };
   try {
-    res.configFile = options.jiti.resolve(resolve(cwd, source), {
+    res.configFile = options.jiti!.resolve(resolve(cwd, source), {
       paths: [cwd],
     });
   } catch {}
 
   // Always normalize path
-  res.configFile = resolve(res.configFile);
+  res.configFile = resolve(res.configFile!);
 
-  if (!existsSync(res.configFile)) {
+  if (!existsSync(res.configFile!)) {
     return res;
   }
-  res.config = options.jiti(res.configFile);
-  if (typeof res.config === "function") {
+  res.config = options.jiti!(res.configFile!);
+  if (res.config instanceof Function) {
     res.config = await res.config();
   }
+
+  // Extend env specific config
+  if (options.envName) {
+    const envConfig = {
+      ...res.config!["$" + options.envName],
+      ...res.config!.$env?.[options.envName],
+    };
+    if (Object.keys(envConfig).length > 0) {
+      res.config = defu(envConfig, res.config);
+    }
+  }
+
+  // Meta
+  res.meta = defu(res.sourceOptions!.meta, res.config!.$meta) as MT;
+  delete res.config!.$meta;
+
+  // Overrides
+  if (res.sourceOptions!.overrides) {
+    res.config = defu(res.sourceOptions!.overrides, res.config) as T;
+  }
+
   return res;
 }

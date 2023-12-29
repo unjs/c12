@@ -1,19 +1,22 @@
-# c12
+# ⚙️ c12
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![Github Actions][github-actions-src]][github-actions-href]
 [![Codecov][codecov-src]][codecov-href]
+[![License][license-src]][license-href]
 
-> Smart Configuration Loader
+c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## Features
 
-- JSON, CJS, Typescript and ESM config loader with [unjs/jiti](https://github.com/unjs/jiti)
+- JSON, CJS, Typescript, and ESM config loader with [unjs/jiti](https://github.com/unjs/jiti)
 - RC config support with [unjs/rc9](https://github.com/unjs/rc9)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
-- Support extending nested configurations from multiple local or git sources
+- Reads config from the nearest `package.json` file
+- [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
+- Overwrite with [environment-specific configuration](#environment-specific-configuration)
+- Config watcher with auto-reload and HMR support
 
 ## Usage
 
@@ -34,48 +37,49 @@ Import:
 
 ```js
 // ESM
-import { loadConfig } from 'c12'
+import { loadConfig, watchConfig } from "c12";
 
 // CommonJS
-const { loadConfig } = require('c12')
+const { loadConfig, watchConfig } = require("c12");
 ```
 
 Load configuration:
 
 ```js
 // Get loaded config
-const { config } = await loadConfig({})
+const { config } = await loadConfig({});
 
 // Get resolved config and extended layers
-const { config, configFile, layers } = await loadConfig({})
+const { config, configFile, layers } = await loadConfig({});
 ```
 
 ## Loading priority
 
 c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
 
-1. config overrides passed by options
-2. config file in CWD
+1. Config overrides passed by options
+2. Config file in CWD
 3. RC file in CWD
-4. global RC file in user's home directory
-5. default config passed by options
-6. Extended config layers
+4. Global RC file in the user's home directory
+5. Config from `package.json`
+6. Default config passed by options
+7. Extended config layers
 
 ## Options
 
 ### `cwd`
 
-Resolve configuration from this working directory. Default is `process.cwd()`
+Resolve configuration from this working directory. The default is `process.cwd()`
 
 ### `name`
 
-Configuration base name. Default is `config`.
+Configuration base name. The default is `config`.
 
-### `configName`
+### `configFile`
 
-Configuration file name without extension . Default is generated from `name` (name=foo => `foo.config`).
+Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).
 
-Set to `false` to avoid loading config file.
+Set to `false` to avoid loading the config file.
 
 ### `rcFile`
 
@@ -85,11 +89,19 @@ Set to `false` to disable loading RC config.
 
 ### `globalRC`
 
-Load RC config from the workspace directory and user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
 ### `dotenv`
 
 Loads `.env` file if enabled. It is disabled by default.
+
+### `packageJson`
+
+Loads config from nearest `package.json` file. It is disabled by default.
+
+If `true` value is passed, c12 uses `name` field from `package.json`.
+
+You can also pass either a string or an array of strings as a value to use those fields.
 
 ### `defaults`
 
@@ -99,7 +111,7 @@ Specify default configuration. It has the **lowest** priority and is applied **a
 
 Specify default configuration. It is applied **before** extending config.
 
-### `overides`
+### `overrides`
 
 Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
@@ -111,16 +123,26 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configu
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
 
+### `giget`
+
+Options passed to [unjs/giget](https://github.com/unjs/giget) when extending layer from git source.
+
+### `envName`
+
+Environment name used for [environment specific configuration](#environment-specific-configuration).
+
+The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
+
 ## Extending configuration
 
-If resolved config contains a `extends` key, it will be used to extend configuration.
+If resolved config contains a `extends` key, it will be used to extend the configuration.
 
 Extending can be nested and each layer can extend from one base or more.
 
-Final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
+The final config is merged result of extended options and user options with [unjs/defu](https://github.com/unjs/defu).
 
-Each item in extends, is a string that can be either an absolute or relative path to current config file pointing to a config file for extending or directory containing config file.
-If it starts with either of `github:`, `gitlab:`, `bitbucket:` or `https:`, c12 autmatically clones it.
+Each item in extends is a string that can be either an absolute or relative path to the current config file pointing to a config file for extending or the directory containing the config file.
+If it starts with either `github:`, `gitlab:`, `bitbucket:`, or `https:`, c12 automatically clones it.
 
 For custom merging strategies, you can directly access each layer with `layers` property.
 
@@ -130,31 +152,28 @@ For custom merging strategies, you can directly access each layer with `layers` 
 // config.ts
 export default {
   colors: {
-    primary: 'user_primary'
+    primary: "user_primary",
   },
-  extends: [
-    './theme',
-    './config.dev.ts'
-  ]
-}
+  extends: ["./theme"],
+};
 ```
 
 ```js
 // config.dev.ts
 export default {
-  dev: true
-}
+  dev: true,
+};
 ```
 
 ```js
 // theme/config.ts
 export default {
-  extends: '../base',
+  extends: "../base",
   colors: {
-    primary: 'theme_primary',
-    secondary: 'theme_secondary'
-  }
-}
+    primary: "theme_primary",
+    secondary: "theme_secondary",
+  },
+};
 ```
 
 ```js
@@ -167,7 +186,7 @@ export default {
 }
 ```
 
-Loaded configuration would look like this:
+The loaded configuration would look like this:
 
 ```js
 {
@@ -190,6 +209,111 @@ Layers:
 ]
 ```
 
+## Extending Config Layer from Remote Sources
+
+You can also extend configuration from remote sources such as npm or github.
+
+In the repo, there should be a `config.ts` (or `config.{name}.ts`) file to be considered as a valid config layer.
+
+**Example:** Extend from a github repository
+
+```js
+// config.ts
+export default {
+  extends: "gh:user/repo",
+};
+```
+
+**Example:** Extend from a github repository with branch and subpath
+
+```js
+// config.ts
+export default {
+  extends: "gh:user/repo/theme#dev",
+};
+```
+
+**Example:** Extend with clone configuration
+
+```js
+// config.ts
+export default {
+  extends: ["gh:user/repo", { giget: { auth: process.env.GITHUB_TOKEN } }],
+};
+```
+
+Refer to [unjs/giget](https://giget.unjs.io) for more information.
+
+## Environment-specific configuration
+
+Users can define environment-specific configuration using these config keys:
+
+- `$test: {...}`
+- `$development: {...}`
+- `$production: {...}`
+- `$env: { [env]: {...} }`
+
+c12 tries to match [`envName`](#envname) and override environment config if specified.
+
+**Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment-specific configuration.
+
+**Example:**
+
+```js
+{
+  // Default configuration
+  logLevel: 'info',
+
+  // Environment overrides
+  $test: { logLevel: 'silent' },
+  $development: { logLevel: 'warning' },
+  $production: { logLevel: 'error' },
+  $env: {
+    staging: { logLevel: 'debug' }
+  }
+}
+```
+
+## Watching Configuration
+
+you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
+
+### Lifecycle hooks
+
+- `onWatch`: This function is always called when config is updated, added, or removed before attempting to reload the config.
+- `acceptHMR`: By implementing this function, you can compare old and new functions and return `true` if a full reload is not needed.
+- `onUpdate`: This function is always called after the new config is updated. If `acceptHMR` returns true, it will be skipped.
+
+```ts
+import { watchConfig } from "c12";
+
+const config = watchConfig({
+  cwd: ".",
+  // chokidarOptions: {}, // Default is { ignoreInitial: true }
+  // debounce: 200 // Default is 100. You can set it to false to disable debounced watcher
+  onWatch: (event) => {
+    console.log("[watcher]", event.type, event.path);
+  },
+  acceptHMR({ oldConfig, newConfig, getDiff }) {
+    const diff = getDiff();
+    if (diff.length === 0) {
+      console.log("No config changed detected!");
+      return true; // No changes!
+    }
+  },
+  onUpdate({ oldConfig, newConfig, getDiff }) {
+    const diff = getDiff();
+    console.log("Config updated:\n" + diff.map((i) => i.toJSON()).join("\n"));
+  },
+});
+
+console.log("watching config files:", config.watchingFiles);
+console.log("initial config", config.config);
+
+// Stop watcher when not needed anymore
+// await config.unwatch();
+```
+
 ## 💻 Development
 
 - Clone this repository
@@ -202,14 +326,12 @@ Layers:
 Made with 💛 Published under [MIT License](./LICENSE).
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat-square
+
+[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-version-href]: https://npmjs.com/package/c12
-
-[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat-square
+[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-downloads-href]: https://npmjs.com/package/c12
-
-[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/c12/ci/main?style=flat-square
-[github-actions-href]: https://github.com/unjs/c12/actions?query=workflow%3Aci
-
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat-square
+[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat&colorA=18181B&colorB=F0DB4F
 [codecov-href]: https://codecov.io/gh/unjs/c12
+[license-src]: https://img.shields.io/github/license/unjs/c12.svg?style=flat&colorA=18181B&colorB=F0DB4F
+[license-href]: https://github.com/unjs/c12/blob/main/LICENSE

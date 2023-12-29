@@ -1,10 +1,19 @@
 export default {
   theme: "./theme",
-  extends: ["./config.dev", "c12-npm-test"],
+  extends: [
+    ["c12-npm-test"],
+    ["gh:unjs/c12/test/fixture/_github#main", { giget: {} }],
+  ],
+  $test: {
+    extends: ["./config.dev"],
+    envConfig: true,
+  },
   colors: {
     primary: "user_primary",
   },
   configFile: true,
   overriden: false,
+  // foo: "bar",
+  // x: "123",
   array: ["a"],
 };

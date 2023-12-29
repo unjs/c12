@@ -65,7 +65,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
 
-  const dotenvFile = resolve(options.cwd, options.fileName);
+  const dotenvFile = resolve(options.cwd, options.fileName!);
 
   if (existsSync(dotenvFile)) {
     const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
@@ -73,7 +73,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Apply process.env
-  if (!options.env._applied) {
+  if (!options.env?._applied) {
     Object.assign(environment, options.env);
     environment._applied = true;
   }
@@ -90,14 +90,14 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 function interpolate(
   target: Record<string, any>,
   source: Record<string, any> = {},
-  parse = (v: any) => v
+  parse = (v: any) => v,
 ) {
   function getValue(key: string) {
     // Source value 'wins' over target value
-    return source[key] !== undefined ? source[key] : target[key];
+    return source[key] === undefined ? target[key] : source[key];
   }
 
-  function interpolate(value: unknown, parents: string[] = []) {
+  function interpolate(value: unknown, parents: string[] = []): any {
     if (typeof value !== "string") {
       return value;
     }
@@ -105,25 +105,25 @@ function interpolate(
     return parse(
       // eslint-disable-next-line unicorn/no-array-reduce
       matches.reduce((newValue, match) => {
-        const parts = /(.?)\${?([\w:]+)?}?/g.exec(match);
+        const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
         const prefix = parts[1];
 
         let value, replacePart: string;
 
         if (prefix === "\\") {
-          replacePart = parts[0];
+          replacePart = parts[0] || "";
           value = replacePart.replace("\\$", "$");
         } else {
           const key = parts[2];
-          replacePart = parts[0].slice(prefix.length);
+          replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion
           if (parents.includes(key)) {
             // eslint-disable-next-line no-console
             console.warn(
               `Please avoid recursive environment variables ( loop: ${parents.join(
-                " > "
-              )} > ${key} )`
+                " > ",
+              )} > ${key} )`,
             );
             return "";
           }
@@ -134,10 +134,10 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value !== undefined
-          ? newValue.replace(replacePart, value)
-          : newValue;
-      }, value)
+        return value === undefined
+          ? newValue
+          : newValue.replace(replacePart, value);
+      }, value),
     );
   }
 

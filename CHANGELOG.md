@@ -2,6 +2,151 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.5.1
+
+[compare changes](https://github.com/unjs/c12/compare/v1.4.2...v1.5.1)
+
+### 🚀 Enhancements
+
+- Improve extending github layers ([#109](https://github.com/unjs/c12/pull/109))
+- Allow setting giget clone options ([#112](https://github.com/unjs/c12/pull/112))
+
+### 🏡 Chore
+
+- Update dependencies ([1f2ab64](https://github.com/unjs/c12/commit/1f2ab64))
+- Update release script ([6c21f09](https://github.com/unjs/c12/commit/6c21f09))
+
+### ✅ Tests
+
+- Update gh fixture to main ([a8b73c2](https://github.com/unjs/c12/commit/a8b73c2))
+
+### 🎨 Styles
+
+- Lint with prettier v3 ([7940e9b](https://github.com/unjs/c12/commit/7940e9b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.4.2
+
+[compare changes](https://github.com/unjs/c12/compare/v1.4.1...v1.4.2)
+
+
+### 🩹 Fixes
+
+  - Allow extends dir to start with dot ([#71](https://github.com/unjs/c12/pull/71))
+
+### 📖 Documentation
+
+  - Fix typo for `configFile` ([#83](https://github.com/unjs/c12/pull/83))
+
+### 🏡 Chore
+
+  - **release:** V1.4.1 ([2b87193](https://github.com/unjs/c12/commit/2b87193))
+  - Update dependencies ([309454a](https://github.com/unjs/c12/commit/309454a))
+  - Lint project ([a102400](https://github.com/unjs/c12/commit/a102400))
+  - Lint ([e19a6ff](https://github.com/unjs/c12/commit/e19a6ff))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Rijk Van Zanten ([@rijkvanzanten](http://github.com/rijkvanzanten))
+
+## v1.4.1
+
+[compare changes](https://github.com/unjs/c12/compare/v1.4.0...v1.4.1)
+
+
+### 🩹 Fixes
+
+  - **watchConfig:** Handle custom config names ([eedd141](https://github.com/unjs/c12/commit/eedd141))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.4.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.3.0...v1.4.0)
+
+
+### 🚀 Enhancements
+
+  - `watchConfig` utility ([#77](https://github.com/unjs/c12/pull/77))
+  - **watchConfig:** Support hmr ([#78](https://github.com/unjs/c12/pull/78))
+
+### 📖 Documentation
+
+  - Fix small grammer issues ([5f2b3a1](https://github.com/unjs/c12/commit/5f2b3a1))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.3.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.2.0...v1.3.0)
+
+
+### 🚀 Enhancements
+
+  - Generic types support ([#64](https://github.com/unjs/c12/pull/64))
+
+### 🩹 Fixes
+
+  - Use `rm` instead of `rmdir` for recursive remove ([#69](https://github.com/unjs/c12/pull/69))
+
+### 🏡 Chore
+
+  - **readme:** Update badges ([ff08ce2](https://github.com/unjs/c12/commit/ff08ce2))
+  - **readme:** Add emoji ([9df0498](https://github.com/unjs/c12/commit/9df0498))
+  - Update to pnpm 8 ([ecec1f2](https://github.com/unjs/c12/commit/ecec1f2))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Daniel Roe <daniel@roe.dev>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
+## v1.2.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.1.2...v1.2.0)
+
+
+### 🚀 Enhancements
+
+  - Load config from `package.json` ([#52](https://github.com/unjs/c12/pull/52))
+  - Environment specific configuration ([#61](https://github.com/unjs/c12/pull/61))
+  - Layer meta and source options ([#62](https://github.com/unjs/c12/pull/62))
+  - `envName` config ([4a0227d](https://github.com/unjs/c12/commit/4a0227d))
+
+### 🩹 Fixes
+
+  - Allow extending from npm packages with subpath ([#54](https://github.com/unjs/c12/pull/54))
+
+### 📖 Documentation
+
+  - Fix grammer and typos ([3e8436c](https://github.com/unjs/c12/commit/3e8436c))
+  - Don't mention unsupported usage ([ea7ac6e](https://github.com/unjs/c12/commit/ea7ac6e))
+
+### 🏡 Chore
+
+  - Update badge ([b0c78e2](https://github.com/unjs/c12/commit/b0c78e2))
+  - Update readme ([8480e41](https://github.com/unjs/c12/commit/8480e41))
+  - Update mlly ([cf6ef84](https://github.com/unjs/c12/commit/cf6ef84))
+
+### ✅ Tests
+
+  - Update test for env extends ([f363687](https://github.com/unjs/c12/commit/f363687))
+  - Update snapshot ([071180f](https://github.com/unjs/c12/commit/071180f))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+- Guillaume Chau ([@Akryum](http://github.com/Akryum))
+
 ## v1.1.2
 
 [compare changes](https://github.com/unjs/c12/compare/v1.1.1...v1.1.2)

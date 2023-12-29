@@ -3,16 +3,25 @@ import { expect, it, describe } from "vitest";
 import { resolve } from "pathe";
 import { loadConfig } from "../src";
 
-const r = (path) => resolve(fileURLToPath(new URL(path, import.meta.url)));
-const transformPaths = (object) =>
+const r = (path: string) =>
+  resolve(fileURLToPath(new URL(path, import.meta.url)));
+const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>"));
 
 describe("c12", () => {
   it("load fixture config", async () => {
-    const { config, layers } = await loadConfig({
+    type UserConfig = Partial<{
+      virtual: boolean;
+      overriden: boolean;
+      defaultConfig: boolean;
+      extends: string[];
+    }>;
+    const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
       dotenv: true,
+      packageJson: ["c12", "c12-alt"],
       globalRc: true,
+      envName: "test",
       extend: {
         extendKey: ["theme", "extends"],
       },
@@ -32,13 +41,25 @@ describe("c12", () => {
       },
     });
 
-    expect(transformPaths(config)).toMatchInlineSnapshot(`
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
       {
+        "$env": {
+          "test": {
+            "baseEnvConfig": true,
+          },
+        },
+        "$test": {
+          "envConfig": true,
+          "extends": [
+            "./config.dev",
+          ],
+        },
         "array": [
           "a",
           "b",
         ],
         "baseConfig": true,
+        "baseEnvConfig": true,
         "colors": {
           "primary": "user_primary",
           "secondary": "theme_secondary",
@@ -47,15 +68,19 @@ describe("c12", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "envConfig": true,
+        "githubLayer": true,
         "npmConfig": true,
         "overriden": true,
+        "packageJSON": true,
+        "packageJSON2": true,
         "rcFile": true,
         "testConfig": true,
         "virtual": true,
       }
     `);
 
-    expect(transformPaths(layers)).toMatchInlineSnapshot(`
+    expect(transformPaths(layers!)).toMatchInlineSnapshot(`
       [
         {
           "config": {
@@ -64,6 +89,12 @@ describe("c12", () => {
         },
         {
           "config": {
+            "$test": {
+              "envConfig": true,
+              "extends": [
+                "./config.dev",
+              ],
+            },
             "array": [
               "a",
             ],
@@ -71,9 +102,18 @@ describe("c12", () => {
               "primary": "user_primary",
             },
             "configFile": true,
+            "envConfig": true,
             "extends": [
               "./config.dev",
-              "c12-npm-test",
+              [
+                "c12-npm-test",
+              ],
+              [
+                "gh:unjs/c12/test/fixture/_github#main",
+                {
+                  "giget": {},
+                },
+              ],
             ],
             "overriden": false,
             "theme": "./theme",
@@ -90,6 +130,13 @@ describe("c12", () => {
         },
         {
           "config": {
+            "packageJSON": true,
+            "packageJSON2": true,
+          },
+          "configFile": "package.json",
+        },
+        {
+          "config": {
             "colors": {
               "primary": "theme_primary",
               "secondary": "theme_secondary",
@@ -97,20 +144,35 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/theme/config.ts",
           "cwd": "<path>/fixture/theme",
+          "meta": {},
+          "source": "config",
+          "sourceOptions": {},
         },
         {
           "config": {
+            "$env": {
+              "test": {
+                "baseEnvConfig": true,
+              },
+            },
             "array": [
               "b",
             ],
             "baseConfig": true,
+            "baseEnvConfig": true,
             "colors": {
               "primary": "base_primary",
               "text": "base_text",
             },
           },
-          "configFile": "<path>/fixture/base/config.ts",
-          "cwd": "<path>/fixture/base",
+          "configFile": "<path>/fixture/.base/config.ts",
+          "cwd": "<path>/fixture/.base",
+          "meta": {
+            "name": "base",
+            "version": "1.0.0",
+          },
+          "source": "config",
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -118,6 +180,9 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/config.dev.ts",
           "cwd": "<path>/fixture",
+          "meta": {},
+          "source": "./config.dev",
+          "sourceOptions": {},
         },
         {
           "config": {
@@ -125,6 +190,21 @@ describe("c12", () => {
           },
           "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
+          "meta": {},
+          "source": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "sourceOptions": {},
+        },
+        {
+          "config": {
+            "githubLayer": true,
+          },
+          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/config.ts",
+          "cwd": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo",
+          "meta": {},
+          "source": "config",
+          "sourceOptions": {
+            "giget": {},
+          },
         },
         {
           "config": {
@@ -143,8 +223,14 @@ describe("c12", () => {
       },
     });
 
-    expect(transformPaths(config)).toMatchInlineSnapshot(`
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
       {
+        "$test": {
+          "envConfig": true,
+          "extends": [
+            "./config.dev",
+          ],
+        },
         "array": [
           "a",
         ],
@@ -153,6 +239,8 @@ describe("c12", () => {
         },
         "configFile": true,
         "devConfig": true,
+        "envConfig": true,
+        "githubLayer": true,
         "npmConfig": true,
         "overriden": false,
         "theme": "./theme",
