@@ -255,7 +255,10 @@ async function resolveConfig<
 
     const localNodeModules = resolve(options.cwd!, "node_modules");
 
-    if (existsSync(localNodeModules)) {
+    const parentDir = dirname(options.cwd!);
+    if (basename(parentDir) === ".c12") {
+      cloneDir = join(parentDir, cloneName);
+    } else if (existsSync(localNodeModules)) {
       cloneDir = join(localNodeModules, ".c12", cloneName);
     } else {
       cloneDir = process.env.XDG_CACHE_HOME
