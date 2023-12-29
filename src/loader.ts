@@ -19,6 +19,8 @@ import type {
   InputConfig,
 } from "./types";
 
+const _normalize = (p?: string) => p?.replace(/\\/g, "/");
+
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
@@ -288,6 +290,7 @@ async function resolveConfig<
       paths: [cwd],
     });
   } catch {}
+
   if (!existsSync(res.configFile!)) {
     return res;
   }
@@ -315,6 +318,10 @@ async function resolveConfig<
   if (res.sourceOptions!.overrides) {
     res.config = defu(res.sourceOptions!.overrides, res.config) as T;
   }
+
+  // Always windows paths
+  res.configFile = _normalize(res.configFile);
+  res.source = _normalize(res.source);
 
   return res;
 }
