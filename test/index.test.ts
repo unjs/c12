@@ -1,13 +1,15 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
-import {
+import type {
   ConfigLayer,
   ConfigLayerMeta,
   UserInputConfig,
-  loadConfig,
 } from "../src";
+import { normalize } from "pathe";
+import { loadConfig } from "../src";
 
-const r = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+const r = (path: string) =>
+  normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
@@ -72,6 +74,7 @@ describe("c12", () => {
         "defaultConfig": true,
         "devConfig": true,
         "envConfig": true,
+        "githubLayer": true,
         "npmConfig": true,
         "overriden": true,
         "packageJSON": true,
@@ -109,8 +112,11 @@ describe("c12", () => {
               "./config.dev",
               [
                 "c12-npm-test",
+              ],
+              [
+                "gh:unjs/c12/test/fixture/_github#main",
                 {
-                  "userMeta": 123,
+                  "giget": {},
                 },
               ],
             ],
@@ -191,8 +197,18 @@ describe("c12", () => {
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
           "meta": {},
           "source": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "sourceOptions": {},
+        },
+        {
+          "config": {
+            "githubLayer": true,
+          },
+          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/config.ts",
+          "cwd": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo",
+          "meta": {},
+          "source": "config",
           "sourceOptions": {
-            "userMeta": 123,
+            "giget": {},
           },
         },
         {
@@ -229,6 +245,7 @@ describe("c12", () => {
         "configFile": true,
         "devConfig": true,
         "envConfig": true,
+        "githubLayer": true,
         "npmConfig": true,
         "overriden": false,
         "theme": "./theme",

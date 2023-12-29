@@ -1,5 +1,6 @@
 import type { JITI } from "jiti";
 import type { JITIOptions } from "jiti/dist/types";
+import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv";
 
 export interface ConfigLayerMeta {
@@ -11,7 +12,7 @@ export type UserInputConfig = Record<string, any>;
 
 export interface C12InputConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
   $test?: T;
   $development?: T;
@@ -22,21 +23,22 @@ export interface C12InputConfig<
 
 export type InputConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > = C12InputConfig<T, MT> & T;
 
 export interface SourceOptions<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
   meta?: MT;
+  giget?: DownloadTemplateOptions;
   overrides?: T;
   [key: string]: any;
 }
 
 export interface ConfigLayer<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
   config: T | null;
   source?: string;
@@ -48,7 +50,7 @@ export interface ConfigLayer<
 
 export interface ResolvedConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > extends ConfigLayer<T, MT> {
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
@@ -56,7 +58,7 @@ export interface ResolvedConfig<
 
 export interface LoadConfigOptions<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
   name?: string;
   cwd?: string;
@@ -80,7 +82,7 @@ export interface LoadConfigOptions<
 
   resolve?: (
     id: string,
-    options: LoadConfigOptions<T, MT>
+    options: LoadConfigOptions<T, MT>,
   ) =>
     | null
     | undefined
@@ -89,6 +91,8 @@ export interface LoadConfigOptions<
 
   jiti?: JITI;
   jitiOptions?: JITIOptions;
+
+  giget?: DownloadTemplateOptions;
 
   extend?:
     | false
@@ -99,12 +103,12 @@ export interface LoadConfigOptions<
 
 export type DefineConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 > = (input: InputConfig<T, MT>) => InputConfig<T, MT>;
 
 export function createDefineConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(): DefineConfig<T, MT> {
   return (input: InputConfig<T, MT>) => input;
 }

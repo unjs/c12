@@ -5,7 +5,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![License][license-src]][license-href]
 
-Smart Configuration Loader.
+c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## Features
 
@@ -127,6 +127,10 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configu
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
 
+### `giget`
+
+Options passed to [unjs/giget](https://github.com/unjs/giget) when extending layer from git source.
+
 ### `envName`
 
 Environment name used for [environment specific configuration](#environment-specific-configuration).
@@ -208,6 +212,41 @@ Layers:
  { config: /* dev   config */, configFile: /* path/to/config.dev.ts  */, cwd: /* path/ */ },
 ]
 ```
+
+## Extending Config Layer from Remote Sources
+
+You can also extend configuration from remote sources such as npm or github.
+
+In the repo, there should be a `config.ts` (or `config.{name}.ts`) file to be considered as a valid config layer.
+
+**Example:** Extend from a github repository
+
+```js
+// config.ts
+export default {
+  extends: "gh:user/repo",
+};
+```
+
+**Example:** Extend from a github repository with branch and subpath
+
+```js
+// config.ts
+export default {
+  extends: "gh:user/repo/theme#dev",
+};
+```
+
+**Example:** Extend with clone configuration
+
+```js
+// config.ts
+export default {
+  extends: ["gh:user/repo", { giget: { auth: process.env.GITHUB_TOKEN } }],
+};
+```
+
+Refer to [unjs/giget](https://giget.unjs.io) for more information.
 
 ## Environment-specific configuration
 

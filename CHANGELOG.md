@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.5.1
+
+[compare changes](https://github.com/unjs/c12/compare/v1.4.2...v1.5.1)
+
+### 🚀 Enhancements
+
+- Improve extending github layers ([#109](https://github.com/unjs/c12/pull/109))
+- Allow setting giget clone options ([#112](https://github.com/unjs/c12/pull/112))
+
+### 🏡 Chore
+
+- Update dependencies ([1f2ab64](https://github.com/unjs/c12/commit/1f2ab64))
+- Update release script ([6c21f09](https://github.com/unjs/c12/commit/6c21f09))
+
+### ✅ Tests
+
+- Update gh fixture to main ([a8b73c2](https://github.com/unjs/c12/commit/a8b73c2))
+
+### 🎨 Styles
+
+- Lint with prettier v3 ([7940e9b](https://github.com/unjs/c12/commit/7940e9b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.4.2
 
 [compare changes](https://github.com/unjs/c12/compare/v1.4.1...v1.4.2)

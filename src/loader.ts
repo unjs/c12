@@ -1,10 +1,11 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname, basename } from "pathe";
+import { resolve, extname, dirname, basename, join } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
+import { hash } from "ohash";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
 
@@ -18,9 +19,11 @@ import type {
   InputConfig,
 } from "./types";
 
+const _normalize = (p?: string) => p?.replace(/\\/g, "/");
+
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
@@ -76,19 +79,19 @@ export async function loadConfig<
     if (options.globalRc) {
       Object.assign(
         configRC,
-        rc9.readUser({ name: options.rcFile, dir: options.cwd })
+        rc9.readUser({ name: options.rcFile, dir: options.cwd }),
       );
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
         Object.assign(
           configRC,
-          rc9.read({ name: options.rcFile, dir: workspaceDir })
+          rc9.read({ name: options.rcFile, dir: workspaceDir }),
         );
       }
     }
     Object.assign(
       configRC,
-      rc9.read({ name: options.rcFile, dir: options.cwd })
+      rc9.read({ name: options.rcFile, dir: options.cwd }),
     );
   }
 
@@ -115,7 +118,7 @@ export async function loadConfig<
     config,
     configRC,
     pkgJson,
-    options.defaultConfig
+    options.defaultConfig,
   ) as T;
 
   // Allow extending
@@ -160,7 +163,7 @@ export async function loadConfig<
 
 async function extendConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
   (config as any)._layers = config._layers || [];
   if (!options.extend) {
@@ -174,8 +177,8 @@ async function extendConfig<
   for (const key of keys as string[]) {
     extendSources.push(
       ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(
-        Boolean
-      )
+        Boolean,
+      ),
     );
     delete config[key];
   }
@@ -195,8 +198,8 @@ async function extendConfig<
       // eslint-disable-next-line no-console
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
-          originalExtendSource
-        )}\` in ${options.cwd}`
+          originalExtendSource,
+        )}\` in ${options.cwd}`,
       );
       continue;
     }
@@ -205,7 +208,7 @@ async function extendConfig<
       // TODO: Use error in next major versions
       // eslint-disable-next-line no-console
       console.warn(
-        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`
+        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`,
       );
       continue;
     }
@@ -218,7 +221,7 @@ async function extendConfig<
   }
 }
 
-const GIT_PREFIXES = ["github:", "gitlab:", "bitbucket:", "https://"];
+const GIT_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://"];
 
 // https://github.com/dword-design/package-name-regex
 const NPM_PACKAGE_RE =
@@ -226,11 +229,11 @@ const NPM_PACKAGE_RE =
 
 async function resolveConfig<
   T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(
   source: string,
   options: LoadConfigOptions<T, MT>,
-  sourceOptions: SourceOptions<T, MT> = {}
+  sourceOptions: SourceOptions<T, MT> = {},
 ): Promise<ResolvedConfig<T, MT>> {
   // Custom user resolver
   if (options.resolve) {
@@ -243,17 +246,32 @@ async function resolveConfig<
   // Download git URLs and resolve to local path
   if (GIT_PREFIXES.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
-    const url = new URL(source);
-    const gitRepo =
-      url.protocol + url.pathname.split("/").slice(0, 2).join("/");
-    const name = gitRepo.replace(/[#/:@\\]/g, "_");
-    const tmpDir = process.env.XDG_CACHE_HOME
-      ? resolve(process.env.XDG_CACHE_HOME, "c12", name)
-      : resolve(homedir(), ".cache/c12", name);
-    if (existsSync(tmpDir)) {
-      await rm(tmpDir, { recursive: true });
+
+    const cloneName =
+      source.replace(/\W+/g, "_").split("_").splice(0, 3).join("_") +
+      "_" +
+      hash(source);
+
+    let cloneDir: string;
+
+    const localNodeModules = resolve(options.cwd!, "node_modules");
+
+    if (existsSync(localNodeModules)) {
+      cloneDir = join(localNodeModules, ".c12", cloneName);
+    } else {
+      cloneDir = process.env.XDG_CACHE_HOME
+        ? resolve(process.env.XDG_CACHE_HOME, "c12", cloneName)
+        : resolve(homedir(), ".cache/c12", cloneName);
     }
-    const cloned = await downloadTemplate(source, { dir: tmpDir });
+
+    if (existsSync(cloneDir)) {
+      await rm(cloneDir, { recursive: true });
+    }
+    const cloned = await downloadTemplate(source, {
+      dir: cloneDir,
+      ...options.giget,
+      ...sourceOptions.giget,
+    });
     source = cloned.dir;
   }
 
@@ -282,6 +300,7 @@ async function resolveConfig<
       paths: [cwd],
     });
   } catch {}
+
   if (!existsSync(res.configFile!)) {
     return res;
   }
@@ -309,6 +328,10 @@ async function resolveConfig<
   if (res.sourceOptions!.overrides) {
     res.config = defu(res.sourceOptions!.overrides, res.config) as T;
   }
+
+  // Always windows paths
+  res.configFile = _normalize(res.configFile);
+  res.source = _normalize(res.source);
 
   return res;
 }
