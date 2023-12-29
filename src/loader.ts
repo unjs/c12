@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve, extname, dirname, basename, join } from "pathe";
+import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
@@ -289,9 +289,6 @@ async function resolveConfig<
     });
   } catch {}
 
-  // Always normalize path
-  res.configFile = resolve(res.configFile!);
-
   if (!existsSync(res.configFile!)) {
     return res;
   }
@@ -319,6 +316,11 @@ async function resolveConfig<
   if (res.sourceOptions!.overrides) {
     res.config = defu(res.sourceOptions!.overrides, res.config) as T;
   }
+
+  // Always windows paths
+  const _normalize = (p?: string) => p?.replace(/\\/g, "/");
+  res.configFile = _normalize(res.configFile);
+  res.source = _normalize(res.source);
 
   return res;
 }

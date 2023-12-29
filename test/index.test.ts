@@ -1,12 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
-import { resolve } from "pathe";
+import { normalize } from "pathe";
 import { loadConfig } from "../src";
 
 const r = (path: string) =>
-  resolve(fileURLToPath(new URL(path, import.meta.url)));
+  normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
-  JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>"));
+  JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
 describe("c12", () => {
   it("load fixture config", async () => {
