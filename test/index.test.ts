@@ -1,11 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
-import type {
-  ConfigLayer,
-  ConfigLayerMeta,
-  UserInputConfig,
-} from "../src";
 import { normalize } from "pathe";
+import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
 import { loadConfig } from "../src";
 
 const r = (path: string) =>
@@ -253,11 +249,11 @@ describe("c12", () => {
     `);
   });
 
-  it("should opt-out environment-specific and built-in keys start with $", async () => {
+  it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       cwd: r("./fixture"),
       envName: "test",
-      verbose: false,
+      omit$Keys: true,
       extend: {
         extendKey: ["theme", "extends"],
       },
@@ -275,12 +271,12 @@ describe("c12", () => {
     >[];
 
     const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "config"
+      (layer) => layer.configFile === "config",
     )!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseConfigLay = transformdLayers.find(
-      (layer) => layer.configFile === "<path>/fixture/.base/config.ts"
+      (layer) => layer.configFile === "<path>/fixture/.base/config.ts",
     )!;
     expect(Object.keys(baseConfigLay.config!)).toContain("$env");
   });

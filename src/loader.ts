@@ -39,7 +39,6 @@ export async function loadConfig<
       ...options.extend,
     };
   }
-  options.verbose = options.verbose ?? true;
 
   // Create jiti instance
   options.jiti =
@@ -149,7 +148,7 @@ export async function loadConfig<
   }
 
   // Remove environment-specific and built-in keys start with $
-  if (!options.verbose) {
+  if (options.omit$Keys) {
     for (const key in r.config) {
       if (key.startsWith("$")) {
         delete r.config[key];

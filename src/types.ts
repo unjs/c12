@@ -78,7 +78,7 @@ export interface LoadConfigOptions<
   defaultConfig?: T;
   overrides?: T;
 
-  verbose?: boolean;
+  omit$Keys?: boolean;
 
   resolve?: (
     id: string,

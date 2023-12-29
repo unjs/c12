@@ -115,9 +115,9 @@ Specify default configuration. It is applied **before** extending config.
 
 Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
-### `verbose`
+### `omit$Keys`
 
-Include environment-specific and built-in keys start with `$` in the resolved config. The default is `true`.
+Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
 
 ### `jiti`
 
