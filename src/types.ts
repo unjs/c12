@@ -32,6 +32,7 @@ export interface SourceOptions<
 > {
   meta?: MT;
   giget?: DownloadTemplateOptions;
+  install?: boolean;
   overrides?: T;
   [key: string]: any;
 }

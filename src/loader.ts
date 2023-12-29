@@ -279,6 +279,7 @@ async function resolveConfig<
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
+      install: sourceOptions.install,
       ...options.giget,
       ...sourceOptions.giget,
     });
