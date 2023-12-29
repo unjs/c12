@@ -147,6 +147,15 @@ export async function loadConfig<
     r.config = defu(r.config, options.defaults) as T;
   }
 
+  // Remove environment-specific and built-in keys start with $
+  if (options.omit$Keys) {
+    for (const key in r.config) {
+      if (key.startsWith("$")) {
+        delete r.config[key];
+      }
+    }
+  }
+
   // Return resolved config
   return r;
 }
