@@ -5,7 +5,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![License][license-src]][license-href]
 
-Smart Configuration Loader.
+c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## Features
 
