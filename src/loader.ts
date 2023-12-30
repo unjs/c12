@@ -274,12 +274,13 @@ async function resolveConfig<
         : resolve(homedir(), ".cache/c12", cloneName);
     }
 
-    if (existsSync(cloneDir)) {
+    if (existsSync(cloneDir) && !sourceOptions.install) {
       await rm(cloneDir, { recursive: true });
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
       install: sourceOptions.install,
+      force: sourceOptions.install,
       ...options.giget,
       ...sourceOptions.giget,
     });
