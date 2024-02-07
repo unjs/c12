@@ -56,6 +56,7 @@ export async function loadConfig<
         ".cts",
         ".json",
         ".jsonc",
+        ".json5",
       ],
       ...options.jitiOptions,
     });
@@ -328,6 +329,9 @@ async function resolveConfig<
   }
   if (res.configFile!.endsWith(".jsonc")) {
     const { parse } = await import("jsonc-parser");
+    res.config = parse(await readFile(res.configFile!, "utf8"));
+  } else if (res.configFile!.endsWith(".json5")) {
+    const { parse } = await import("json5");
     res.config = parse(await readFile(res.configFile!, "utf8"));
   } else {
     res.config = options.jiti!(res.configFile!);

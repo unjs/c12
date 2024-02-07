@@ -143,7 +143,7 @@ describe("c12", () => {
               "secondary": "theme_secondary",
             },
           },
-          "configFile": "<path>/fixture/theme/config.ts",
+          "configFile": "<path>/fixture/theme/config.json5",
           "cwd": "<path>/fixture/theme",
           "meta": {},
           "source": "config",
