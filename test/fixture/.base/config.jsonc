@@ -1,4 +1,5 @@
 {
+  // jsonc can support comments!
   "$meta": {
     "name": "base",
     "version": "1.0.0"
