@@ -166,7 +166,7 @@ describe("c12", () => {
               "text": "base_text",
             },
           },
-          "configFile": "<path>/fixture/.base/config.ts",
+          "configFile": "<path>/fixture/.base/config.jsonc",
           "cwd": "<path>/fixture/.base",
           "meta": {
             "name": "base",
@@ -276,7 +276,7 @@ describe("c12", () => {
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseConfigLay = transformdLayers.find(
-      (layer) => layer.configFile === "<path>/fixture/.base/config.ts",
+      (layer) => layer.configFile === "<path>/fixture/.base/config.jsonc",
     )!;
     expect(Object.keys(baseConfigLay.config!)).toContain("$env");
   });
