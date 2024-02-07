@@ -1,9 +1,12 @@
 # ⚙️ c12
 
-[![npm version][npm-version-src]][npm-version-href]
-[![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![Codecov][codecov-src]][codecov-href]
-[![License][license-src]][license-href]
+<!-- automd:badges color=yellow codecov -->
+
+[![npm version](https://img.shields.io/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
+[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
+[![codecov](https://img.shields.io/codecov/c/gh/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
+
+<!-- /automd -->
 
 c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
@@ -32,16 +35,26 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 Install package:
 
+<!-- automd:pm-install -->
+
 ```sh
+# ✨ Auto-detect
+npx nypm i c12@^1.7.0
+
 # npm
-npm install c12
+npm install c12@^1.7.0
 
 # yarn
-yarn add c12
+yarn add c12@^1.7.0
 
 # pnpm
-pnpm install c12
+pnpm install c12@^1.7.0
+
+# bun
+bun install c12@^1.7.0
 ```
+
+<!-- /automd -->
 
 Import:
 
