@@ -7,7 +7,7 @@
 
 c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
-## Features
+## ✅ Features
 
 - `.js`, `.ts`, `.cjs`, `.mjs` config loader with [unjs/jiti](https://github.com/unjs/jiti)
 - `.json`, `.json5` and `.jsonc` config support.
@@ -18,6 +18,15 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
 - Config watcher with auto-reload and HMR support
+
+## 🦴 Used by
+
+- [Nuxt](https://nuxt.com/)
+- [Nitro](https://nitro.unjs.io/)
+- [Unbuild](https://unbuild.unjs.io)
+- [Automd](https://automd.unjs.io)
+- [Changelogen](https://changelogen.unjs.io)
+- [RemixKit](https://github.com/jrestall/remix-kit)
 
 ## Usage
 
