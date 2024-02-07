@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
 import createJiti from "jiti";
@@ -47,6 +47,16 @@ export async function loadConfig<
       interopDefault: true,
       requireCache: false,
       esmResolve: true,
+      extensions: [
+        ".js",
+        ".mjs",
+        ".cjs",
+        ".ts",
+        ".mts",
+        ".cts",
+        ".json",
+        ".jsonc",
+      ],
       ...options.jitiOptions,
     });
 
@@ -316,7 +326,12 @@ async function resolveConfig<
   if (!existsSync(res.configFile!)) {
     return res;
   }
-  res.config = options.jiti!(res.configFile!);
+  if (res.configFile!.endsWith(".jsonc")) {
+    const { parse } = await import("jsonc-parser");
+    res.config = parse(await readFile(res.configFile!, "utf8"));
+  } else {
+    res.config = options.jiti!(res.configFile!);
+  }
   if (res.config instanceof Function) {
     res.config = await res.config();
   }

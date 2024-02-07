@@ -9,10 +9,11 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## Features
 
-- JSON, CJS, Typescript, and ESM config loader with [unjs/jiti](https://github.com/unjs/jiti)
-- RC config support with [unjs/rc9](https://github.com/unjs/rc9)
-- Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
+- `.json`, `.js`, `.ts`, and `.mjs` config loader with [unjs/jiti](https://github.com/unjs/jiti)
+- `.jsonc` config support with [jsonc-parser](https://github.com/microsoft/node-jsonc-parser)
+- `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
+- Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
