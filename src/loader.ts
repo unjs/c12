@@ -298,11 +298,16 @@ async function resolveConfig<
     source = cloned.dir;
   }
 
+  // Util to try resolving a module
+  const tryResolve = (id: string) => {
+    try {
+      return options.jiti!.resolve(id, { paths: [options.cwd!] });
+    } catch {}
+  };
+
   // Try resolving as npm package
   if (NPM_PACKAGE_RE.test(source)) {
-    try {
-      source = options.jiti!.resolve(source, { paths: [options.cwd!] });
-    } catch {}
+    source = tryResolve(source) || source;
   }
 
   // Import from local fs
@@ -314,19 +319,22 @@ async function resolveConfig<
   }
   const res: ResolvedConfig<T, MT> = {
     config: undefined as unknown as T,
+    configFile: undefined,
     cwd,
     source,
     sourceOptions,
   };
-  try {
-    res.configFile = options.jiti!.resolve(resolve(cwd, source), {
-      paths: [cwd],
-    });
-  } catch {}
+
+  res.configFile =
+    tryResolve(resolve(cwd, source)) ||
+    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, ""))) ||
+    tryResolve(resolve(cwd, ".config", source)) ||
+    source;
 
   if (!existsSync(res.configFile!)) {
     return res;
   }
+
   if (res.configFile!.endsWith(".jsonc")) {
     const { parse } = await import("jsonc-parser");
     res.config = parse(await readFile(res.configFile!, "utf8"));
