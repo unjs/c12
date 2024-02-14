@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.8.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.7.0...v1.8.0)
+
+### 🚀 Enhancements
+
+- Support `.config` dir ([#136](https://github.com/unjs/c12/pull/136))
+
+### 🩹 Fixes
+
+- Use default export of `json5` for parsing ([#135](https://github.com/unjs/c12/pull/135))
+
+### 🏡 Chore
+
+- Add used by section ([9e998a8](https://github.com/unjs/c12/commit/9e998a8))
+- Use automd ([b114398](https://github.com/unjs/c12/commit/b114398))
+
+### ✅ Tests
+
+- Refactor to use named configs ([329b6f8](https://github.com/unjs/c12/commit/329b6f8))
+- Update tests ([593619a](https://github.com/unjs/c12/commit/593619a))
+
+### ❤️ Contributors
+
+- Sadegh Barati ([@sadeghbarati](http://github.com/sadeghbarati))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.7.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.6.1...v1.7.0)
