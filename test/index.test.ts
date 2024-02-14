@@ -53,7 +53,7 @@ describe("c12", () => {
         "$test": {
           "envConfig": true,
           "extends": [
-            "./config.dev",
+            "./test.config.dev",
           ],
         },
         "array": [
@@ -94,7 +94,7 @@ describe("c12", () => {
             "$test": {
               "envConfig": true,
               "extends": [
-                "./config.dev",
+                "./test.config.dev",
               ],
             },
             "array": [
@@ -106,7 +106,7 @@ describe("c12", () => {
             "configFile": true,
             "envConfig": true,
             "extends": [
-              "./config.dev",
+              "./test.config.dev",
               [
                 "c12-npm-test",
               ],
@@ -120,7 +120,7 @@ describe("c12", () => {
             "overriden": false,
             "theme": "./theme",
           },
-          "configFile": "config",
+          "configFile": "test.config",
           "cwd": "<path>/fixture",
         },
         {
@@ -128,7 +128,7 @@ describe("c12", () => {
             "rcFile": true,
             "testConfig": true,
           },
-          "configFile": ".configrc",
+          "configFile": ".testrc",
         },
         {
           "config": {
@@ -144,10 +144,10 @@ describe("c12", () => {
               "secondary": "theme_secondary",
             },
           },
-          "configFile": "<path>/fixture/theme/config.json5",
+          "configFile": "<path>/fixture/theme/test.config.json5",
           "cwd": "<path>/fixture/theme",
           "meta": {},
-          "source": "config",
+          "source": "test.config",
           "sourceOptions": {},
         },
         {
@@ -167,43 +167,43 @@ describe("c12", () => {
               "text": "base_text",
             },
           },
-          "configFile": "<path>/fixture/.base/config.jsonc",
+          "configFile": "<path>/fixture/.base/test.config.jsonc",
           "cwd": "<path>/fixture/.base",
           "meta": {
             "name": "base",
             "version": "1.0.0",
           },
-          "source": "config",
+          "source": "test.config",
           "sourceOptions": {},
         },
         {
           "config": {
             "devConfig": true,
           },
-          "configFile": "<path>/fixture/config.dev.ts",
+          "configFile": "<path>/fixture/test.config.dev.ts",
           "cwd": "<path>/fixture",
           "meta": {},
-          "source": "./config.dev",
+          "source": "./test.config.dev",
           "sourceOptions": {},
         },
         {
           "config": {
             "npmConfig": true,
           },
-          "configFile": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "configFile": "<path>/fixture/node_modules/c12-npm-test/test.config.ts",
           "cwd": "<path>/fixture/node_modules/c12-npm-test",
           "meta": {},
-          "source": "<path>/fixture/node_modules/c12-npm-test/config.ts",
+          "source": "<path>/fixture/node_modules/c12-npm-test/test.config.ts",
           "sourceOptions": {},
         },
         {
           "config": {
             "githubLayer": true,
           },
-          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/config.ts",
+          "configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/test.config.ts",
           "cwd": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo",
           "meta": {},
-          "source": "config",
+          "source": "test.config",
           "sourceOptions": {
             "giget": {},
           },
@@ -231,7 +231,7 @@ describe("c12", () => {
         "$test": {
           "envConfig": true,
           "extends": [
-            "./config.dev",
+            "./test.config.dev",
           ],
         },
         "array": [
@@ -274,13 +274,13 @@ describe("c12", () => {
     >[];
 
     const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "config",
+      (layer) => layer.configFile === "test.config",
     )!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
-    const baseConfigLay = transformdLayers.find(
-      (layer) => layer.configFile === "<path>/fixture/.base/config.jsonc",
+    const baseLayerConfig = transformdLayers.find(
+      (layer) => layer.configFile === "<path>/fixture/.base/test.config.jsonc",
     )!;
-    expect(Object.keys(baseConfigLay.config!)).toContain("$env");
+    expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
 });
