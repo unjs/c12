@@ -327,6 +327,7 @@ async function resolveConfig<
 
   res.configFile =
     tryResolve(resolve(cwd, source)) ||
+    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, ""))) ||
     tryResolve(resolve(cwd, ".config", source)) ||
     source;
 
