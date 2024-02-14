@@ -2,6 +2,6 @@
   "name": "c12-github-layer",
   "version": "0.0.0",
   "exports": {
-    ".": "./config.ts"
+    ".": "./test.config.ts"
   }
 }

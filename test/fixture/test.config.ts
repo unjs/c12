@@ -5,7 +5,7 @@ export default {
     ["gh:unjs/c12/test/fixture/_github#main", { giget: {} }],
   ],
   $test: {
-    extends: ["./config.dev"],
+    extends: ["./test.config.dev"],
     envConfig: true,
   },
   colors: {

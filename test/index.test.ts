@@ -19,6 +19,7 @@ describe("c12", () => {
     }>;
     const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
+      name: "test",
       dotenv: true,
       packageJson: ["c12", "c12-alt"],
       globalRc: true,
@@ -218,6 +219,7 @@ describe("c12", () => {
 
   it("extend from git repo", async () => {
     const { config } = await loadConfig({
+      name: "test",
       cwd: r("./fixture/new_dir"),
       overrides: {
         extends: ["github:unjs/c12/test/fixture"],
@@ -251,6 +253,7 @@ describe("c12", () => {
 
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
+      name: "test",
       cwd: r("./fixture"),
       envName: "test",
       omit$Keys: true,
