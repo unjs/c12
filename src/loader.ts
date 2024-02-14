@@ -339,7 +339,9 @@ async function resolveConfig<
     const { parse } = await import("jsonc-parser");
     res.config = parse(await readFile(res.configFile!, "utf8"));
   } else if (res.configFile!.endsWith(".json5")) {
-    const { parse } = await import("json5");
+    const parse = await import("json5").then(
+      (m) => m.parse || m.default?.parse || m.default,
+    );
     res.config = parse(await readFile(res.configFile!, "utf8"));
   } else {
     res.config = options.jiti!(res.configFile!);
