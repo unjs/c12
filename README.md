@@ -13,7 +13,8 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 ## ✅ Features
 
 - `.js`, `.ts`, `.cjs`, `.mjs` config loader with [unjs/jiti](https://github.com/unjs/jiti)
-- `.json`, `.json5` and `.jsonc` config support.
+- `.json`, `.json5` and `.jsonc` config support
+- `.config/` directory support following [config dir proposal](https://github.com/pi0/config-dir)
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
