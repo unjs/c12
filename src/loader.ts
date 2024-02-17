@@ -84,24 +84,24 @@ export async function loadConfig<
   }
 
   // Load rc files
-  const configRC = {};
+  let configRC = {};
   if (options.rcFile) {
     if (options.globalRc) {
-      Object.assign(
-        configRC,
+      configRC = defu(
         rc9.readUser({ name: options.rcFile, dir: options.cwd }),
+        configRC,
       );
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
-        Object.assign(
-          configRC,
+        configRC = defu(
           rc9.read({ name: options.rcFile, dir: workspaceDir }),
+          configRC,
         );
       }
     }
-    Object.assign(
-      configRC,
+    configRC = defu(
       rc9.read({ name: options.rcFile, dir: options.cwd }),
+      configRC,
     );
   }
 
