@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "unbuild",
+    "build": "automd && unbuild",
     "dev": "vitest dev",
     "lint": "eslint --ext .ts,.js,.mjs,.cjs . && prettier -c src test",
     "lint:fix": "eslint --ext .ts,.js,.mjs,.cjs . --fix && prettier -w src test",
@@ -46,7 +46,7 @@
   "devDependencies": {
     "@types/node": "^20.11.5",
     "@vitest/coverage-v8": "^1.2.1",
-    "automd": "^0.2.0",
+    "automd": "^0.3.2",
     "changelogen": "^0.5.5",
     "eslint": "^8.56.0",
     "eslint-config-unjs": "^0.2.1",

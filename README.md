@@ -2,9 +2,9 @@
 
 <!-- automd:badges color=yellow codecov -->
 
-[![npm version](https://img.shields.io/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
-[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
-[![codecov](https://img.shields.io/codecov/c/gh/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
+[![npm version](https://flat.badgen.net/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
+[![npm downloads](https://flat.badgen.net/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
+[![codecov](https://flat.badgen.net/codecov/c/github/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
 
 <!-- /automd -->
 
@@ -36,36 +36,44 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 Install package:
 
-<!-- automd:pm-install -->
+<!-- automd:pm-install no-version -->
 
 ```sh
 # ✨ Auto-detect
-npx nypm i c12@^1.7.0
+npx nypm i c12
 
 # npm
-npm install c12@^1.7.0
+npm install c12
 
 # yarn
-yarn add c12@^1.7.0
+yarn add c12
 
 # pnpm
-pnpm install c12@^1.7.0
+pnpm install c12
 
 # bun
-bun install c12@^1.7.0
+bun install c12
 ```
 
 <!-- /automd -->
 
 Import:
 
-```js
-// ESM
-import { loadConfig, watchConfig } from "c12";
+<!-- automd:jsimport cjs imports="loadConfig,watchConfig" -->
 
-// CommonJS
+**ESM** (Node.js, Bun)
+
+```js
+import { loadConfig, watchConfig } from "c12";
+```
+
+**CommonJS** (Legacy Node.js)
+
+```js
 const { loadConfig, watchConfig } = require("c12");
 ```
+
+<!-- /automd -->
 
 Load configuration:
 
@@ -342,24 +350,38 @@ console.log("initial config", config.config);
 // await config.unwatch();
 ```
 
-## 💻 Development
+## Contribution
+
+<details>
+  <summary>Local development</summary>
 
 - Clone this repository
-- Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable` (use `npm i -g corepack` for Node.js < 16.10)
+- Install the latest LTS version of [Node.js](https://nodejs.org/en/)
+- Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable`
 - Install dependencies using `pnpm install`
-- Run interactive tests using `pnpm dev`
+- Run tests using `pnpm dev` or `pnpm test`
+
+</details>
+
+<!-- /automd -->
 
 ## License
 
-Made with 💛 Published under [MIT License](./LICENSE).
+<!-- automd:contributors license=MIT author="pi0" -->
 
-<!-- Badges -->
+Published under the [MIT](https://github.com/unjs/c12/blob/main/LICENSE) license.
+Made by [@pi0](https://github.com/pi0) and [community](https://github.com/unjs/c12/graphs/contributors) 💛
+<br><br>
+<a href="https://github.com/unjs/c12/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=unjs/c12" />
+</a>
 
-[npm-version-src]: https://img.shields.io/npm/v/c12?style=flat&colorA=18181B&colorB=F0DB4F
-[npm-version-href]: https://npmjs.com/package/c12
-[npm-downloads-src]: https://img.shields.io/npm/dm/c12?style=flat&colorA=18181B&colorB=F0DB4F
-[npm-downloads-href]: https://npmjs.com/package/c12
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/c12/main?style=flat&colorA=18181B&colorB=F0DB4F
-[codecov-href]: https://codecov.io/gh/unjs/c12
-[license-src]: https://img.shields.io/github/license/unjs/c12.svg?style=flat&colorA=18181B&colorB=F0DB4F
-[license-href]: https://github.com/unjs/c12/blob/main/LICENSE
+<!-- /automd -->
+
+<!-- automd:with-automd -->
+
+---
+
+_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
+
+<!-- /automd -->
