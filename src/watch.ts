@@ -1,4 +1,4 @@
-import { watch, WatchOptions } from "chokidar";
+import type { WatchOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
 import { diff } from "ohash";
@@ -82,6 +82,7 @@ export async function watchConfig<
     ),
   ] as string[];
 
+  const watch = await import("chokidar").then((r) => r.watch || r.default || r);
   const _fswatcher = watch(watchingFiles, {
     ignoreInitial: true,
     ...options.chokidarOptions,
