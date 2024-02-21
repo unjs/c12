@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.9.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.8.0...v1.9.0)
+
+### 🚀 Enhancements
+
+- Use confbox ([#140](https://github.com/unjs/c12/pull/140))
+
+### 🔥 Performance
+
+- Lazy load `chokidar` ([a8b3a1d](https://github.com/unjs/c12/commit/a8b3a1d))
+
+### 🩹 Fixes
+
+- Deep merge rc sources with defu ([#139](https://github.com/unjs/c12/pull/139))
+- **watcher:** Watch `.config` and all supported extensions ([94c8181](https://github.com/unjs/c12/commit/94c8181))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.8.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.7.0...v1.8.0)
