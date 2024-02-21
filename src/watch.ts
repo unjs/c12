@@ -8,7 +8,7 @@ import type {
   ResolvedConfig,
   LoadConfigOptions,
 } from "./types";
-import { loadConfig } from "./loader";
+import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader";
 
 export type ConfigWatcher<
   T extends UserInputConfig = UserInputConfig,
@@ -64,9 +64,15 @@ export async function watchConfig<
       (config.layers || [])
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...["ts", "js", "mjs", "cjs", "cts", "mts", "json"].map((ext) =>
-            resolve(l.cwd!, configFileName + "." + ext),
-          ),
+          ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
+            resolve(l.cwd!, configFileName + ext),
+            resolve(l.cwd!, ".config", configFileName + ext),
+            resolve(
+              l.cwd!,
+              ".config",
+              configFileName.replace(/\.config$/, "") + ext,
+            ),
+          ]),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
           options.rcFile &&
