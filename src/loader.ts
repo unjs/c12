@@ -84,9 +84,9 @@ export async function loadConfig<
   }
 
   // Load rc files
-  let configRC = Object.create(null) as T;
+  const configRC = {};
   if (options.rcFile) {
-    const rcSources = [];
+    const rcSources: T[] = [];
     // 1. cwd
     rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
     if (options.globalRc) {
@@ -98,7 +98,7 @@ export async function loadConfig<
       // 3. user home
       rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    configRC = defu({}, ...rcSources) as T;
+    Object.assign(configRC, defu({}, ...rcSources));
   }
 
   // Load config from package.json
