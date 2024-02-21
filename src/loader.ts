@@ -21,6 +21,31 @@ import type {
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
+const ASYNC_LOADERS = {
+  ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
+  ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
+  ".jsonc": () => import("confbox/jsonc").then((r) => r.parseJSONC),
+  ".json5": () => import("confbox/json5").then((r) => r.parseJSON5),
+  ".toml": () => import("confbox/toml").then((r) => r.parseTOML),
+} as const;
+
+export const SUPPORTED_EXTENSIONS = [
+  // with jiti
+  ".js",
+  ".ts",
+  ".mjs",
+  ".cjs",
+  ".mts",
+  ".cts",
+  ".json",
+  // with confbox
+  ".jsonc",
+  ".json5",
+  ".yaml",
+  ".yml",
+  ".toml",
+] as const;
+
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
@@ -47,17 +72,7 @@ export async function loadConfig<
       interopDefault: true,
       requireCache: false,
       esmResolve: true,
-      extensions: [
-        ".js",
-        ".mjs",
-        ".cjs",
-        ".ts",
-        ".mts",
-        ".cts",
-        ".json",
-        ".jsonc",
-        ".json5",
-      ],
+      extensions: [...SUPPORTED_EXTENSIONS],
       ...options.jitiOptions,
     });
 
@@ -331,14 +346,12 @@ async function resolveConfig<
     return res;
   }
 
-  if (res.configFile!.endsWith(".jsonc")) {
-    const { parse } = await import("jsonc-parser");
-    res.config = parse(await readFile(res.configFile!, "utf8"));
-  } else if (res.configFile!.endsWith(".json5")) {
-    const parse = await import("json5").then(
-      (m) => m.parse || m.default?.parse || m.default,
-    );
-    res.config = parse(await readFile(res.configFile!, "utf8"));
+  const configFileExt = extname(res.configFile!) || "";
+  if (configFileExt in ASYNC_LOADERS) {
+    const asyncLoader =
+      await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
+    const contents = await readFile(res.configFile!, "utf8");
+    res.config = asyncLoader(contents);
   } else {
     res.config = options.jiti!(res.configFile!);
   }
