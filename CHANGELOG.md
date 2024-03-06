@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.10.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.9.0...v1.10.0)
+
+### 🚀 Enhancements
+
+- Support `auth` shortcut for layer config ([#142](https://github.com/unjs/c12/pull/142))
+
+### 🏡 Chore
+
+- Update automd ([a5834c7](https://github.com/unjs/c12/commit/a5834c7))
+- Update ci ([b970591](https://github.com/unjs/c12/commit/b970591))
+- Apply automated updates ([db37eaa](https://github.com/unjs/c12/commit/db37eaa))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.9.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.8.0...v1.9.0)

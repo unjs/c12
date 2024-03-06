@@ -312,6 +312,7 @@ async function resolveConfig<
       dir: cloneDir,
       install: sourceOptions.install,
       force: sourceOptions.install,
+      auth: sourceOptions.auth,
       ...options.giget,
       ...sourceOptions.giget,
     });

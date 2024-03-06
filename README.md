@@ -40,7 +40,7 @@ Install package:
 
 ```sh
 # ✨ Auto-detect
-npx nypm i c12
+npx nypm install c12
 
 # npm
 npm install c12
@@ -249,7 +249,7 @@ Layers:
 ]
 ```
 
-## Extending Config Layer from Remote Sources
+## Extending config layer from remote sources
 
 You can also extend configuration from remote sources such as npm or github.
 
@@ -273,14 +273,16 @@ export default {
 };
 ```
 
-**Example:** Extend with clone configuration
+**Example:** Extend a private repository and install dependencies:
 
 ```js
 // config.ts
 export default {
-  extends: ["gh:user/repo", { giget: { auth: process.env.GITHUB_TOKEN } }],
+  extends: ["gh:user/repo", { auth: process.env.GITHUB_TOKEN, install: true }],
 };
 ```
+
+You can pass more options to `giget: {}` in layer config.
 
 Refer to [unjs/giget](https://giget.unjs.io) for more information.
 
@@ -314,7 +316,7 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
 }
 ```
 
-## Watching Configuration
+## Watching configuration
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
 
@@ -386,6 +388,6 @@ Made by [@pi0](https://github.com/pi0) and [community](https://github.com/unjs/c
 
 ---
 
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
+_🤖 auto updated with [automd](https://automd.unjs.io)_
 
 <!-- /automd -->

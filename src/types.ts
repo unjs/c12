@@ -30,11 +30,34 @@ export interface SourceOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
+  /** Custom meta for layer */
   meta?: MT;
-  giget?: DownloadTemplateOptions;
-  install?: boolean;
+
+  /** Layer config overrides */
   overrides?: T;
+
   [key: string]: any;
+
+  /**
+   * Options for cloning remote sources
+   *
+   * @see https://giget.unjs.io
+   */
+  giget?: DownloadTemplateOptions;
+
+  /**
+   * Install dependencies after cloning
+   *
+   * @see https://nypm.unjs.io
+   */
+  install?: boolean;
+
+  /**
+   * Token for cloning private sources
+   *
+   * @see https://giget.unjs.io#providing-token-for-private-repositories
+   */
+  auth?: string;
 }
 
 export interface ConfigLayer<
