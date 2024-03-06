@@ -151,6 +151,10 @@ Specify override configuration. It has the **highest** priority and is applied *
 
 Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
 
+### `reverseKeys`
+
+Reverse the order of the array in the resolved config. The default is `[]`.
+
 ### `jiti`
 
 Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configuration files.
