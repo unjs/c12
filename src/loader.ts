@@ -178,6 +178,15 @@ export async function loadConfig<
     }
   }
 
+  // Reverse arrays if defined
+  if (options.reverseArrays && Array.isArray(options.reverseArrays)) {
+    for (const key of options.reverseArrays) {
+      if (r.config[key] && Array.isArray(r.config[key])) {
+        r.config[key] = r.config[key].reverse();
+      }
+    }
+  }
+
   // Return resolved config
   return r;
 }

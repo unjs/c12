@@ -10,6 +10,7 @@
     "text": "base_text",
   },
   "array": ["b"],
+  "array2": ["b", "c"],
   "$env": {
     "test": { "baseEnvConfig": true },
   },

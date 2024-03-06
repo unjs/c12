@@ -81,6 +81,8 @@ export interface LoadConfigOptions<
 
   omit$Keys?: boolean;
 
+  reverseArrays?: (string & keyof T)[] | string[];
+
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>,

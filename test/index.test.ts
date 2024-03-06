@@ -27,6 +27,7 @@ describe("c12", () => {
       extend: {
         extendKey: ["theme", "extends"],
       },
+      reverseArrays: ["array2"],
       resolve: (id) => {
         if (id === "virtual") {
           return { config: { virtual: true } };
@@ -59,6 +60,11 @@ describe("c12", () => {
         "array": [
           "a",
           "b",
+        ],
+        "array2": [
+          "c",
+          "b",
+          "a",
         ],
         "baseConfig": true,
         "baseEnvConfig": true,
@@ -98,6 +104,9 @@ describe("c12", () => {
               ],
             },
             "array": [
+              "a",
+            ],
+            "array2": [
               "a",
             ],
             "colors": {
@@ -159,6 +168,10 @@ describe("c12", () => {
             },
             "array": [
               "b",
+            ],
+            "array2": [
+              "b",
+              "c",
             ],
             "baseConfig": true,
             "baseEnvConfig": true,
