@@ -245,7 +245,7 @@ Layers:
 ]
 ```
 
-## Extending Config Layer from Remote Sources
+## Extending config layer from remote sources
 
 You can also extend configuration from remote sources such as npm or github.
 
@@ -269,14 +269,16 @@ export default {
 };
 ```
 
-**Example:** Extend with clone configuration
+**Example:** Extend a private repository and install dependencies:
 
 ```js
 // config.ts
 export default {
-  extends: ["gh:user/repo", { giget: { auth: process.env.GITHUB_TOKEN } }],
+  extends: ["gh:user/repo", { auth: process.env.GITHUB_TOKEN, install: true }],
 };
 ```
+
+You can pass more options to `giget: {}` in layer config.
 
 Refer to [unjs/giget](https://giget.unjs.io) for more information.
 
@@ -310,7 +312,7 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
 }
 ```
 
-## Watching Configuration
+## Watching configuration
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
 
