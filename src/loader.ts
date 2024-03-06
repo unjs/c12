@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
 import createJiti from "jiti";
 import * as rc9 from "rc9";
-import { defu } from "defu";
+import { defu, defuFn } from "defu";
 import { hash } from "ohash";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
@@ -178,13 +178,10 @@ export async function loadConfig<
     }
   }
 
-  // Reverse arrays if defined
-  if (options.reverseArrays && Array.isArray(options.reverseArrays)) {
-    for (const key of options.reverseArrays) {
-      if (r.config[key] && Array.isArray(r.config[key])) {
-        r.config[key] = r.config[key].reverse();
-      }
-    }
+  // !IMPORTANT: Needs to be after resolving config to then apply merge strategy
+  // Use merge strategy if provided by user
+  if (options.mergeStrategy && Object.keys(options.mergeStrategy).length > 0) {
+    r.config = defuFn(options.mergeStrategy, r.config) as T;
   }
 
   // Return resolved config

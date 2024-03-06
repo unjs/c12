@@ -9,6 +9,7 @@
     "primary": "base_primary",
     "text": "base_text",
   },
+  "count": 1,
   "array": ["b"],
   "array2": ["b", "c"],
   "$env": {

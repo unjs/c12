@@ -16,6 +16,9 @@ describe("c12", () => {
       overriden: boolean;
       defaultConfig: boolean;
       extends: string[];
+      array: string[];
+      array2: string[];
+      count: number;
     }>;
     const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
@@ -27,7 +30,10 @@ describe("c12", () => {
       extend: {
         extendKey: ["theme", "extends"],
       },
-      reverseArrays: ["array2"],
+      mergeStrategy: {
+        count: (current) => (current || 0) + 1,
+        array2: (current) => current?.reverse(),
+      },
       resolve: (id) => {
         if (id === "virtual") {
           return { config: { virtual: true } };
@@ -74,6 +80,7 @@ describe("c12", () => {
           "text": "base_text",
         },
         "configFile": true,
+        "count": 2,
         "defaultConfig": true,
         "devConfig": true,
         "envConfig": true,
@@ -179,6 +186,7 @@ describe("c12", () => {
               "primary": "base_primary",
               "text": "base_text",
             },
+            "count": 1,
           },
           "configFile": "<path>/fixture/.base/test.config.jsonc",
           "cwd": "<path>/fixture/.base",

@@ -104,7 +104,9 @@ export interface LoadConfigOptions<
 
   omit$Keys?: boolean;
 
-  reverseArrays?: (string & keyof T)[] | string[];
+  mergeStrategy?: {
+    [key in keyof T]: (current: T[key]) => T[key];
+  };
 
   resolve?: (
     id: string,
