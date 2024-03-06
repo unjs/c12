@@ -40,7 +40,7 @@ Install package:
 
 ```sh
 # ✨ Auto-detect
-npx nypm i c12
+npx nypm install c12
 
 # npm
 npm install c12
@@ -384,6 +384,6 @@ Made by [@pi0](https://github.com/pi0) and [community](https://github.com/unjs/c
 
 ---
 
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
+_🤖 auto updated with [automd](https://automd.unjs.io)_
 
 <!-- /automd -->
