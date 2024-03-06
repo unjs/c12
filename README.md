@@ -151,9 +151,9 @@ Specify override configuration. It has the **highest** priority and is applied *
 
 Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
 
-### `reverseKeys`
+### `mergeStrategy`
 
-Reverse the order of the array in the resolved config. The default is `[]`.
+Custom object merge strategy that uses [defuFn](https://github.com/unjs/defu#function-merger). This gives you full control over what to do over the merging process.
 
 ### `jiti`
 
