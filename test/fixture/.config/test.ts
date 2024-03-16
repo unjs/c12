@@ -16,4 +16,6 @@ export default {
   // foo: "bar",
   // x: "123",
   array: ["a"],
+  undefinedKey: undefined,
+  nullKey: null,
 };

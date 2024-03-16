@@ -117,6 +117,7 @@ describe("c12", () => {
                 },
               ],
             ],
+            "nullKey": null,
             "overriden": false,
             "theme": "./theme",
           },
@@ -282,5 +283,75 @@ describe("c12", () => {
       (layer) => layer.configFile === "<path>/fixture/.base/test.config.jsonc",
     )!;
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
+  });
+
+  it("provides fallback values", async () => {
+    type UserConfig = Partial<{
+      virtual: boolean;
+      overriden: boolean;
+      defaultConfig: boolean;
+      extends: string[];
+    }>;
+    const { config } = await loadConfig<UserConfig>({
+      cwd: r("./fixture"),
+      provideFallbackValues: true,
+      name: "test",
+      dotenv: true,
+      packageJson: ["c12", "c12-alt"],
+      globalRc: true,
+      envName: "test",
+      extend: {
+        extendKey: ["theme", "extends"],
+      },
+      overrides: {
+        overriden: true,
+      },
+      defaults: {
+        defaultConfig: true,
+      },
+      defaultConfig: {
+        extends: ["virtual"],
+      },
+    });
+
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
+      {
+        "$env": {
+          "test": {
+            "baseEnvConfig": true,
+          },
+        },
+        "$test": {
+          "envConfig": true,
+          "extends": [
+            "./test.config.dev",
+          ],
+        },
+        "array": [
+          "a",
+          "b",
+        ],
+        "baseConfig": true,
+        "baseEnvConfig": true,
+        "colors": {
+          "primary": "user_primary",
+          "secondary": "theme_secondary",
+          "text": "base_text",
+        },
+        "configFile": true,
+        "defaultConfig": true,
+        "devConfig": true,
+        "envConfig": true,
+        "githubLayer": true,
+        "npmConfig": true,
+        "nullKey": "",
+        "overriden": true,
+        "packageJSON": true,
+        "packageJSON2": true,
+        "rcFile": true,
+        "testConfig": true,
+        "undefinedKey": "",
+      }
+    `);
   });
 });
