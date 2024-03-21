@@ -8,6 +8,7 @@ import { defu } from "defu";
 import { hash } from "ohash";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
+import { provideFallbackValues } from "./utils";
 
 import type {
   UserInputConfig,
@@ -131,6 +132,10 @@ export async function loadConfig<
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
     Object.assign(pkgJson, defu({}, ...values));
+  }
+
+  if (options.provideFallbackValues && config) {
+    provideFallbackValues(config);
   }
 
   // Combine sources

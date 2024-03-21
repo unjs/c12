@@ -123,6 +123,8 @@ export interface LoadConfigOptions<
     | {
         extendKey?: string | string[];
       };
+
+  provideFallbackValues?: boolean;
 }
 
 export type DefineConfig<
