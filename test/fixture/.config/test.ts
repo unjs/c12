@@ -16,4 +16,5 @@ export default {
   // foo: "bar",
   // x: "123",
   array: ["a"],
+  array2: ["a"],
 };

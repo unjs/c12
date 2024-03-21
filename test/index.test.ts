@@ -16,6 +16,9 @@ describe("c12", () => {
       overriden: boolean;
       defaultConfig: boolean;
       extends: string[];
+      array: string[];
+      array2: string[];
+      count: number;
     }>;
     const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
@@ -26,6 +29,10 @@ describe("c12", () => {
       envName: "test",
       extend: {
         extendKey: ["theme", "extends"],
+      },
+      mergeStrategy: {
+        count: (current) => (current || 0) + 1,
+        array2: (current) => current?.reverse(),
       },
       resolve: (id) => {
         if (id === "virtual") {
@@ -60,6 +67,11 @@ describe("c12", () => {
           "a",
           "b",
         ],
+        "array2": [
+          "c",
+          "b",
+          "a",
+        ],
         "baseConfig": true,
         "baseEnvConfig": true,
         "colors": {
@@ -68,6 +80,7 @@ describe("c12", () => {
           "text": "base_text",
         },
         "configFile": true,
+        "count": 2,
         "defaultConfig": true,
         "devConfig": true,
         "envConfig": true,
@@ -98,6 +111,9 @@ describe("c12", () => {
               ],
             },
             "array": [
+              "a",
+            ],
+            "array2": [
               "a",
             ],
             "colors": {
@@ -160,12 +176,17 @@ describe("c12", () => {
             "array": [
               "b",
             ],
+            "array2": [
+              "b",
+              "c",
+            ],
             "baseConfig": true,
             "baseEnvConfig": true,
             "colors": {
               "primary": "base_primary",
               "text": "base_text",
             },
+            "count": 1,
           },
           "configFile": "<path>/fixture/.base/test.config.jsonc",
           "cwd": "<path>/fixture/.base",

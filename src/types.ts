@@ -104,6 +104,10 @@ export interface LoadConfigOptions<
 
   omit$Keys?: boolean;
 
+  mergeStrategy?: {
+    [key in keyof T]: (current: T[key]) => T[key];
+  };
+
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>,
