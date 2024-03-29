@@ -2,9 +2,9 @@
 
 <!-- automd:badges color=yellow codecov -->
 
-[![npm version](https://flat.badgen.net/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
-[![npm downloads](https://flat.badgen.net/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
-[![codecov](https://flat.badgen.net/codecov/c/github/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
+[![npm version](https://img.shields.io/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
+[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
+[![codecov](https://img.shields.io/codecov/c/gh/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
 
 <!-- /automd -->
 
