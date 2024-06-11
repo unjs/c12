@@ -76,6 +76,7 @@ export interface ResolvedConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > extends ConfigLayer<T, MT> {
+  config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
 }
