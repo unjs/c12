@@ -67,6 +67,9 @@ export async function loadConfig<
     };
   }
 
+  // Custom merger
+  const _merger = options.merger || defu;
+
   // Create jiti instance
   options.jiti =
     options.jiti ||
@@ -126,7 +129,7 @@ export async function loadConfig<
       // 3. user home
       rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    _configs.rc = defu({} as T, ...rcSources);
+    _configs.rc = _merger({} as T, ...rcSources);
   }
 
   // Load config from package.json
@@ -142,7 +145,7 @@ export async function loadConfig<
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
-    _configs.packageJson = defu({} as T, ...values);
+    _configs.packageJson = _merger({} as T, ...values);
   }
 
   // Resolve config sources
@@ -155,7 +158,7 @@ export async function loadConfig<
   }
 
   // Combine sources
-  r.config = defu(
+  r.config = _merger(
     configs.overrides,
     configs.main,
     configs.rc,
@@ -168,7 +171,7 @@ export async function loadConfig<
     await extendConfig(r.config, options);
     r.layers = r.config._layers;
     delete r.config._layers;
-    r.config = defu(r.config, ...r.layers!.map((e) => e.config)) as T;
+    r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
   }
 
   // Preserve unmerged sources as layers
@@ -190,7 +193,7 @@ export async function loadConfig<
 
   // Apply defaults
   if (options.defaults) {
-    r.config = defu(r.config, options.defaults) as T;
+    r.config = _merger(r.config, options.defaults) as T;
   }
 
   // Remove environment-specific and built-in keys start with $
@@ -296,6 +299,9 @@ async function resolveConfig<
     }
   }
 
+  // Custom merger
+  const _merger = options.merger || defu;
+
   // Download giget URIs and resolve to local path
   if (GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
@@ -393,7 +399,7 @@ async function resolveConfig<
       ...res.config!.$env?.[options.envName],
     };
     if (Object.keys(envConfig).length > 0) {
-      res.config = defu(envConfig, res.config);
+      res.config = _merger(envConfig, res.config);
     }
   }
 
@@ -403,7 +409,7 @@ async function resolveConfig<
 
   // Overrides
   if (res.sourceOptions!.overrides) {
-    res.config = defu(res.sourceOptions!.overrides, res.config) as T;
+    res.config = _merger(res.sourceOptions!.overrides, res.config) as T;
   }
 
   // Always windows paths

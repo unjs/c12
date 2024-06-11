@@ -133,6 +133,8 @@ export interface LoadConfigOptions<
 
   giget?: DownloadTemplateOptions;
 
+  merger?: (...sources: Array<T | null | undefined>) => T;
+
   extend?:
     | false
     | {

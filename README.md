@@ -163,6 +163,12 @@ Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration
 
 Options passed to [unjs/giget](https://github.com/unjs/giget) when extending layer from git source.
 
+### `merger`
+
+Custom options merger function. Default is [defu](https://github.com/unjs/defu).
+
+**Note:** Custom merge function should deeply merge options with arguments high -> low priority.
+
 ### `envName`
 
 Environment name used for [environment specific configuration](#environment-specific-configuration).
@@ -216,10 +222,10 @@ export default {
 // base/config.ts
 export default {
   colors: {
-    primary: 'base_primary',
-    text: 'base_text'
-  }
-}
+    primary: "base_primary",
+    text: "base_text",
+  },
+};
 ```
 
 The loaded configuration would look like this:
@@ -228,21 +234,39 @@ The loaded configuration would look like this:
 const config = {
   dev: true,
   colors: {
-    primary: 'user_primary',
-    secondary: 'theme_secondary',
-    text: 'base_text'
-  }
-}
+    primary: "user_primary",
+    secondary: "theme_secondary",
+    text: "base_text",
+  },
+};
 ```
 
 Layers:
 
 ```js
 [
- { config: { /* theme config */ }, configFile:  "/path/to/theme/config.ts", cwd: "/path/to/theme " },
- { config: { /* base  config */ }, configFile: "/path/to/base/config.ts",   cwd: "/path/to/base" },
- { config: { /* dev   config */ }, configFile: "/path/to/config.dev.ts",    cwd: "/path/" },
-]
+  {
+    config: {
+      /* theme config */
+    },
+    configFile: "/path/to/theme/config.ts",
+    cwd: "/path/to/theme ",
+  },
+  {
+    config: {
+      /* base  config */
+    },
+    configFile: "/path/to/base/config.ts",
+    cwd: "/path/to/base",
+  },
+  {
+    config: {
+      /* dev   config */
+    },
+    configFile: "/path/to/config.dev.ts",
+    cwd: "/path/",
+  },
+];
 ```
 
 ## Extending config layer from remote sources
@@ -300,16 +324,16 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
 ```js
 export default {
   // Default configuration
-  logLevel: 'info',
+  logLevel: "info",
 
   // Environment overrides
-  $test: { logLevel: 'silent' },
-  $development: { logLevel: 'warning' },
-  $production: { logLevel: 'error' },
+  $test: { logLevel: "silent" },
+  $development: { logLevel: "warning" },
+  $production: { logLevel: "error" },
   $env: {
-    staging: { logLevel: 'debug' }
-  }
-}
+    staging: { logLevel: "debug" },
+  },
+};
 ```
 
 ## Watching configuration
