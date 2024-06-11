@@ -250,10 +250,11 @@ describe("c12", () => {
         },
         "configFile": true,
         "devConfig": true,
+        "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
         "npmConfig": true,
-        "overriden": false,
+        "overridden": false,
         "theme": "./theme",
       }
     `);
