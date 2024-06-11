@@ -22,6 +22,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
 - Config watcher with auto-reload and HMR support
+- Create or update configuration files with [magicast](https://github.com/unjs/magicast)
 
 ## 🦴 Used by
 
@@ -36,7 +37,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 Install package:
 
-<!-- automd:pm-install no-version -->
+<!-- automd:pm-install -->
 
 ```sh
 # ✨ Auto-detect
@@ -374,6 +375,56 @@ console.log("initial config", config.config);
 
 // Stop watcher when not needed anymore
 // await config.unwatch();
+```
+
+## Updating config
+
+> [!NOTE]
+> This feature is experimental
+
+Update or create a new configuration files.
+
+Add `magicast` peer dependency:
+
+<!-- automd:pm-install name="magicast" dev -->
+
+```sh
+# ✨ Auto-detect
+npx nypm install -D magicast
+
+# npm
+npm install -D magicast
+
+# yarn
+yarn add -D magicast
+
+# pnpm
+pnpm install -D magicast
+
+# bun
+bun install -D magicast
+```
+
+<!-- /automd -->
+
+Import util from `c12/update`
+
+```js
+const { configFile, created } = await updateConfigFile({
+  cwd: ".",
+  configFile: "foo.config",
+  onCreate: ({ configFile }) => {
+    // You can prompt user if wants to create a new config file and return false to cancel
+    console.log(`Creating new config file in ${configFile}...`);
+    return "export default { test: true }";
+  },
+  onUpdate: (config) => {
+    // You can update the config contents just like an object
+    config.test2 = false;
+  },
+});
+
+console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
 ```
 
 ## Contribution

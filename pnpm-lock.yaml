@@ -66,6 +66,9 @@ importers:
       expect-type:
         specifier: ^0.19.0
         version: 0.19.0
+      magicast:
+        specifier: ^0.3.4
+        version: 0.3.4
       prettier:
         specifier: ^3.3.2
         version: 3.3.2

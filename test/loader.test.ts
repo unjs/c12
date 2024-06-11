@@ -9,7 +9,7 @@ const r = (path: string) =>
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
-describe("c12", () => {
+describe("loader", () => {
   it("load fixture config", async () => {
     type UserConfig = Partial<{
       virtual: boolean;
