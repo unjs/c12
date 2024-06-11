@@ -253,7 +253,7 @@ describe("c12", () => {
         "envConfig": true,
         "githubLayer": true,
         "npmConfig": true,
-        "overridden": false,
+        "overriden": false,
         "theme": "./theme",
       }
     `);
