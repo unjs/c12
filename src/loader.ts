@@ -14,9 +14,11 @@ import type {
   ConfigLayerMeta,
   LoadConfigOptions,
   ResolvedConfig,
+  ResolvableConfig,
   ConfigLayer,
   SourceOptions,
   InputConfig,
+  ResolvableConfigContext,
 } from "./types";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -83,16 +85,17 @@ export async function loadConfig<
     configFile: resolve(options.cwd, options.configFile),
     layers: [],
   };
-  const configs: Record<
-    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
-    T | null | undefined
-  > = {
-    overrides: options.overrides,
-    main: undefined,
-    rc: undefined,
-    packageJson: undefined,
-    defaultConfig: options.defaultConfig,
-  };
+
+  // prettier-ignore
+  type _ConfigName = keyof ResolvableConfigContext["configs"]
+  const _configs: Record<_ConfigName, ResolvableConfig<T> | null | undefined> =
+    {
+      overrides: options.overrides,
+      main: undefined,
+      rc: undefined,
+      packageJson: undefined,
+      defaultConfig: options.defaultConfig,
+    };
 
   // Load dotenv
   if (options.dotenv) {
@@ -102,11 +105,11 @@ export async function loadConfig<
     });
   }
 
-  // Load config file
-  const _resolved = await resolveConfig(".", options);
-  if (_resolved.configFile) {
-    configs.main = _resolved.config;
-    r.configFile = _resolved.configFile;
+  // Load main config file
+  const _mainConfig = await resolveConfig(".", options);
+  if (_mainConfig.configFile) {
+    _configs.main = _mainConfig.config;
+    r.configFile = _mainConfig.configFile;
   }
 
   // Load rc files
@@ -123,7 +126,7 @@ export async function loadConfig<
       // 3. user home
       rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    configs.rc = defu({} as T, ...rcSources);
+    _configs.rc = defu({} as T, ...rcSources);
   }
 
   // Load config from package.json
@@ -139,7 +142,16 @@ export async function loadConfig<
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
-    configs.packageJson = defu({} as T, ...values);
+    _configs.packageJson = defu({} as T, ...values);
+  }
+
+  // Resolve config sources
+  const configs = {} as Record<_ConfigName, T | null | undefined>;
+  for (const key in _configs) {
+    const value = _configs[key as _ConfigName];
+    configs[key as _ConfigName] = await (typeof value === "function"
+      ? value({ configs })
+      : value);
   }
 
   // Combine sources
