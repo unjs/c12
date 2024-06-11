@@ -112,7 +112,8 @@ export interface LoadConfigOptions<
 
   packageJson?: boolean | string | string[];
 
-  defaults?: ResolvableConfig<T>;
+  defaults?: T;
+
   defaultConfig?: ResolvableConfig<T>;
   overrides?: ResolvableConfig<T>;
 
