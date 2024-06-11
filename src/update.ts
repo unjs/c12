@@ -9,7 +9,7 @@ const UPDATABLE_EXTS = [".js", ".ts", ".mjs", ".cjs", ".mts", ".cts"] as const;
 /**
  * @experimental Update a config file or create a new one.
  */
-export async function updateConfigFile(
+export async function updateConfig(
   opts: UpdateConfigOptions,
 ): Promise<UpdateConfigResult> {
   const { parseModule } = await import("magicast");

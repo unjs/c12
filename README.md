@@ -410,7 +410,7 @@ bun install -D magicast
 Import util from `c12/update`
 
 ```js
-const { configFile, created } = await updateConfigFile({
+const { configFile, created } = await updateConfig({
   cwd: ".",
   configFile: "foo.config",
   onCreate: ({ configFile }) => {

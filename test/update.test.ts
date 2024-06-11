@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe, beforeAll } from "vitest";
 import { normalize } from "pathe";
-import { updateConfigFile } from "../src/update";
+import { updateConfig } from "../src/update";
 import { readFile, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
@@ -15,7 +15,7 @@ describe("update config file", () => {
   });
   it("create new config", async () => {
     let onCreateFile;
-    const res = await updateConfigFile({
+    const res = await updateConfig({
       cwd: tmpDir,
       configFile: "foo.config",
       onCreate: ({ configFile }) => {
