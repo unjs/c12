@@ -83,6 +83,16 @@ export async function loadConfig<
     configFile: resolve(options.cwd, options.configFile),
     layers: [],
   };
+  const configs: Record<
+    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
+    T | null | undefined
+  > = {
+    overrides: options.overrides,
+    main: undefined,
+    rc: undefined,
+    packageJson: undefined,
+    defaultConfig: options.defaultConfig,
+  };
 
   // Load dotenv
   if (options.dotenv) {
@@ -93,13 +103,13 @@ export async function loadConfig<
   }
 
   // Load config file
-  const { config, configFile } = await resolveConfig(".", options);
-  if (configFile) {
-    r.configFile = configFile;
+  const _resolved = await resolveConfig(".", options);
+  if (_resolved.configFile) {
+    configs.main = _resolved.config;
+    r.configFile = _resolved.configFile;
   }
 
   // Load rc files
-  const configRC = {};
   if (options.rcFile) {
     const rcSources: T[] = [];
     // 1. cwd
@@ -113,11 +123,10 @@ export async function loadConfig<
       // 3. user home
       rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    Object.assign(configRC, defu({}, ...rcSources));
+    configs.rc = defu({} as T, ...rcSources);
   }
 
   // Load config from package.json
-  const pkgJson = {};
   if (options.packageJson) {
     const keys = (
       Array.isArray(options.packageJson)
@@ -130,16 +139,16 @@ export async function loadConfig<
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
-    Object.assign(pkgJson, defu({}, ...values));
+    configs.packageJson = defu({} as T, ...values);
   }
 
   // Combine sources
   r.config = defu(
-    options.overrides,
-    config,
-    configRC,
-    pkgJson,
-    options.defaultConfig,
+    configs.overrides,
+    configs.main,
+    configs.rc,
+    configs.packageJson,
+    configs.defaultConfig,
   ) as T;
 
   // Allow extending
@@ -151,15 +160,18 @@ export async function loadConfig<
   }
 
   // Preserve unmerged sources as layers
-  const baseLayers = [
-    options.overrides && {
-      config: options.overrides,
+  const baseLayers: ConfigLayer<T, MT>[] = [
+    configs.overrides && {
+      config: configs.overrides,
       configFile: undefined,
       cwd: undefined,
     },
-    { config, configFile: options.configFile, cwd: options.cwd },
-    options.rcFile && { config: configRC, configFile: options.rcFile },
-    options.packageJson && { config: pkgJson, configFile: "package.json" },
+    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
+    configs.rc && { config: configs.rc, configFile: options.rcFile },
+    configs.packageJson && {
+      config: configs.packageJson,
+      configFile: "package.json",
+    },
   ].filter((l) => l && l.config) as ConfigLayer<T, MT>[];
 
   r.layers = [...baseLayers, ...r.layers!];
