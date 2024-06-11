@@ -12,7 +12,7 @@ export default {
     primary: "user_primary",
   },
   configFile: true,
-  overriden: false,
+  overridden: false,
   enableDefault: true,
   // foo: "bar",
   // x: "123",

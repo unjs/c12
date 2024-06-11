@@ -13,7 +13,7 @@ describe("c12", () => {
   it("load fixture config", async () => {
     type UserConfig = Partial<{
       virtual: boolean;
-      overriden: boolean;
+      overridden: boolean;
       enableDefault: boolean;
       defaultConfig: boolean;
       extends: string[];
@@ -34,7 +34,7 @@ describe("c12", () => {
         }
       },
       overrides: {
-        overriden: true,
+        overridden: true,
       },
       defaults: {
         defaultConfig: true,
@@ -80,7 +80,7 @@ describe("c12", () => {
         "envConfig": true,
         "githubLayer": true,
         "npmConfig": true,
-        "overriden": true,
+        "overridden": true,
         "packageJSON": true,
         "packageJSON2": true,
         "rcFile": true,
@@ -93,7 +93,7 @@ describe("c12", () => {
       [
         {
           "config": {
-            "overriden": true,
+            "overridden": true,
           },
         },
         {
@@ -125,7 +125,7 @@ describe("c12", () => {
                 },
               ],
             ],
-            "overriden": false,
+            "overridden": false,
             "theme": "./theme",
           },
           "configFile": "test.config",
@@ -253,7 +253,7 @@ describe("c12", () => {
         "envConfig": true,
         "githubLayer": true,
         "npmConfig": true,
-        "overriden": false,
+        "overridden": false,
         "theme": "./theme",
       }
     `);
