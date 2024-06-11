@@ -216,7 +216,7 @@ export default {
 // base/config.ts
 export default {
   colors: {
-    primary: 'base_primary'
+    primary: 'base_primary',
     text: 'base_text'
   }
 }
@@ -225,7 +225,7 @@ export default {
 The loaded configuration would look like this:
 
 ```js
-{
+const config = {
   dev: true,
   colors: {
     primary: 'user_primary',
@@ -239,9 +239,9 @@ Layers:
 
 ```js
 [
- { config: /* theme config */, configFile: /* path/to/theme/config.ts */, cwd: /* path/to/theme */ },
- { config: /* base  config */, configFile: /* path/to/base/config.ts  */, cwd: /* path/to/base */ },
- { config: /* dev   config */, configFile: /* path/to/config.dev.ts  */, cwd: /* path/ */ },
+ { config: { /* theme config */ }, configFile:  "/path/to/theme/config.ts", cwd: "/path/to/theme " },
+ { config: { /* base  config */ }, configFile: "/path/to/base/config.ts",   cwd: "/path/to/base" },
+ { config: { /* dev   config */ }, configFile: "/path/to/config.dev.ts",    cwd: "/path/" },
 ]
 ```
 
@@ -298,7 +298,7 @@ c12 tries to match [`envName`](#envname) and override environment config if spec
 **Example:**
 
 ```js
-{
+export default {
   // Default configuration
   logLevel: 'info',
 

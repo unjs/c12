@@ -216,7 +216,7 @@ async function extendConfig<
     }
     if (typeof extendSource !== "string") {
       // TODO: Use error in next major versions
-      // eslint-disable-next-line no-console
+
       console.warn(
         `Cannot extend config from \`${JSON.stringify(
           originalExtendSource,
@@ -227,7 +227,7 @@ async function extendConfig<
     const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
-      // eslint-disable-next-line no-console
+
       console.warn(
         `Cannot extend config from \`${extendSource}\` in ${options.cwd}`,
       );
@@ -314,7 +314,9 @@ async function resolveConfig<
   const tryResolve = (id: string) => {
     try {
       return options.jiti!.resolve(id, { paths: [options.cwd!] });
-    } catch {}
+    } catch {
+      // Ignore errors
+    }
   };
 
   // Try resolving as npm package

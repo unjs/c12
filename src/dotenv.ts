@@ -29,7 +29,7 @@ export interface DotenvOptions {
   /**
    * An object describing environment variables (key, value pairs).
    */
-  // eslint-disable-next-line no-undef
+
   env?: NodeJS.ProcessEnv;
 }
 
@@ -112,14 +112,13 @@ function interpolate(
 
         if (prefix === "\\") {
           replacePart = parts[0] || "";
-          value = replacePart.replace("\\$", "$");
+          value = replacePart.replace(String.raw`\$`, "$");
         } else {
           const key = parts[2];
           replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion
           if (parents.includes(key)) {
-            // eslint-disable-next-line no-console
             console.warn(
               `Please avoid recursive environment variables ( loop: ${parents.join(
                 " > ",
