@@ -80,6 +80,20 @@ export interface ResolvedConfig<
   cwd?: string;
 }
 
+export interface ResolvableConfigContext<
+  T extends UserInputConfig = UserInputConfig,
+> {
+  configs: Record<
+    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
+    T | null | undefined
+  >;
+}
+
+type MaybePromise<T> = T | Promise<T>;
+export type ResolvableConfig<T extends UserInputConfig = UserInputConfig> =
+  | MaybePromise<T | null | undefined>
+  | ((ctx: ResolvableConfigContext<T>) => MaybePromise<T | null | undefined>);
+
 export interface LoadConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
@@ -99,8 +113,9 @@ export interface LoadConfigOptions<
   packageJson?: boolean | string | string[];
 
   defaults?: T;
-  defaultConfig?: T;
-  overrides?: T;
+
+  defaultConfig?: ResolvableConfig<T>;
+  overrides?: ResolvableConfig<T>;
 
   omit$Keys?: boolean;
 

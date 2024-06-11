@@ -13,6 +13,7 @@ export default {
   },
   configFile: true,
   overriden: false,
+  enableDefault: true,
   // foo: "bar",
   // x: "123",
   array: ["a"],

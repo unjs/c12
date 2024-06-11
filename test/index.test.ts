@@ -14,6 +14,7 @@ describe("c12", () => {
     type UserConfig = Partial<{
       virtual: boolean;
       overriden: boolean;
+      enableDefault: boolean;
       defaultConfig: boolean;
       extends: string[];
     }>;
@@ -38,8 +39,13 @@ describe("c12", () => {
       defaults: {
         defaultConfig: true,
       },
-      defaultConfig: {
-        extends: ["virtual"],
+      defaultConfig: ({ configs }) => {
+        if (configs?.main?.enableDefault) {
+          return Promise.resolve({
+            extends: ["virtual"],
+          });
+        }
+        return {};
       },
     });
 
@@ -70,6 +76,7 @@ describe("c12", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
         "npmConfig": true,
@@ -104,6 +111,7 @@ describe("c12", () => {
               "primary": "user_primary",
             },
             "configFile": true,
+            "enableDefault": true,
             "envConfig": true,
             "extends": [
               "./test.config.dev",
