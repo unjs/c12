@@ -31,7 +31,7 @@ export async function updateConfig(
       opts.configFile + (opts.createExtension || ".ts"),
     );
     const createResult =
-      (await opts.onCreate?.({ configFile: configFile })) || true;
+      (await opts.onCreate?.({ configFile: configFile })) ?? true;
     if (!createResult) {
       throw new Error("Config file creation aborted.");
     }
