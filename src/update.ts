@@ -16,9 +16,13 @@ export async function updateConfig(
 
   // Try to find an existing config file
   let configFile =
-    (await _tryResolve(opts.configFile, opts.cwd, SUPPORTED_EXTENSIONS)) ||
     (await _tryResolve(
-      `.config/${opts.configFile}`,
+      `./${opts.configFile}`,
+      opts.cwd,
+      SUPPORTED_EXTENSIONS,
+    )) ||
+    (await _tryResolve(
+      `./.config/${opts.configFile}`,
       opts.cwd,
       SUPPORTED_EXTENSIONS,
     ));
