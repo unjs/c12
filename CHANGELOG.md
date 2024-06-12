@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.11.0
+
+[compare changes](https://github.com/unjs/c12/compare/v1.10.0...v1.11.0)
+
+### 🚀 Enhancements
+
+- Resolvable configs ([#159](https://github.com/unjs/c12/pull/159))
+- Custom merger to replace built-in defu ([#160](https://github.com/unjs/c12/pull/160))
+- Config update util ([#162](https://github.com/unjs/c12/pull/162))
+
+### 🩹 Fixes
+
+- **loadConfig:** `config` is not nullable ([#161](https://github.com/unjs/c12/pull/161))
+
+### 💅 Refactors
+
+- Internally use named sources ([#158](https://github.com/unjs/c12/pull/158))
+
+### 🏡 Chore
+
+- Update dependencies ([3105900](https://github.com/unjs/c12/commit/3105900))
+- Update to eslint v9 ([ddbb78c](https://github.com/unjs/c12/commit/ddbb78c))
+- Lint ([06f21a1](https://github.com/unjs/c12/commit/06f21a1))
+- Apply automated updates ([fa0fda1](https://github.com/unjs/c12/commit/fa0fda1))
+- Fix typo (overridden) ([09bb378](https://github.com/unjs/c12/commit/09bb378))
+- Update snapshot ([8b64427](https://github.com/unjs/c12/commit/8b64427))
+- Update test ([764f4ac](https://github.com/unjs/c12/commit/764f4ac))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.10.0
 
 [compare changes](https://github.com/unjs/c12/compare/v1.9.0...v1.10.0)
