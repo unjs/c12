@@ -62,7 +62,7 @@ export async function updateConfig(
       ? defaultExport.$args[0]
       : defaultExport;
 
-  opts.onUpdate?.(configObj);
+  await opts.onUpdate?.(configObj);
 
   await writeFile(configFile, _module.generate().code);
 
