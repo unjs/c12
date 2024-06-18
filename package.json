@@ -50,11 +50,11 @@
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.5",
     "@vitest/coverage-v8": "^1.6.0",
     "automd": "^0.3.7",
     "changelogen": "^0.5.5",
-    "eslint": "^9.4.0",
+    "eslint": "^9.5.0",
     "eslint-config-unjs": "^0.3.2",
     "expect-type": "^0.19.0",
     "magicast": "^0.3.4",
@@ -71,5 +71,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.3.0"
+  "packageManager": "pnpm@9.4.0"
 }
