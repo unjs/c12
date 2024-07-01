@@ -32,6 +32,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [Automd](https://automd.unjs.io)
 - [Changelogen](https://changelogen.unjs.io)
 - [RemixKit](https://github.com/jrestall/remix-kit)
+- [Hey API](https://github.com/hey-api/openapi-ts)
 
 ## Usage
 
