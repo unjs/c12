@@ -1,5 +1,4 @@
-import type { JITI } from "jiti";
-import type { JITIOptions } from "jiti/dist/types";
+import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv";
 
@@ -129,8 +128,8 @@ export interface LoadConfigOptions<
     | ResolvedConfig<T, MT>
     | Promise<ResolvedConfig<T, MT> | undefined | null>;
 
-  jiti?: JITI;
-  jitiOptions?: JITIOptions;
+  jiti?: Jiti;
+  jitiOptions?: JitiOptions;
 
   giget?: DownloadTemplateOptions;
 
