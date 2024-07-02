@@ -1,6 +1,6 @@
 {
   "name": "c12",
-  "version": "1.11.1",
+  "version": "2.0.0-beta.0",
   "description": "Smart Config Loader",
   "repository": "unjs/c12",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "lint": "eslint . && prettier -c src test",
     "lint:fix": "eslint . --fix && prettier -w src test",
     "prepack": "unbuild",
-    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
+    "release": "pnpm build && pnpm test && changelogen --release --prerelease --push --publish --publishTag beta",
     "test": "pnpm lint && vitest run --coverage && pnpm test:types",
     "test:types": "tsc --noEmit"
   },
