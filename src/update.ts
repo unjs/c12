@@ -25,6 +25,11 @@ export async function updateConfig(
       `./.config/${opts.configFile}`,
       opts.cwd,
       SUPPORTED_EXTENSIONS,
+    )) ||
+    (await _tryResolve(
+      `./.config/${opts.configFile.split(".")[0]}`,
+      opts.cwd,
+      SUPPORTED_EXTENSIONS,
     ));
 
   // If not found
