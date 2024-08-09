@@ -260,6 +260,57 @@ describe("loader", () => {
     `);
   });
 
+  it("skip remote configs", async () => {
+    type Config = {
+      extends?: string[];
+      defaultValue?: boolean;
+      npmValue?: boolean;
+    };
+    const opts = {
+      name: "test",
+      cwd: r("./fixture/new_dir"),
+      overrides: {
+        extends: ["virtual", "github:unjs/c12/test/fixture"],
+      },
+      resolve: (id: string) => {
+        if (id === "virtual") {
+          return { config: { npmValue: true } };
+        }
+      },
+      defaultConfig: {
+        defaultValue: true,
+      },
+    };
+    const { config: remoteConfig } = await loadConfig<Config>({
+      ...opts,
+      extendOptions: {
+        skipRemote: true,
+      },
+    });
+
+    const { config: npmConfig } = await loadConfig<Config>({
+      ...opts,
+      extendOptions: {
+        skipRemote: {
+          allowAuth: false,
+          allowNPM: true,
+        },
+      },
+    });
+
+    expect(transformPaths(remoteConfig!)).toMatchInlineSnapshot(`
+      {
+        "defaultValue": true,
+      }
+    `);
+    expect(transformPaths(npmConfig!)).toMatchInlineSnapshot(`
+      {
+        "defaultValue": true,
+        "npmValue": true,
+      }
+    `);
+  });
+
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       name: "test",
