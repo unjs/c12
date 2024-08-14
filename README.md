@@ -188,8 +188,6 @@ The final config is merged result of extended options and user options with [unj
 Each item in extends is a string that can be either an absolute or relative path to the current config file pointing to a config file for extending or the directory containing the config file.
 If it starts with either `github:`, `gitlab:`, `bitbucket:`, or `https:`, c12 automatically clones it.
 
-You can set the `extendOptions` option when loading the config (with `loadConfig`) to customize the extending behavior like ignoring remote sources.
-
 For custom merging strategies, you can directly access each layer with `layers` property.
 
 **Example:**
@@ -306,7 +304,7 @@ export default {
 };
 ```
 
-You can pass more options to `giget: {}` in layer config.
+You can pass more options to `giget: {}` in layer config or disable it by setting it to `false`.
 
 Refer to [unjs/giget](https://giget.unjs.io) for more information.
 

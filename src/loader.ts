@@ -251,24 +251,6 @@ async function extendConfig<
       continue;
     }
 
-    // Skipping remote sources if set up
-    const skipRemote = options?.extendOptions?.skipRemote;
-    const isGiGetSource = GIGET_PREFIXES.some((prefix) =>
-      extendSource.startsWith(prefix),
-    );
-    const isNPMSource = NPM_PACKAGE_RE.test(extendSource);
-    if (skipRemote && (isNPMSource || isGiGetSource)) {
-      if (skipRemote === true) continue;
-
-      const hasAuth = Boolean((sourceOptions as SourceOptions)?.auth);
-      const skippingGitgetSource =
-        isGiGetSource && !(hasAuth ? skipRemote.allowAuth : false);
-      if (skippingGitgetSource) continue;
-
-      const skippingNPMSource = isNPMSource && !skipRemote.allowNPM;
-      if (skippingNPMSource) continue;
-    }
-
     const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
@@ -321,7 +303,10 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
-  if (GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))) {
+  const isGigetSource = GIGET_PREFIXES.some((prefix) =>
+    source.startsWith(prefix),
+  );
+  if (options.giget !== false && isGigetSource) {
     const { downloadTemplate } = await import("giget");
 
     const cloneName =

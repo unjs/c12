@@ -131,7 +131,7 @@ export interface LoadConfigOptions<
   jiti?: Jiti;
   jitiOptions?: JitiOptions;
 
-  giget?: DownloadTemplateOptions;
+  giget?: false | DownloadTemplateOptions;
 
   merger?: (...sources: Array<T | null | undefined>) => T;
 
@@ -140,27 +140,6 @@ export interface LoadConfigOptions<
     | {
         extendKey?: string | string[];
       };
-  /**
-   * Options for extending configs
-   */
-  extendOptions?: {
-    /**
-     * Skip and ignore remote configs when extending. This blocks downloading configs
-     * from github or npm, only local configs will be used.
-     */
-    skipRemote?:
-      | boolean
-      | {
-          /**
-           * Allow extending configs with auth tokens.
-           */
-          allowAuth?: boolean;
-          /**
-           * Allow extending configs from npm.
-           */
-          allowNPM?: boolean;
-        };
-  };
 }
 
 export type DefineConfig<
