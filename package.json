@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.16.3",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-v8": "^2.0.5",
     "automd": "^0.3.8",
     "changelogen": "^0.5.5",
     "eslint": "^9.9.1",
@@ -61,7 +61,7 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "unbuild": "^3.0.0-rc.7",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.5"
   },
   "peerDependencies": {
     "magicast": "^0.3.5"
