@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-beta.2
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.0-beta.1...v2.0.0-beta.2)
+
+### 🚀 Enhancements
+
+- Allow disabling remote extend with `giget: false` ([#181](https://github.com/unjs/c12/pull/181))
+- Support update existing `.config/[name].[ext]` config ([#169](https://github.com/unjs/c12/pull/169))
+
+### 🩹 Fixes
+
+- **updateConfig:** Properly resolve config relative to cwd ([#188](https://github.com/unjs/c12/pull/188))
+
+### 🏡 Chore
+
+- Update deps ([6d22a97](https://github.com/unjs/c12/commit/6d22a97))
+
+### ❤️ Contributors
+
+- Yizack Rangel ([@Yizack](http://github.com/Yizack))
+- Samuel Braun <office.samigo.a@gmail.com>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v2.0.0-beta.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.11.1...v2.0.0-beta.1)
