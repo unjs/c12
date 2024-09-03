@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-beta.1
+
+[compare changes](https://github.com/unjs/c12/compare/v1.11.1...v2.0.0-beta.1)
+
+### 🚀 Enhancements
+
+- Upgrade to jiti v2 beta ([#172](https://github.com/unjs/c12/pull/172))
+
+### 🏡 Chore
+
+- Aadd hey-api to list of users ([#171](https://github.com/unjs/c12/pull/171))
+- Update release script for beta ([0127b2d](https://github.com/unjs/c12/commit/0127b2d))
+- Stricter tsconfig ([e930e6b](https://github.com/unjs/c12/commit/e930e6b))
+- Update deps ([da3595c](https://github.com/unjs/c12/commit/da3595c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Lubos ([@mrlubos](http://github.com/mrlubos))
+
 ## v1.11.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.11.0...v1.11.1)

@@ -32,6 +32,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [Automd](https://automd.unjs.io)
 - [Changelogen](https://changelogen.unjs.io)
 - [RemixKit](https://github.com/jrestall/remix-kit)
+- [Hey API](https://github.com/hey-api/openapi-ts)
 
 ## Usage
 
@@ -303,7 +304,7 @@ export default {
 };
 ```
 
-You can pass more options to `giget: {}` in layer config.
+You can pass more options to `giget: {}` in layer config or disable it by setting it to `false`.
 
 Refer to [unjs/giget](https://giget.unjs.io) for more information.
 

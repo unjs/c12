@@ -85,7 +85,7 @@ export async function updateConfig(
 
 function _tryResolve(path: string, cwd: string, exts: readonly string[]) {
   return _resolvePath(path, {
-    url: cwd,
+    url: join(cwd, "_index.js"),
     extensions: exts as string[],
   }).catch(() => undefined);
 }

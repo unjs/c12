@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
-import createJiti from "jiti";
+import { createJiti } from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { hash } from "ohash";
@@ -73,10 +73,9 @@ export async function loadConfig<
   // Create jiti instance
   options.jiti =
     options.jiti ||
-    createJiti(undefined as unknown as string, {
+    createJiti(join(options.cwd, options.configFile), {
       interopDefault: true,
-      requireCache: false,
-      esmResolve: true,
+      moduleCache: false,
       extensions: [...SUPPORTED_EXTENSIONS],
       ...options.jitiOptions,
     });
@@ -303,7 +302,10 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
-  if (GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))) {
+  if (
+    options.giget !== false &&
+    GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))
+  ) {
     const { downloadTemplate } = await import("giget");
 
     const cloneName =
@@ -343,7 +345,7 @@ async function resolveConfig<
   // Util to try resolving a module
   const tryResolve = (id: string) => {
     try {
-      return options.jiti!.resolve(id, { paths: [options.cwd!] });
+      return options.jiti!.esmResolve(id, { try: true });
     } catch {
       // Ignore errors
     }
@@ -386,7 +388,7 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    res.config = options.jiti!(res.configFile!);
+    res.config = (await options.jiti!.import(res.configFile!)) as T;
   }
   if (res.config instanceof Function) {
     res.config = await res.config();

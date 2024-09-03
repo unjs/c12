@@ -233,6 +233,14 @@ describe("loader", () => {
         extends: ["github:unjs/c12/test/fixture"],
       },
     });
+    const { config: nonExtendingConfig } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/new_dir"),
+      giget: false,
+      overrides: {
+        extends: ["github:unjs/c12/test/fixture"],
+      },
+    });
 
     expect(transformPaths(config!)).toMatchInlineSnapshot(`
       {
@@ -257,6 +265,10 @@ describe("loader", () => {
         "overridden": false,
         "theme": "./theme",
       }
+    `);
+
+    expect(transformPaths(nonExtendingConfig!)).toMatchInlineSnapshot(`
+      {}
     `);
   });
 
