@@ -303,10 +303,10 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
-  const isGigetSource = GIGET_PREFIXES.some((prefix) =>
-    source.startsWith(prefix),
-  );
-  if (options.giget !== false && isGigetSource) {
+  if (
+    options.giget !== false &&
+    GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))
+  ) {
     const { downloadTemplate } = await import("giget");
 
     const cloneName =
