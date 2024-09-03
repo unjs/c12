@@ -250,7 +250,6 @@ async function extendConfig<
       );
       continue;
     }
-
     const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
