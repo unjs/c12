@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.11.2
+
+[compare changes](https://github.com/unjs/c12/compare/v1.11.1...v1.11.2)
+
+### 🩹 Fixes
+
+- **update:** Await on `onUpdate` ([6b37c98](https://github.com/unjs/c12/commit/6b37c98))
+- **update:** Respect falsy value of `onCreate` ([cc4e991](https://github.com/unjs/c12/commit/cc4e991))
+- **update:** Use relative path to resolve config ([8b58b25](https://github.com/unjs/c12/commit/8b58b25))
+- **updateConfig:** Properly resolve config relative to cwd ([#188](https://github.com/unjs/c12/pull/188))
+
+### 🏡 Chore
+
+- **release:** V1.11.1 ([9820c7d](https://github.com/unjs/c12/commit/9820c7d))
+- Update deps ([ffb35ad](https://github.com/unjs/c12/commit/ffb35ad))
+- Enable ci for v1 ([f72f30b](https://github.com/unjs/c12/commit/f72f30b))
+- Apply automated updates ([2c193f7](https://github.com/unjs/c12/commit/2c193f7))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.11.1
 
 [compare changes](https://github.com/unjs/c12/compare/v1.11.0...v1.11.1)
