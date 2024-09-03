@@ -304,7 +304,7 @@ export default {
 };
 ```
 
-You can pass more options to `giget: {}` in layer config.
+You can pass more options to `giget: {}` in layer config or disable it by setting it to `false`.
 
 Refer to [unjs/giget](https://giget.unjs.io) for more information.
 

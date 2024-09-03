@@ -131,7 +131,7 @@ export interface LoadConfigOptions<
   jiti?: Jiti;
   jitiOptions?: JitiOptions;
 
-  giget?: DownloadTemplateOptions;
+  giget?: false | DownloadTemplateOptions;
 
   merger?: (...sources: Array<T | null | undefined>) => T;
 
