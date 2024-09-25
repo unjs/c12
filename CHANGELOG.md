@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-beta.3
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.0-beta.2...v2.0.0-beta.3)
+
+### 💅 Refactors
+
+- Update to jiti 2.0.0 ([c2cc1e9](https://github.com/unjs/c12/commit/c2cc1e9))
+
+### 🏡 Chore
+
+- Update deps ([24e8c47](https://github.com/unjs/c12/commit/24e8c47))
+- Update chokidar to v4 ([77aa9a2](https://github.com/unjs/c12/commit/77aa9a2))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v2.0.0-beta.2
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.0-beta.1...v2.0.0-beta.2)
