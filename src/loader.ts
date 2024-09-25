@@ -3,6 +3,7 @@ import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
 import { createJiti } from "jiti";
+import { fileURLToPath } from "mlly";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { hash } from "ohash";
@@ -344,11 +345,8 @@ async function resolveConfig<
 
   // Util to try resolving a module
   const tryResolve = (id: string) => {
-    try {
-      return options.jiti!.esmResolve(id, { try: true });
-    } catch {
-      // Ignore errors
-    }
+    const resolved = options.jiti!.esmResolve(id, { try: true });
+    return resolved ? fileURLToPath(resolved) : undefined;
   };
 
   // Try resolving as npm package
