@@ -60,7 +60,7 @@
     "magicast": "^0.3.5",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2",
-    "unbuild": "3.0.0-rc.7",
+    "unbuild": "3.0.0-rc.8",
     "vitest": "^2.1.1"
   },
   "peerDependencies": {
@@ -71,5 +71,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.10.0"
+  "packageManager": "pnpm@9.11.0"
 }
