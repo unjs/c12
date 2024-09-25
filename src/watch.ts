@@ -1,4 +1,4 @@
-import type { WatchOptions } from "chokidar";
+import type { ChokidarOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
 import { diff } from "ohash";
@@ -22,7 +22,7 @@ export interface WatchConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > extends LoadConfigOptions<T, MT> {
-  chokidarOptions?: WatchOptions;
+  chokidarOptions?: ChokidarOptions;
   debounce?: false | number;
 
   onWatch?: (event: {

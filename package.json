@@ -36,7 +36,7 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
-    "chokidar": "^3.6.0",
+    "chokidar": "^4.0.1",
     "confbox": "^0.1.7",
     "defu": "^6.1.4",
     "dotenv": "^16.4.5",
