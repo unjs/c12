@@ -50,12 +50,12 @@
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.7.1",
+    "@types/node": "^22.7.4",
     "@vitest/coverage-v8": "^2.1.1",
     "automd": "^0.3.8",
     "changelogen": "^0.5.7",
     "eslint": "^9.11.1",
-    "eslint-config-unjs": "^0.3.2",
+    "eslint-config-unjs": "^0.4.1",
     "expect-type": "^0.20.0",
     "magicast": "^0.3.5",
     "prettier": "^3.3.3",
