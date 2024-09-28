@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.0-beta.3...v2.0.0)
+
+### 🏡 Chore
+
+- Update release script ([7cfd90f](https://github.com/unjs/c12/commit/7cfd90f))
+- Update deps ([6639a4b](https://github.com/unjs/c12/commit/6639a4b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v2.0.0-beta.3
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.0-beta.2...v2.0.0-beta.3)
