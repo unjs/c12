@@ -3,7 +3,7 @@
 <!-- automd:badges color=yellow codecov -->
 
 [![npm version](https://img.shields.io/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
-[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npmjs.com/package/c12)
+[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npm.chart.dev/c12)
 [![codecov](https://img.shields.io/codecov/c/gh/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
 
 <!-- /automd -->
@@ -55,6 +55,9 @@ pnpm install c12
 
 # bun
 bun install c12
+
+# deno
+deno install c12
 ```
 
 <!-- /automd -->
@@ -63,7 +66,7 @@ Import:
 
 <!-- automd:jsimport cjs imports="loadConfig,watchConfig" -->
 
-**ESM** (Node.js, Bun)
+**ESM** (Node.js, Bun, Deno)
 
 ```js
 import { loadConfig, watchConfig } from "c12";
@@ -404,6 +407,9 @@ pnpm install -D magicast
 
 # bun
 bun install -D magicast
+
+# deno
+deno install --dev magicast
 ```
 
 <!-- /automd -->
