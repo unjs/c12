@@ -386,7 +386,9 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    res.config = (await options.jiti!.import(res.configFile!)) as T;
+    res.config = (await options.jiti!.import(res.configFile!, {
+      default: true,
+    })) as T;
   }
   if (res.config instanceof Function) {
     res.config = await res.config();
