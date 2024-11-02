@@ -31,6 +31,12 @@ export interface DotenvOptions {
    */
 
   env?: NodeJS.ProcessEnv;
+
+  /**
+   * When set to `true`, any existing environment variables will be overridden.
+   * Defaults to `false`.
+   */
+  override?: boolean;
 }
 
 export type Env = typeof process.env;
@@ -49,12 +55,15 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
+    override: options.override ?? false,
   });
 
   // Fill process.env
   for (const key in environment) {
-    if (!key.startsWith("_") && targetEnvironment[key] === undefined) {
-      targetEnvironment[key] = environment[key];
+    if (!key.startsWith("_")) {
+      if (options.override || targetEnvironment[key] === undefined) {
+        targetEnvironment[key] = environment[key];
+      }
     }
   }
 
@@ -74,7 +83,15 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   // Apply process.env
   if (!options.env?._applied) {
-    Object.assign(environment, options.env);
+    if (options.override && options.env) {
+      for (const key in options.env) {
+        if (!(key in environment) && !key.startsWith("_")) {
+          environment[key] = options.env[key];
+        }
+      }
+    } else {
+      Object.assign(environment, options.env);
+    }
     environment._applied = true;
   }
 
