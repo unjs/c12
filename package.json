@@ -50,7 +50,7 @@
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.8.6",
+    "@types/node": "^22.9.0",
     "@vitest/coverage-v8": "^2.1.4",
     "automd": "^0.3.12",
     "changelogen": "^0.5.7",
