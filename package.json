@@ -42,7 +42,7 @@
     "dotenv": "^16.4.5",
     "giget": "^1.2.3",
     "jiti": "^2.4.0",
-    "mlly": "^1.7.2",
+    "mlly": "^1.7.3",
     "ohash": "^1.1.4",
     "pathe": "^1.1.2",
     "perfect-debounce": "^1.0.0",
@@ -50,18 +50,18 @@
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.9.0",
-    "@vitest/coverage-v8": "^2.1.4",
+    "@types/node": "^22.10.1",
+    "@vitest/coverage-v8": "^2.1.6",
     "automd": "^0.3.12",
     "changelogen": "^0.5.7",
-    "eslint": "^9.14.0",
-    "eslint-config-unjs": "^0.4.1",
+    "eslint": "^9.15.0",
+    "eslint-config-unjs": "^0.4.2",
     "expect-type": "^1.1.0",
     "magicast": "^0.3.5",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.3",
+    "prettier": "^3.4.1",
+    "typescript": "^5.7.2",
     "unbuild": "3.0.0-rc.11",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.6"
   },
   "peerDependencies": {
     "magicast": "^0.3.5"
@@ -71,5 +71,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.14.3"
 }
