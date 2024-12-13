@@ -305,7 +305,10 @@ async function resolveConfig<
   // Download giget URIs and resolve to local path
   if (
     options.giget !== false &&
-    GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))
+    (Object.keys(sourceOptions.giget?.providers || {})
+      .map((key) => `${key}:`)
+      .some((prefix) => source.startsWith(prefix)) ||
+      GIGET_PREFIXES.some((prefix) => source.startsWith(prefix)))
   ) {
     const { downloadTemplate } = await import("giget");
 
