@@ -4,6 +4,7 @@ import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
 import { createJiti } from "jiti";
 import { fileURLToPath } from "mlly";
+import { glob } from "tinyglobby";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { hash } from "ohash";
@@ -374,6 +375,19 @@ async function resolveConfig<
     tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, ""))) ||
     tryResolve(resolve(cwd, ".config", source)) ||
     source;
+
+  if (options.name && options.splitConfigFile) {
+    const globExtensions = `{${SUPPORTED_EXTENSIONS.map((e) => e.slice(1)).join(",")}}`;
+    const globPaths = await glob(
+      [
+        `${options.name}?(.*).config.${globExtensions}`,
+        `.config/${options.name}?(.*)?(.config).${globExtensions}`,
+        `.config/${options.name}/**/*?(.*)?(.config).${globExtensions}`,
+      ],
+      { cwd, deep: 1, ...(typeof options.splitConfigFile === 'object' ? options.splitConfigFile : {}) },
+    );
+    console.log(globPaths.map((g) => resolve(cwd, g)), res.configFile, source);
+  }
 
   if (!existsSync(res.configFile!)) {
     return res;

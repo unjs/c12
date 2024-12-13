@@ -1,5 +1,6 @@
 import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
+import type { GlobOptions } from "tinyglobby"
 import type { DotenvOptions } from "./dotenv";
 
 export interface ConfigLayerMeta {
@@ -102,6 +103,7 @@ export interface LoadConfigOptions<
   cwd?: string;
 
   configFile?: string;
+  splitConfigFile?: boolean | GlobOptions
 
   rcFile?: false | string;
   globalRc?: boolean;
