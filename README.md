@@ -82,12 +82,20 @@ const { loadConfig, watchConfig } = require("c12");
 
 Load configuration:
 
-```js
+```ts
 // Get loaded config
 const { config } = await loadConfig({});
 
-// Get resolved config and extended layers
-const { config, configFile, layers } = await loadConfig({});
+type MyConfig = {
+  option1: boolean;
+  option2: string;
+}
+
+// Get (typed) resolved config and extended layers
+const { config, configFile, layers } = await loadConfig<MyConfig>({});
+
+// Export defineConfig utility for type-safety
+export const defineMyConfig = createDefineConfig<MyConfig>();
 ```
 
 ## Loading priority
