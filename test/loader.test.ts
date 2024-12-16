@@ -304,4 +304,14 @@ describe("loader", () => {
     )!;
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
+
+  it("globalDefineConfigFn", async () => {
+    const { config } = await loadConfig({
+      name: "test-global-fn",
+      cwd: r("./fixture"),
+      globalDefineConfigFn: true
+    });
+
+    expect(config.it).toBe('works');
+  })
 });
