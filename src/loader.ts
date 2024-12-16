@@ -7,6 +7,7 @@ import { fileURLToPath } from "mlly";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { hash } from "ohash";
+import { pascalCase } from "scule";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
 
@@ -61,6 +62,7 @@ export async function loadConfig<
     options.configFile ??
     (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
+  options.globalDefineConfigFn = options.globalDefineConfigFn === true ? `define${[...new Set([pascalCase(options.name), 'Config'])].join('')}` : options.globalDefineConfigFn || false;
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
@@ -106,6 +108,11 @@ export async function loadConfig<
       cwd: options.cwd,
       ...(options.dotenv === true ? {} : options.dotenv),
     });
+  }
+
+  if (options.globalDefineConfigFn) {
+    // @ts-expect-error updating globalThis
+    globalThis[options.globalDefineConfigFn] = (c: any) => c;
   }
 
   // Load main config file
@@ -172,6 +179,11 @@ export async function loadConfig<
     r.layers = r.config._layers;
     delete r.config._layers;
     r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
+  }
+
+  if (options.globalDefineConfigFn) {
+    // @ts-expect-error updating globalThis
+    delete globalThis[options.globalDefineConfigFn];
   }
 
   // Preserve unmerged sources as layers

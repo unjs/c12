@@ -202,6 +202,12 @@ export interface LoadConfigOptions<
   merger?: (...sources: Array<T | null | undefined>) => T;
 
   /**
+   * Load configuration files using defineConfig utility without import statements.
+   * If true, the utility name is `define${pascalCase(name)}Config`, else use string.
+   */
+  globalDefineConfigFn?: boolean | string;
+
+  /**
    * Allow extending of configuration.
    *
    * @see https://github.com/unjs/c12#extending-configuration
