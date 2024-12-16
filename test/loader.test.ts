@@ -309,9 +309,9 @@ describe("loader", () => {
     const { config } = await loadConfig({
       name: "test-global-fn",
       cwd: r("./fixture"),
-      globalDefineConfigFn: true
+      globalDefineConfigFn: true,
     });
 
-    expect(config.it).toBe('works');
-  })
+    expect(config.it).toBe("works");
+  });
 });

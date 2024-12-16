@@ -62,7 +62,10 @@ export async function loadConfig<
     options.configFile ??
     (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
-  options.globalDefineConfigFn = options.globalDefineConfigFn === true ? `define${[...new Set([pascalCase(options.name), 'Config'])].join('')}` : options.globalDefineConfigFn || false;
+  options.globalDefineConfigFn =
+    options.globalDefineConfigFn === true
+      ? `define${[...new Set([pascalCase(options.name), "Config"])].join("")}`
+      : options.globalDefineConfigFn || false;
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
