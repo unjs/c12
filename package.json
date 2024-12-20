@@ -36,12 +36,12 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
-    "chokidar": "^4.0.1",
+    "chokidar": "^4.0.3",
     "confbox": "^0.1.8",
     "defu": "^6.1.4",
     "dotenv": "^16.4.7",
     "giget": "^1.2.3",
-    "jiti": "^2.4.1",
+    "jiti": "^2.4.2",
     "mlly": "^1.7.3",
     "ohash": "^1.1.4",
     "pathe": "^1.1.2",
@@ -54,13 +54,13 @@
     "@vitest/coverage-v8": "^2.1.8",
     "automd": "^0.3.12",
     "changelogen": "^0.5.7",
-    "eslint": "^9.16.0",
+    "eslint": "^9.17.0",
     "eslint-config-unjs": "^0.4.2",
     "expect-type": "^1.1.0",
     "magicast": "^0.3.5",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
-    "unbuild": "3.0.0-rc.11",
+    "unbuild": "3.0.1",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
@@ -71,5 +71,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.1"
 }
