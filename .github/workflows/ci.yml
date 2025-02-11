@@ -12,11 +12,11 @@ jobs:
   ci:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - run: corepack enable
+      - run: npm i -fg corepack && corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 20
