@@ -115,6 +115,10 @@ export async function loadConfig<
     r.configFile = _mainConfig.configFile;
   }
 
+  if (_mainConfig.meta) {
+    r.meta = _mainConfig.meta;
+  }
+
   // Load rc files
   if (options.rcFile) {
     const rcSources: T[] = [];
