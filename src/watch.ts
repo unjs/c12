@@ -1,7 +1,7 @@
 import type { ChokidarOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
-import { diff } from "ohash";
+import type { diff } from "ohash/utils";
 import type {
   UserInputConfig,
   ConfigLayerMeta,
@@ -9,6 +9,8 @@ import type {
   LoadConfigOptions,
 } from "./types";
 import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader";
+
+type DiffEntries = ReturnType<typeof diff>;
 
 export type ConfigWatcher<
   T extends UserInputConfig = UserInputConfig,
@@ -31,7 +33,7 @@ export interface WatchConfigOptions<
   }) => void | Promise<void>;
 
   acceptHMR?: (context: {
-    getDiff: () => ReturnType<typeof diff>;
+    getDiff: () => DiffEntries;
     newConfig: ResolvedConfig<T, MT>;
     oldConfig: ResolvedConfig<T, MT>;
   }) => void | boolean | Promise<void | boolean>;
@@ -89,6 +91,7 @@ export async function watchConfig<
   ] as string[];
 
   const watch = await import("chokidar").then((r) => r.watch || r.default || r);
+  const { diff } = await import("ohash/utils");
   const _fswatcher = watch(watchingFiles, {
     ignoreInitial: true,
     ...options.chokidarOptions,
