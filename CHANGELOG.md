@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.3
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.2...v2.0.3)
+
+### 💅 Refactors
+
+- Upgrade to ohash v2 ([#230](https://github.com/unjs/c12/pull/230))
+
+### 📦 Build
+
+- Update `exports` ([acee667](https://github.com/unjs/c12/commit/acee667))
+
+### 🏡 Chore
+
+- Update deps ([f5badac](https://github.com/unjs/c12/commit/f5badac))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v2.0.2
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.1...v2.0.2)
