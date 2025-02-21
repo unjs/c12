@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.4
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.3...v2.0.4)
+
+### 📦 Build
+
+- Fix typo in exports ([82f560c](https://github.com/unjs/c12/commit/82f560c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v2.0.3
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.2...v2.0.3)
