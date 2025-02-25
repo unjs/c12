@@ -79,11 +79,13 @@ export async function updateConfig(
 
 // --- Internal ---
 
-function tryResolve(path: string, cwd: string, exts: readonly string[]) {
+function tryResolve(path: string, cwd: string, extensions: string[]) {
   return resolveModulePath(path, {
     try: true,
     from: join(cwd, "/"),
-    extensions: exts as string[],
+    extensions,
+    suffixes: ["", "/index"],
+    cache: false,
   });
 }
 

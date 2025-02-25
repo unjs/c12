@@ -1,9 +1,10 @@
 import { existsSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join } from "pathe";
+import { resolveModulePath } from "exsolve";
 import { createJiti } from "jiti";
-import { fileURLToPath } from "mlly";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
@@ -31,7 +32,7 @@ const ASYNC_LOADERS = {
   ".toml": () => import("confbox/toml").then((r) => r.parseTOML),
 } as const;
 
-export const SUPPORTED_EXTENSIONS = [
+export const SUPPORTED_EXTENSIONS = Object.freeze([
   // with jiti
   ".js",
   ".ts",
@@ -46,7 +47,7 @@ export const SUPPORTED_EXTENSIONS = [
   ".yaml",
   ".yml",
   ".toml",
-] as const;
+]) as unknown as string[];
 
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
@@ -355,15 +356,9 @@ async function resolveConfig<
     source = cloned.dir;
   }
 
-  // Util to try resolving a module
-  const tryResolve = (id: string) => {
-    const resolved = options.jiti!.esmResolve(id, { try: true });
-    return resolved ? fileURLToPath(resolved) : undefined;
-  };
-
   // Try resolving as npm package
   if (NPM_PACKAGE_RE.test(source)) {
-    source = tryResolve(source) || source;
+    source = tryResolve(source, options) || source;
   }
 
   // Import from local fs
@@ -382,9 +377,12 @@ async function resolveConfig<
   };
 
   res.configFile =
-    tryResolve(resolve(cwd, source)) ||
-    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, ""))) ||
-    tryResolve(resolve(cwd, ".config", source)) ||
+    tryResolve(resolve(cwd, source), options) ||
+    tryResolve(
+      resolve(cwd, ".config", source.replace(/\.config$/, "")),
+      options,
+    ) ||
+    tryResolve(resolve(cwd, ".config", source), options) ||
     source;
 
   if (!existsSync(res.configFile!)) {
@@ -431,4 +429,16 @@ async function resolveConfig<
   res.source = _normalize(res.source);
 
   return res;
+}
+
+// --- internal ---
+
+function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
+  return resolveModulePath(id, {
+    try: true,
+    from: pathToFileURL(join(options.cwd || ".", options.configFile || "/")),
+    suffixes: ["", "/index"],
+    extensions: SUPPORTED_EXTENSIONS,
+    cache: false,
+  });
 }
