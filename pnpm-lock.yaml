@@ -29,9 +29,6 @@ importers:
       jiti:
         specifier: ^2.4.2
         version: 2.4.2
-      mlly:
-        specifier: ^1.7.4
-        version: 1.7.4
       ohash:
         specifier: ^2.0.5
         version: 2.0.5
