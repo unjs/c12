@@ -306,9 +306,17 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
+  const customProviderKeys = Object.keys(
+    sourceOptions.giget?.providers || {},
+  ).map((key) => `${key}:`);
+  const gigetPrefixes =
+    customProviderKeys.length > 0
+      ? [...new Set([...customProviderKeys, ...GIGET_PREFIXES])]
+      : GIGET_PREFIXES;
+
   if (
     options.giget !== false &&
-    GIGET_PREFIXES.some((prefix) => source.startsWith(prefix))
+    gigetPrefixes.some((prefix) => source.startsWith(prefix))
   ) {
     const { downloadTemplate } = await import("giget");
     const { digest } = await import("ohash");
