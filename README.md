@@ -65,21 +65,13 @@ deno install c12
 
 Import:
 
-<!-- automd:jsimport cjs imports="loadConfig,watchConfig" -->
-
-**ESM** (Node.js, Bun, Deno)
-
 ```js
+// ESM import
 import { loadConfig, watchConfig } from "c12";
+
+// or using dynamic import
+const { loadConfig, watchConfig } = await import("c12");
 ```
-
-**CommonJS** (Legacy Node.js)
-
-```js
-const { loadConfig, watchConfig } = require("c12");
-```
-
-<!-- /automd -->
 
 Load configuration:
 
