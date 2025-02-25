@@ -33,6 +33,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [Changelogen](https://changelogen.unjs.io)
 - [RemixKit](https://github.com/jrestall/remix-kit)
 - [Hey API](https://github.com/hey-api/openapi-ts)
+- [kysely-ctl](https://github.com/kysely-org/kysely-ctl)
 
 ## Usage
 
@@ -64,21 +65,13 @@ deno install c12
 
 Import:
 
-<!-- automd:jsimport cjs imports="loadConfig,watchConfig" -->
-
-**ESM** (Node.js, Bun, Deno)
-
 ```js
+// ESM import
 import { loadConfig, watchConfig } from "c12";
+
+// or using dynamic import
+const { loadConfig, watchConfig } = await import("c12");
 ```
-
-**CommonJS** (Legacy Node.js)
-
-```js
-const { loadConfig, watchConfig } = require("c12");
-```
-
-<!-- /automd -->
 
 Load configuration:
 

@@ -6,7 +6,6 @@ import { createJiti } from "jiti";
 import { fileURLToPath } from "mlly";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { hash } from "ohash";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
 
@@ -113,6 +112,10 @@ export async function loadConfig<
   if (_mainConfig.configFile) {
     _configs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
+  }
+
+  if (_mainConfig.meta) {
+    r.meta = _mainConfig.meta;
   }
 
   // Load rc files
@@ -311,11 +314,12 @@ async function resolveConfig<
       GIGET_PREFIXES.some((prefix) => source.startsWith(prefix)))
   ) {
     const { downloadTemplate } = await import("giget");
+    const { digest } = await import("ohash");
 
     const cloneName =
       source.replace(/\W+/g, "_").split("_").splice(0, 3).join("_") +
       "_" +
-      hash(source);
+      digest(source).slice(0, 10).replace(/[-_]/g, "");
 
     let cloneDir: string;
 

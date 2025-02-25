@@ -1,6 +1,6 @@
 {
   "name": "c12",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "description": "Smart Config Loader",
   "repository": "unjs/c12",
   "license": "MIT",
@@ -8,22 +8,17 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "./update": {
-      "import": "./dist/update.mjs",
-      "require": "./dist/update.cjs",
-      "types": "./dist/update.d.ts"
+      "types": "./dist/update.d.mts",
+      "default": "./dist/update.mjs"
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "files": [
-    "dist",
-    "update.d.ts"
+    "dist"
   ],
   "scripts": {
     "build": "automd && unbuild",
@@ -36,32 +31,32 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
-    "chokidar": "^4.0.1",
+    "chokidar": "^4.0.3",
     "confbox": "^0.1.8",
     "defu": "^6.1.4",
-    "dotenv": "^16.4.5",
-    "giget": "^1.2.3",
-    "jiti": "^2.4.0",
-    "mlly": "^1.7.3",
-    "ohash": "^1.1.4",
-    "pathe": "^1.1.2",
+    "dotenv": "^16.4.7",
+    "giget": "^1.2.5",
+    "jiti": "^2.4.2",
+    "mlly": "^1.7.4",
+    "ohash": "^2.0.5",
+    "pathe": "^2.0.3",
     "perfect-debounce": "^1.0.0",
-    "pkg-types": "^1.2.1",
+    "pkg-types": "^2.0.0",
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.1",
-    "@vitest/coverage-v8": "^2.1.6",
+    "@types/node": "^22.13.5",
+    "@vitest/coverage-v8": "^3.0.7",
     "automd": "^0.3.12",
     "changelogen": "^0.5.7",
-    "eslint": "^9.15.0",
+    "eslint": "^9.21.0",
     "eslint-config-unjs": "^0.4.2",
     "expect-type": "^1.1.0",
     "magicast": "^0.3.5",
-    "prettier": "^3.4.1",
-    "typescript": "^5.7.2",
-    "unbuild": "3.0.0-rc.11",
-    "vitest": "^2.1.6"
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3",
+    "unbuild": "^3.3.1",
+    "vitest": "^3.0.7"
   },
   "peerDependencies": {
     "magicast": "^0.3.5"
@@ -71,5 +66,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.14.3"
+  "packageManager": "pnpm@10.5.0"
 }
