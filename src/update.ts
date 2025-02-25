@@ -1,4 +1,4 @@
-import { resolvePath as _resolvePath } from "mlly";
+import { resolveModulePath } from "exsolve";
 import { SUPPORTED_EXTENSIONS } from "./loader";
 import { join } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -16,21 +16,17 @@ export async function updateConfig(
 
   // Try to find an existing config file
   let configFile =
-    (await _tryResolve(
-      `./${opts.configFile}`,
-      opts.cwd,
-      SUPPORTED_EXTENSIONS,
-    )) ||
-    (await _tryResolve(
+    tryResolve(`./${opts.configFile}`, opts.cwd, SUPPORTED_EXTENSIONS) ||
+    tryResolve(
       `./.config/${opts.configFile}`,
       opts.cwd,
       SUPPORTED_EXTENSIONS,
-    )) ||
-    (await _tryResolve(
+    ) ||
+    tryResolve(
       `./.config/${opts.configFile.split(".")[0]}`,
       opts.cwd,
       SUPPORTED_EXTENSIONS,
-    ));
+    );
 
   // If not found
   let created = false;
@@ -83,11 +79,12 @@ export async function updateConfig(
 
 // --- Internal ---
 
-function _tryResolve(path: string, cwd: string, exts: readonly string[]) {
-  return _resolvePath(path, {
-    url: join(cwd, "_index.js"),
+function tryResolve(path: string, cwd: string, exts: readonly string[]) {
+  return resolveModulePath(path, {
+    try: true,
+    from: join(cwd, "/"),
     extensions: exts as string[],
-  }).catch(() => undefined);
+  });
 }
 
 // --- Types ---
