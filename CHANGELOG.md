@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.0.0
+
+[compare changes](https://github.com/unjs/c12/compare/v2.0.4...v3.0.0)
+
+### 🩹 Fixes
+
+- Allow custom giget provider ([#207](https://github.com/unjs/c12/pull/207))
+
+### 💅 Refactors
+
+- Migrate from `mlly` to `exsolve` for module resolution ([822af14](https://github.com/unjs/c12/commit/822af14))
+- Fully migrate to exsolve for module resolution ([146899e](https://github.com/unjs/c12/commit/146899e))
+
+### 📦 Build
+
+- ⚠️  Esm-only ([d53d0a2](https://github.com/unjs/c12/commit/d53d0a2))
+
+### 🏡 Chore
+
+- Update deps ([83da8d6](https://github.com/unjs/c12/commit/83da8d6))
+- Update pkg-types to v2 ([6607dcf](https://github.com/unjs/c12/commit/6607dcf))
+- Update lock file ([e180e22](https://github.com/unjs/c12/commit/e180e22))
+- Update giget to v2 ([89d16b3](https://github.com/unjs/c12/commit/89d16b3))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Esm-only ([d53d0a2](https://github.com/unjs/c12/commit/d53d0a2))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Ayax <simonskyskate@hotmail.com>
+
 ## v2.0.4
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.3...v2.0.4)
