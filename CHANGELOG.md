@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.0.1
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.0...v3.0.1)
+
+### 🩹 Fixes
+
+- Fix windows related resolve issues ([#235](https://github.com/unjs/c12/pull/235))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v3.0.0
 
 [compare changes](https://github.com/unjs/c12/compare/v2.0.4...v3.0.0)
