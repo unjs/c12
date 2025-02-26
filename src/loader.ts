@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
-import { resolve, extname, dirname, basename, join } from "pathe";
+import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
 import { createJiti } from "jiti";
 import * as rc9 from "rc9";
@@ -434,11 +434,12 @@ async function resolveConfig<
 // --- internal ---
 
 function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
-  return resolveModulePath(id, {
+  const res = resolveModulePath(id, {
     try: true,
     from: pathToFileURL(join(options.cwd || ".", options.configFile || "/")),
     suffixes: ["", "/index"],
     extensions: SUPPORTED_EXTENSIONS,
     cache: false,
   });
+  return res ? normalize(res) : undefined;
 }
