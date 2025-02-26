@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.0.2
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.1...v3.0.2)
+
+### 🏡 Chore
+
+- Update exsolve to 1.0.0 ([937bfe4](https://github.com/unjs/c12/commit/937bfe4))
+- Update deps ([0156c8d](https://github.com/unjs/c12/commit/0156c8d))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.0.1
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.0...v3.0.1)
