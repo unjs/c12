@@ -1,6 +1,6 @@
 import { resolveModulePath } from "exsolve";
 import { SUPPORTED_EXTENSIONS } from "./loader";
-import { join } from "pathe";
+import { join, normalize } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, extname } from "node:path";
 
@@ -80,13 +80,14 @@ export async function updateConfig(
 // --- Internal ---
 
 function tryResolve(path: string, cwd: string, extensions: string[]) {
-  return resolveModulePath(path, {
+  const res = resolveModulePath(path, {
     try: true,
     from: join(cwd, "/"),
     extensions,
     suffixes: ["", "/index"],
     cache: false,
   });
+  return res ? normalize(res) : undefined;
 }
 
 // --- Types ---
