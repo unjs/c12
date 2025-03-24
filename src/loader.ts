@@ -9,7 +9,9 @@ import * as rc9 from "rc9";
 import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
+import { validateConfig } from "./validator";
 
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type {
   UserInputConfig,
   ConfigLayerMeta,
@@ -211,6 +213,18 @@ export async function loadConfig<
 
   // Return resolved config
   return r;
+}
+
+export async function loadConfigWithValidate<
+  S extends StandardSchemaV1 = StandardSchemaV1,
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(
+  options: LoadConfigOptions<T, MT>,
+  schema: S,
+): Promise<StandardSchemaV1.InferOutput<S>> {
+  const config = await loadConfig(options);
+  return validateConfig(schema, config);
 }
 
 async function extendConfig<
