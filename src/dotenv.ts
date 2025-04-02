@@ -69,7 +69,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
-  const registry = getDotEnvVariableRegistry(targetEnvironment)!;
+  const registry = getDotEnvVariableRegistry(targetEnvironment);
 
   // Fill process.env
   for (const key in environment) {
