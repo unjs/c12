@@ -42,7 +42,7 @@ export type Env = typeof process.env;
  */
 const dotenvVariableRegistry = new Map<
   Record<string, any>,
-  Record<string, boolean>
+  Set<string>
 >();
 export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   const targetEnvironment = options.env ?? process.env;
@@ -56,7 +56,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   });
 
   if (!dotenvVariableRegistry.has(targetEnvironment)) {
-    dotenvVariableRegistry.set(targetEnvironment, {});
+    dotenvVariableRegistry.set(targetEnvironment, new Set());
   }
 
   const appliedVariables = dotenvVariableRegistry.get(targetEnvironment)!;
@@ -64,7 +64,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   // Fill process.env
   for (const key in environment) {
     if (!key.startsWith("_")) {
-      appliedVariables[key] = true;
+      appliedVariables.add(key);
       targetEnvironment[key] = environment[key];
     }
   }
@@ -90,7 +90,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // Apply process.env
   for (const key in options.env) {
     // ignore keys that have been previously set from .env file
-    if (!appliedVariables?.[key]) {
+    if (!appliedVariables?.has(key)) {
       environment[key] = options.env[key];
     }
   }
