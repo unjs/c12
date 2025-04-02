@@ -61,6 +61,8 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   return environment;
 }
 
+const appliedSymbol = Symbol.for("c12.dotenvLoaded");
+
 /** Load environment variables into an object. */
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
@@ -73,9 +75,9 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Apply process.env
-  if (options.env?._applied !== "") {
+  if (options.env?.[appliedSymbol as any] !== "") {
     Object.assign(environment, options.env);
-    Object.defineProperty(options.env, "_applied", {
+    Object.defineProperty(options.env, appliedSymbol, {
       value: "",
       enumerable: false,
     });
