@@ -305,7 +305,7 @@ describe("loader", () => {
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
 
-  it("no config loaded and failOnNotFound is undefined", async () => {
+  it("no config loaded and failOnNotFound is default setting", async () => {
     expect(
       loadConfig({
         configFile: "THIS_FILE_DOES_NOT_EXIST.ts",
