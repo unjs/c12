@@ -69,12 +69,9 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
-  const registry = getDotEnvVariableRegistry(targetEnvironment);
-
   // Fill process.env
   for (const key in environment) {
     if (!key.startsWith("_")) {
-      registry.add(key);
       targetEnvironment[key] = environment[key];
     }
   }
@@ -88,18 +85,21 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   const dotenvFile = resolve(options.cwd, options.fileName!);
 
-  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
-    Object.assign(environment, parsed);
-  }
-
   const registry = getDotEnvVariableRegistry(options.env || {});
 
   // Apply process.env
-  for (const key in options.env) {
-    // ignore keys that have been previously set from .env file
-    if (!registry?.has(key)) {
-      environment[key] = options.env[key];
+  Object.assign(environment, options.env);
+
+  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    for (const key in parsed) {
+      if (key in environment && !registry.has(key)) {
+        // do not override existing env variables
+        continue;
+      }
+
+      environment[key] = parsed[key];
+      registry.add(key);
     }
   }
 

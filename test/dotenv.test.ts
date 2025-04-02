@@ -25,4 +25,15 @@ describe("update config file", () => {
     await setupDotenv({ cwd: tmpDir });
     expect(process.env.dotenv).toBe("456");
   });
+  it("should not override OS environment values", async () => {
+    process.env.override = "os";
+
+    await writeFile(r("./.tmp/.env"), "override=123");
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.override).toBe("os");
+
+    await writeFile(r("./.tmp/.env"), "override=456");
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.override).toBe("os");
+  });
 });
