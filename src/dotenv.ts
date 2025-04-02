@@ -53,7 +53,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 
   // Fill process.env
   for (const key in environment) {
-    if (!key.startsWith("_") && targetEnvironment[key] === undefined) {
+    if (!key.startsWith("_")) {
       targetEnvironment[key] = environment[key];
     }
   }
