@@ -1,0 +1,28 @@
+import { fileURLToPath } from "node:url";
+import { expect, it, describe, beforeAll } from "vitest";
+import { normalize } from "pathe";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { setupDotenv } from "../src";
+
+const r = (path: string) =>
+  normalize(fileURLToPath(new URL(path, import.meta.url)));
+
+describe("update config file", () => {
+  const tmpDir = r("./.tmp");
+  beforeAll(async () => {
+    await rm(tmpDir, { recursive: true }).catch(() => {});
+    await mkdir(tmpDir, { recursive: true }).catch(() => {});
+  });
+  it("should read .env file into process.env", async () => {
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.dotenv).toBeUndefined();
+
+    await writeFile(r("./.tmp/.env"), "dotenv=123");
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.dotenv).toBe("123");
+
+    await writeFile(r("./.tmp/.env"), "dotenv=456");
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.dotenv).toBe("456");
+  });
+});

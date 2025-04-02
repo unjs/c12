@@ -40,6 +40,10 @@ export type Env = typeof process.env;
  * If you need more control (or access to the values), consider using `loadDotenv` instead
  *
  */
+const dotenvVariableRegistry = new Map<
+  Record<string, any>,
+  Record<string, boolean>
+>();
 export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   const targetEnvironment = options.env ?? process.env;
 
@@ -51,17 +55,22 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
+  if (!dotenvVariableRegistry.has(targetEnvironment)) {
+    dotenvVariableRegistry.set(targetEnvironment, {});
+  }
+
+  const appliedVariables = dotenvVariableRegistry.get(targetEnvironment)!;
+
   // Fill process.env
   for (const key in environment) {
     if (!key.startsWith("_")) {
+      appliedVariables[key] = true;
       targetEnvironment[key] = environment[key];
     }
   }
 
   return environment;
 }
-
-const appliedSymbol = Symbol.for("c12.dotenvLoaded");
 
 /** Load environment variables into an object. */
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
@@ -74,13 +83,16 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
     Object.assign(environment, parsed);
   }
 
+  const appliedVariables = options.env
+    ? dotenvVariableRegistry.get(options.env)
+    : undefined;
+
   // Apply process.env
-  if (options.env?.[appliedSymbol as any] !== "") {
-    Object.assign(environment, options.env);
-    Object.defineProperty(options.env, appliedSymbol, {
-      value: "",
-      enumerable: false,
-    });
+  for (const key in options.env) {
+    // ignore keys that have been previously set from .env file
+    if (!appliedVariables?.[key]) {
+      environment[key] = options.env[key];
+    }
   }
 
   // Interpolate env
