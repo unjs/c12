@@ -87,6 +87,7 @@ export async function loadConfig<
     cwd: options.cwd,
     configFile: resolve(options.cwd, options.configFile),
     layers: [],
+    notFoundConfig: false,
   };
 
   // prettier-ignore
@@ -113,6 +114,7 @@ export async function loadConfig<
   if (_mainConfig.configFile) {
     _configs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
+    r.notFoundConfig = _mainConfig.notFoundConfig;
   }
 
   if (_mainConfig.meta) {
@@ -210,7 +212,7 @@ export async function loadConfig<
   }
 
   // Fail if no config loaded
-  if (Object.keys(r.config).length === 0 && options.failOnNotFound) {
+  if (r.notFoundConfig && options.failOnNotFound) {
     throw new Error("config not loaded");
   }
 
@@ -391,6 +393,7 @@ async function resolveConfig<
     source;
 
   if (!existsSync(res.configFile!)) {
+    res.notFoundConfig = true;
     return res;
   }
 

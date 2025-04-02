@@ -78,6 +78,7 @@ export interface ResolvedConfig<
   config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
+  notFoundConfig?: boolean;
 }
 
 export interface ResolvableConfigContext<
