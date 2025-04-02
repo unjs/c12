@@ -1,4 +1,4 @@
-import { promises as fsp, existsSync } from "node:fs";
+import { promises as fsp, statSync } from "node:fs";
 import { resolve } from "pathe";
 import * as dotenv from "dotenv";
 
@@ -69,7 +69,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   const dotenvFile = resolve(options.cwd, options.fileName!);
 
-  if (existsSync(dotenvFile)) {
+  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
     const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
     Object.assign(environment, parsed);
   }
