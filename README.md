@@ -173,11 +173,9 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
-### `inspectLoadedConfig`
+### `failOnNotFound`
 
-You can define callback that inspect resolved config.
-
-for example... if config is empty, you can throw Error.
+If the config fails to load, an Error can be thrown
 
 ## Extending configuration
 
