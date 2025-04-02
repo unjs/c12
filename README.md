@@ -175,7 +175,7 @@ The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an em
 
 ### `resolve`
 
-You can define custom function that loda config.
+You can define a custom function that resolves the config.
 
 
 ## Extending configuration
