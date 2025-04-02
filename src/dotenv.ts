@@ -37,10 +37,7 @@ export type Env = typeof process.env;
 
 declare global {
   // eslint-disable-next-line no-var
-  var __c12_dotenv_variable_registry: Map<
-    Record<string, any>,
-    Set<string>
-  >;
+  var __c12_dotenv_variable_registry: Map<Record<string, any>, Set<string>>;
 }
 
 function getDotEnvVariableRegistry(env: Record<string, any>) {
