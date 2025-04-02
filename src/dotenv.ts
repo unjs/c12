@@ -73,10 +73,12 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Apply process.env
-  if (!options.env?._applied) {
+  if (options.env?._applied !== "") {
     Object.assign(environment, options.env);
-    // @ts-expect-error environment variables are strings
-    options.env._applied = true;
+    Object.defineProperty(options.env, '_applied', {
+      value: '',
+      enumerable: false
+    })
   }
 
   // Interpolate env
