@@ -209,6 +209,11 @@ export async function loadConfig<
     }
   }
 
+  // inspect config
+  if (options.inspectLoadedConfig) {
+    options.inspectLoadedConfig(r);
+  }
+
   // Return resolved config
   return r;
 }

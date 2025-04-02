@@ -140,6 +140,8 @@ export interface LoadConfigOptions<
     | {
         extendKey?: string | string[];
       };
+
+  inspectLoadedConfig?: (resolvedConfig: ResolvedConfig<T, MT>) => void;
 }
 
 export type DefineConfig<
