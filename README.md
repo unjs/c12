@@ -173,6 +173,11 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
+### `resolve`
+
+You can define custom function that loda config.
+
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.
