@@ -75,10 +75,10 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // Apply process.env
   if (options.env?._applied !== "") {
     Object.assign(environment, options.env);
-    Object.defineProperty(options.env, '_applied', {
-      value: '',
-      enumerable: false
-    })
+    Object.defineProperty(options.env, "_applied", {
+      value: "",
+      enumerable: false,
+    });
   }
 
   // Interpolate env
