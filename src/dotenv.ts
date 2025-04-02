@@ -69,9 +69,16 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
+  const registry = getDotEnvVariableRegistry(targetEnvironment);
+
   // Fill process.env
   for (const key in environment) {
-    if (!key.startsWith("_")) {
+    // skip private variables
+    if (key.startsWith("_")) {
+      continue;
+    }
+    // override if variables are not already set or come from `.env`
+    if (targetEnvironment[key] === undefined || registry.has(key)) {
       targetEnvironment[key] = environment[key];
     }
   }
