@@ -35,15 +35,32 @@ export interface DotenvOptions {
 
 export type Env = typeof process.env;
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __c12_dotenv_variable_registry: Map<
+    Record<string, any>,
+    Set<string>
+  >;
+}
+
+function getDotEnvVariableRegistry(env: Record<string, any>) {
+  const globalRegistry = (globalThis.__c12_dotenv_variable_registry ||= new Map<
+    Record<string, any>,
+    Set<string>
+  >());
+
+  if (!globalRegistry.has(env)) {
+    globalRegistry.set(env, new Set());
+  }
+
+  return globalRegistry.get(env)!;
+}
+
 /**
  * Load and interpolate environment variables into `process.env`.
  * If you need more control (or access to the values), consider using `loadDotenv` instead
  *
  */
-const dotenvVariableRegistry = new Map<
-  Record<string, any>,
-  Set<string>
->();
 export async function setupDotenv(options: DotenvOptions): Promise<Env> {
   const targetEnvironment = options.env ?? process.env;
 
@@ -55,16 +72,12 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
-  if (!dotenvVariableRegistry.has(targetEnvironment)) {
-    dotenvVariableRegistry.set(targetEnvironment, new Set());
-  }
-
-  const appliedVariables = dotenvVariableRegistry.get(targetEnvironment)!;
+  const registry = getDotEnvVariableRegistry(targetEnvironment)!;
 
   // Fill process.env
   for (const key in environment) {
     if (!key.startsWith("_")) {
-      appliedVariables.add(key);
+      registry.add(key);
       targetEnvironment[key] = environment[key];
     }
   }
@@ -83,14 +96,12 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
     Object.assign(environment, parsed);
   }
 
-  const appliedVariables = options.env
-    ? dotenvVariableRegistry.get(options.env)
-    : undefined;
+  const registry = getDotEnvVariableRegistry(options.env || {});
 
   // Apply process.env
   for (const key in options.env) {
     // ignore keys that have been previously set from .env file
-    if (!appliedVariables?.has(key)) {
+    if (!registry?.has(key)) {
       environment[key] = options.env[key];
     }
   }
