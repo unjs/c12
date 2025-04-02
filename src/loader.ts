@@ -209,9 +209,9 @@ export async function loadConfig<
     }
   }
 
-  // inspect config
-  if (options.inspectLoadedConfig) {
-    options.inspectLoadedConfig(r);
+  // Fail if no config loaded
+  if (Object.keys(r.config).length === 0 && options.failOnNotFound) {
+    throw new Error("config not loaded");
   }
 
   // Return resolved config
