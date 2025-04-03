@@ -5,7 +5,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
 
 const tmpDir = normalize(
-  fileURLToPath(new URL(".tmp-config", import.meta.url)),
+  fileURLToPath(new URL(".tmp-dotenv", import.meta.url)),
 );
 const r = (path: string) => join(tmpDir, path);
 
