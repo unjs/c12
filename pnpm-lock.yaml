@@ -12,8 +12,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       confbox:
-        specifier: ^0.1.8
-        version: 0.1.8
+        specifier: ^0.2.2
+        version: 0.2.2
       defu:
         specifier: ^6.1.4
         version: 6.1.4
