@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.0.3
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.2...v3.0.3)
+
+### 🩹 Fixes
+
+- Check if `.env/` is a directory before accessing ([#238](https://github.com/unjs/c12/pull/238))
+- Update dotenv assigned env variables on subsequent calls ([#243](https://github.com/unjs/c12/pull/243))
+
+### 📖 Documentation
+
+- Add `resolve` option ([#240](https://github.com/unjs/c12/pull/240))
+- Remove unsupported `configFile: false` ([#239](https://github.com/unjs/c12/pull/239))
+
+### 🏡 Chore
+
+- Update deps ([b5b3e43](https://github.com/unjs/c12/commit/b5b3e43))
+- Update confbox to 0.2x ([cbbf9a5](https://github.com/unjs/c12/commit/cbbf9a5))
+
+### ✅ Tests
+
+- Only include `src` for coverage report ([#242](https://github.com/unjs/c12/pull/242))
+
+### ❤️ Contributors
+
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+- Kanon ([@ysknsid25](https://github.com/ysknsid25))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.0.2
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.1...v3.0.2)
