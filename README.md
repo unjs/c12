@@ -109,8 +109,6 @@ Configuration base name. The default is `config`.
 
 Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).
 
-Set to `false` to avoid loading the config file.
-
 ### `rcFile`
 
 RC Config file name. Default is generated from `name` (name=foo => `.foorc`).
