@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, afterAll } from "vitest";
 import { normalize } from "pathe";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
@@ -13,6 +13,9 @@ describe("update config file", () => {
   beforeEach(async () => {
     await rm(tmpDir, { recursive: true, force: true });
     await mkdir(tmpDir, { recursive: true });
+  });
+  afterAll(async () => {
+    await rm(tmpDir, { recursive: true, force: true });
   });
   it("should read .env file into process.env", async () => {
     await setupDotenv({ cwd: tmpDir });
