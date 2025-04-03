@@ -173,6 +173,10 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
+### `failOnNotFound`
+
+If the config fails to load, an Error can be thrown
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.

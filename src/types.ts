@@ -78,6 +78,7 @@ export interface ResolvedConfig<
   config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
+  notFoundConfig?: boolean;
 }
 
 export interface ResolvableConfigContext<
@@ -140,6 +141,8 @@ export interface LoadConfigOptions<
     | {
         extendKey?: string | string[];
       };
+
+  failOnNotFound?: true;
 }
 
 export type DefineConfig<

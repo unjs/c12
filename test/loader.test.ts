@@ -304,4 +304,21 @@ describe("loader", () => {
     )!;
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
+
+  it("no config loaded and failOnNotFound is default setting", async () => {
+    expect(
+      loadConfig({
+        configFile: "THIS_FILE_DOES_NOT_EXIST.ts",
+      }),
+    ).resolves.not.toThrowError("config not loaded");
+  });
+
+  it("no config loaded and failOnNotFound is true", async () => {
+    expect(
+      loadConfig({
+        configFile: "THIS_FILE_DOES_NOT_EXIST.ts",
+        failOnNotFound: true,
+      }),
+    ).rejects.toThrowError("config not loaded");
+  });
 });
