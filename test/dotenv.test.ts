@@ -4,9 +4,10 @@ import { join, normalize } from "pathe";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
 
-const tmpDir = normalize(fileURLToPath(new URL(".tmp-config", import.meta.url)));
-const r = (path: string) =>
-  join(tmpDir, path);
+const tmpDir = normalize(
+  fileURLToPath(new URL(".tmp-config", import.meta.url)),
+);
+const r = (path: string) => join(tmpDir, path);
 
 describe("update config file", () => {
   beforeEach(async () => {
