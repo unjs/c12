@@ -51,9 +51,16 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
+  const dotenvVars = getDotEnvVars(targetEnvironment);
+
   // Fill process.env
   for (const key in environment) {
-    if (!key.startsWith("_") && targetEnvironment[key] === undefined) {
+    // Skip private variables
+    if (key.startsWith("_")) {
+      continue;
+    }
+    // Override if variables are not already set or come from `.env`
+    if (targetEnvironment[key] === undefined || dotenvVars.has(key)) {
       targetEnvironment[key] = environment[key];
     }
   }
@@ -67,15 +74,22 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   const dotenvFile = resolve(options.cwd, options.fileName!);
 
-  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
-    Object.assign(environment, parsed);
-  }
+  const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
-  if (!options.env?._applied) {
-    Object.assign(environment, options.env);
-    environment._applied = true;
+  Object.assign(environment, options.env);
+
+  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    for (const key in parsed) {
+      if (key in environment && !dotenvVars.has(key)) {
+        // do not override existing env variables
+        continue;
+      }
+
+      environment[key] = parsed[key];
+      dotenvVars.add(key);
+    }
   }
 
   // Interpolate env
@@ -143,4 +157,19 @@ function interpolate(
   for (const key in target) {
     target[key] = interpolate(getValue(key));
   }
+}
+
+// Internal: Keep track of which variables that are set by dotenv
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __c12_dotenv_vars__: Map<Record<string, any>, Set<string>>;
+}
+
+function getDotEnvVars(targetEnvironment: Record<string, any>) {
+  const globalRegistry = (globalThis.__c12_dotenv_vars__ ||= new Map());
+  if (!globalRegistry.has(targetEnvironment)) {
+    globalRegistry.set(targetEnvironment, new Set());
+  }
+  return globalRegistry.get(targetEnvironment)!;
 }
