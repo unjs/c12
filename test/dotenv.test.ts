@@ -3,7 +3,7 @@ import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
-import { beforeEach } from "node:test"
+import { beforeEach } from "node:test";
 
 const r = (path: string) =>
   normalize(fileURLToPath(new URL(path, import.meta.url)));
