@@ -35,24 +35,6 @@ export interface DotenvOptions {
 
 export type Env = typeof process.env;
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __c12_dotenv_variable_registry: Map<Record<string, any>, Set<string>>;
-}
-
-function getDotEnvVariableRegistry(env: Record<string, any>) {
-  const globalRegistry = (globalThis.__c12_dotenv_variable_registry ||= new Map<
-    Record<string, any>,
-    Set<string>
-  >());
-
-  if (!globalRegistry.has(env)) {
-    globalRegistry.set(env, new Set());
-  }
-
-  return globalRegistry.get(env)!;
-}
-
 /**
  * Load and interpolate environment variables into `process.env`.
  * If you need more control (or access to the values), consider using `loadDotenv` instead
@@ -69,16 +51,16 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
-  const registry = getDotEnvVariableRegistry(targetEnvironment);
+  const dotenvVars = getDotEnvVars(targetEnvironment);
 
   // Fill process.env
   for (const key in environment) {
-    // skip private variables
+    // Skip private variables
     if (key.startsWith("_")) {
       continue;
     }
-    // override if variables are not already set or come from `.env`
-    if (targetEnvironment[key] === undefined || registry.has(key)) {
+    // Override if variables are not already set or come from `.env`
+    if (targetEnvironment[key] === undefined || dotenvVars.has(key)) {
       targetEnvironment[key] = environment[key];
     }
   }
@@ -92,7 +74,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   const dotenvFile = resolve(options.cwd, options.fileName!);
 
-  const registry = getDotEnvVariableRegistry(options.env || {});
+  const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
   Object.assign(environment, options.env);
@@ -100,13 +82,13 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
     const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
     for (const key in parsed) {
-      if (key in environment && !registry.has(key)) {
+      if (key in environment && !dotenvVars.has(key)) {
         // do not override existing env variables
         continue;
       }
 
       environment[key] = parsed[key];
-      registry.add(key);
+      dotenvVars.add(key);
     }
   }
 
@@ -175,4 +157,19 @@ function interpolate(
   for (const key in target) {
     target[key] = interpolate(getValue(key));
   }
+}
+
+// Internal: Keep track of which variables that are set by dotenv
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __c12_dotenv_vars__: Map<Record<string, any>, Set<string>>;
+}
+
+function getDotEnvVars(targetEnvironment: Record<string, any>) {
+  const globalRegistry = (globalThis.__c12_dotenv_vars__ ||= new Map());
+  if (!globalRegistry.has(targetEnvironment)) {
+    globalRegistry.set(targetEnvironment, new Set());
+  }
+  return globalRegistry.get(targetEnvironment)!;
 }
