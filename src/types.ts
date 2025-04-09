@@ -101,7 +101,7 @@ export interface LoadConfigOptions<
   name?: string;
   cwd?: string;
 
-  configFile?: string;
+  configFile?: string | false;
 
   rcFile?: false | string;
   globalRc?: boolean;
