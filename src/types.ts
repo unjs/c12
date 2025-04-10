@@ -68,7 +68,7 @@ export interface ConfigLayer<
   sourceOptions?: SourceOptions<T, MT>;
   meta?: MT;
   cwd?: string;
-  configFile?: string;
+  configFile?: string | false;
 }
 
 export interface ResolvedConfig<
@@ -103,7 +103,7 @@ export interface LoadConfigOptions<
 
   configFile?: string | false;
 
-  rcFile?: false | string;
+  rcFile?: string | false;
   globalRc?: boolean;
 
   dotenv?: boolean | DotenvOptions;

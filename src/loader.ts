@@ -72,20 +72,24 @@ export async function loadConfig<
   const _merger = options.merger || defu;
 
   // Create jiti instance
-  options.jiti =
-    options.jiti ||
-    createJiti(join(options.cwd, options.configFile), {
-      interopDefault: true,
-      moduleCache: false,
-      extensions: [...SUPPORTED_EXTENSIONS],
-      ...options.jitiOptions,
-    });
+  if (options.configFile) {
+    options.jiti =
+      options.jiti ||
+      createJiti(join(options.cwd, options.configFile), {
+        interopDefault: true,
+        moduleCache: false,
+        extensions: [...SUPPORTED_EXTENSIONS],
+        ...options.jitiOptions,
+      });
+  }
 
   // Create context
   const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
-    configFile: resolve(options.cwd, options.configFile),
+    configFile: options.configFile
+      ? resolve(options.cwd, options.configFile)
+      : options.configFile,
     layers: [],
   };
 
@@ -109,14 +113,16 @@ export async function loadConfig<
   }
 
   // Load main config file
-  const _mainConfig = await resolveConfig(".", options);
-  if (_mainConfig.configFile) {
-    _configs.main = _mainConfig.config;
-    r.configFile = _mainConfig.configFile;
-  }
+  if (options.configFile) {
+    const _mainConfig = await resolveConfig(".", options);
+    if (_mainConfig.configFile) {
+      _configs.main = _mainConfig.config;
+      r.configFile = _mainConfig.configFile;
+    }
 
-  if (_mainConfig.meta) {
-    r.meta = _mainConfig.meta;
+    if (_mainConfig.meta) {
+      r.meta = _mainConfig.meta;
+    }
   }
 
   // Load rc files
@@ -185,7 +191,11 @@ export async function loadConfig<
       configFile: undefined,
       cwd: undefined,
     },
-    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
+    configs.main && {
+      config: configs.main,
+      configFile: options.configFile,
+      cwd: options.cwd,
+    },
     configs.rc && { config: configs.rc, configFile: options.rcFile },
     configs.packageJson && {
       config: configs.packageJson,
@@ -301,6 +311,16 @@ async function resolveConfig<
     if (res) {
       return res;
     }
+  }
+
+  if (options.configFile === false) {
+    return {
+      config: undefined as unknown as T,
+      configFile: undefined,
+      cwd: options.cwd,
+      source,
+      sourceOptions,
+    };
   }
 
   // Custom merger
