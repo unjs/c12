@@ -225,6 +225,82 @@ describe("loader", () => {
     `);
   });
 
+  it("load fixture config with `configFile` disabled", async () => {
+    type UserConfig = Partial<{
+      virtual: boolean;
+      overridden: boolean;
+      enableDefault: boolean;
+      defaultConfig: boolean;
+      extends: string[];
+    }>;
+    const { config, layers } = await loadConfig<UserConfig>({
+      cwd: r("./fixture"),
+      name: "test",
+      dotenv: true,
+      packageJson: ["c12", "c12-alt"],
+      globalRc: true,
+      envName: "test",
+      configFile: false,
+      extend: {
+        extendKey: ["theme", "extends"],
+      },
+      resolve: (id) => {
+        if (id === "virtual") {
+          return { config: { virtual: true } };
+        }
+      },
+      overrides: {
+        overridden: true,
+      },
+      defaults: {
+        defaultConfig: true,
+      },
+      defaultConfig: ({ configs }) => {
+        if (configs?.main?.enableDefault) {
+          return Promise.resolve({
+            extends: ["virtual"],
+          });
+        }
+        return {};
+      },
+    });
+
+    expect(transformPaths(config!)).toMatchInlineSnapshot(`
+      {
+        "defaultConfig": true,
+        "overridden": true,
+        "packageJSON": true,
+        "packageJSON2": true,
+        "rcFile": true,
+        "testConfig": true,
+      }
+    `);
+
+    expect(transformPaths(layers!)).toMatchInlineSnapshot(`
+      [
+        {
+          "config": {
+            "overridden": true,
+          },
+        },
+        {
+          "config": {
+            "rcFile": true,
+            "testConfig": true,
+          },
+          "configFile": ".testrc",
+        },
+        {
+          "config": {
+            "packageJSON": true,
+            "packageJSON2": true,
+          },
+          "configFile": "package.json",
+        },
+      ]
+    `);
+  });
+
   it("extend from git repo", async () => {
     const { config } = await loadConfig({
       name: "test",
