@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.0.4
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.3...v3.0.4)
+
+### 🩹 Fixes
+
+- Handle watcher reload errors ([#247](https://github.com/unjs/c12/pull/247))
+
+### 🏡 Chore
+
+- Update deps ([1891b2e](https://github.com/unjs/c12/commit/1891b2e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.0.3
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.2...v3.0.3)
