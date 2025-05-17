@@ -27,7 +27,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 ## 🦴 Used by
 
 - [Nuxt](https://nuxt.com/)
-- [Nitro](https://nitro.unjs.io/)
+- [Nitro](https://nitro.build/)
 - [Unbuild](https://unbuild.unjs.io)
 - [Automd](https://automd.unjs.io)
 - [Changelogen](https://changelogen.unjs.io)
