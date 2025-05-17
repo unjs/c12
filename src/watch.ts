@@ -112,7 +112,7 @@ export async function watchConfig<
     try {
       config = await loadConfig(options);
     } catch (error) {
-      console.warn(`Failed to load config ${path}\n${error}`);
+      console.warn(`Failed to load config file at ${path}. Please check your config file for syntax errors.`);
       return;
     }
     const changeCtx = {
