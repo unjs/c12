@@ -162,7 +162,6 @@ function interpolate(
 // Internal: Keep track of which variables that are set by dotenv
 
 declare global {
-  // eslint-disable-next-line no-var
   var __c12_dotenv_vars__: Map<Record<string, any>, Set<string>>;
 }
 
