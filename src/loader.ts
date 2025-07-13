@@ -155,6 +155,7 @@ export async function loadConfig<
 
   // Resolve config sources
   const configs = {} as Record<ConfigSource, T | null | undefined>;
+  // TODO: #253 change order from defaults to overrides in next major version
   for (const key in rawConfigs) {
     const value = rawConfigs[key as ConfigSource];
     configs[key as ConfigSource] = await (typeof value === "function"
