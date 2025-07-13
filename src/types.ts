@@ -80,13 +80,18 @@ export interface ResolvedConfig<
   cwd?: string;
 }
 
+export type ConfigSource =
+  | "overrides"
+  | "main"
+  | "rc"
+  | "packageJson"
+  | "defaultConfig";
+
 export interface ResolvableConfigContext<
   T extends UserInputConfig = UserInputConfig,
 > {
-  configs: Record<
-    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
-    T | null | undefined
-  >;
+  configs: Record<ConfigSource, T | null | undefined>;
+  rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
 
 type MaybePromise<T> = T | Promise<T>;
