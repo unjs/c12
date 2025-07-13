@@ -400,8 +400,8 @@ async function resolveConfig<
       default: true,
     })) as T;
   }
-  if (res.config instanceof Function) {
-    res.config = await res.config();
+  if (typeof res.config === "function") {
+    res.config = await (res.config as () => Promise<any>)();
   }
 
   // Extend env specific config
