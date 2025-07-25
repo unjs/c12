@@ -34,6 +34,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - [RemixKit](https://github.com/jrestall/remix-kit)
 - [Hey API](https://github.com/hey-api/openapi-ts)
 - [kysely-ctl](https://github.com/kysely-org/kysely-ctl)
+- [Prisma](https://github.com/prisma/prisma)
 
 ## Usage
 
