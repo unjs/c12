@@ -31,6 +31,13 @@ export interface DotenvOptions {
    */
 
   env?: NodeJS.ProcessEnv;
+
+  /**
+   * This property allows to load scoped env files.
+   * Env loading priorities: `.env`, `.env.local`, `.env.[mode]`, and `.env.[mode].local`.
+   */
+
+  mode?: string;
 }
 
 export type Env = typeof process.env;
@@ -49,6 +56,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
+    mode: options.mode,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -71,24 +79,30 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 /** Load environment variables into an object. */
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
-
-  const dotenvFile = resolve(options.cwd, options.fileName!);
-
   const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
   Object.assign(environment, options.env);
 
-  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
-    for (const key in parsed) {
-      if (key in environment && !dotenvVars.has(key)) {
-        // do not override existing env variables
-        continue;
-      }
+  const { fileName, mode } = options;
+  const dotenvFiles = [fileName!, `${fileName!}.local`];
+  if (mode) {
+    dotenvFiles.push(`${fileName!}.${mode}`, `${fileName!}.${mode}.local`);
+  }
 
-      environment[key] = parsed[key];
-      dotenvVars.add(key);
+  for await (const file of dotenvFiles) {
+    const dotenvFile = resolve(options.cwd, file);
+    if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+      const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+      for (const key in parsed) {
+        if (key in environment && !dotenvVars.has(key)) {
+          // do not override existing env variables
+          continue;
+        }
+
+        environment[key] = parsed[key];
+        dotenvVars.add(key);
+      }
     }
   }
 
