@@ -125,10 +125,10 @@ Load RC config from the workspace directory and the user's home directory. Only 
 Loads `.env` file if enabled. It is disabled by default.
 
 ```
-.env:              always loaded.
-.env.local:        always loaded.
-.env.[mode]:       loaded only when mode is defined.
-.env.[mode].local: loaded only when mode is defined.
+.env                always loaded.
+.env.local          always loaded.
+.env.[mode]         loaded only when mode is defined.
+.env.[mode].local   loaded only when mode is defined.
 ```
 
 #### Env Loading Priorities
