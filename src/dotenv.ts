@@ -80,7 +80,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const { fileName = ".env" } = options;
   const dotenvFiles = typeof fileName === "string" ? [fileName] : fileName;
 
-  for await (const file of dotenvFiles) {
+  for (const file of dotenvFiles) {
     const dotenvFile = resolve(options.cwd, file);
     if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
       const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
