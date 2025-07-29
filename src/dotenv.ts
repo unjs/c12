@@ -11,7 +11,7 @@ export interface DotenvOptions {
   /**
    * What file or files to look in for environment variables (either absolute or relative
    * to the current working directory). For example, `.env`.
-   * With the array type, the order enforce the env loading priority.
+   * With the array type, the order enforce the env loading priority (last one overrides).
    */
   fileName?: string | string[];
 
