@@ -40,4 +40,17 @@ describe("update config file", () => {
     await setupDotenv({ cwd: tmpDir });
     expect(process.env.override).toBe("os");
   });
+
+  it("should load envs files with the correct priorities", async () => {
+    await writeFile(r(".my-env"), "foo=bar");
+    await setupDotenv({ cwd: tmpDir, fileName: ".my-env" });
+    expect(process.env.foo).toBe("bar");
+
+    await writeFile(r(".my-env"), "fizz=buzz");
+    await writeFile(r(".my-env"), "api_key=12345678");
+    await writeFile(r(".my-env.local"), "fizz=buzz_local");
+    await setupDotenv({ cwd: tmpDir, fileName: [".my-env", ".my-env.local"] });
+    expect(process.env.api_key).toBe("12345678");
+    expect(process.env.fizz).toBe("buzz_local");
+  });
 });

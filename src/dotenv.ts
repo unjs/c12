@@ -9,10 +9,11 @@ export interface DotenvOptions {
   cwd: string;
 
   /**
-   * What file to look in for environment variables (either absolute or relative
+   * What file or files to look in for environment variables (either absolute or relative
    * to the current working directory). For example, `.env`.
+   * With the array type, the order enforce the env loading priority (last one overrides).
    */
-  fileName?: string;
+  fileName?: string | string[];
 
   /**
    * Whether to interpolate variables within .env.
@@ -72,21 +73,24 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
 
-  const dotenvFile = resolve(options.cwd, options.fileName!);
+  const _fileName = options.fileName || ".env";
+  const dotenvFiles = typeof _fileName === "string" ? [_fileName] : _fileName;
 
   const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
   Object.assign(environment, options.env);
 
-  if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+  for (const file of dotenvFiles) {
+    const dotenvFile = resolve(options.cwd, file);
+    if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+      continue;
+    }
     const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
     for (const key in parsed) {
       if (key in environment && !dotenvVars.has(key)) {
-        // do not override existing env variables
-        continue;
+        continue; // Do not override existing env variables
       }
-
       environment[key] = parsed[key];
       dotenvVars.add(key);
     }
