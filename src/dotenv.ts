@@ -9,10 +9,11 @@ export interface DotenvOptions {
   cwd: string;
 
   /**
-   * What file to look in for environment variables (either absolute or relative
+   * What file or files to look in for environment variables (either absolute or relative
    * to the current working directory). For example, `.env`.
+   * With the array type, the order enforce the env loading priority.
    */
-  fileName?: string;
+  fileName?: string | string[];
 
   /**
    * Whether to interpolate variables within .env.
@@ -31,13 +32,6 @@ export interface DotenvOptions {
    */
 
   env?: NodeJS.ProcessEnv;
-
-  /**
-   * This property allows to load scoped env files.
-   * Env loading priorities: `.env`, `.env.local`, `.env.[mode]`, and `.env.[mode].local`.
-   */
-
-  mode?: string;
 }
 
 export type Env = typeof process.env;
@@ -56,7 +50,6 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
-    mode: options.mode,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -84,11 +77,8 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // Apply process.env
   Object.assign(environment, options.env);
 
-  const { fileName, mode } = options;
-  const dotenvFiles = [fileName!, `${fileName!}.local`];
-  if (mode) {
-    dotenvFiles.push(`${fileName!}.${mode}`, `${fileName!}.${mode}.local`);
-  }
+  const { fileName = ".env" } = options;
+  const dotenvFiles = typeof fileName === "string" ? [fileName] : fileName;
 
   for await (const file of dotenvFiles) {
     const dotenvFile = resolve(options.cwd, file);

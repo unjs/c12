@@ -42,33 +42,15 @@ describe("update config file", () => {
   });
 
   it("should load envs files with the correct priorities", async () => {
-    await writeFile(r(".env"), "BASE=base");
-    await setupDotenv({ cwd: tmpDir });
-    expect(process.env.BASE).toBe("base");
+    await writeFile(r(".my-env"), "foo=bar");
+    await setupDotenv({ cwd: tmpDir, fileName: ".my-env" });
+    expect(process.env.foo).toBe("bar");
 
-    delete process.env.BASE;
-    await writeFile(r(".env"), "BASE=base");
-    await writeFile(r(".env.local"), "BASE=local");
-    await setupDotenv({ cwd: tmpDir, mode: "dev" });
-    expect(process.env.BASE).toBe("local");
-
-    delete process.env.BASE;
-    await writeFile(r(".env"), "BASE=base");
-    await writeFile(r(".env.local"), "BASE=local");
-    await writeFile(r(".env.local"), "FOO=bar");
-    await writeFile(r(".env.dev"), "BASE=dev");
-    await setupDotenv({ cwd: tmpDir, mode: "dev" });
-    expect(process.env.BASE).toBe("dev");
-    expect(process.env.FOO).toBe("bar");
-
-    delete process.env.BASE;
-    await writeFile(r(".env"), "BASE=base");
-    await writeFile(r(".env"), "FOO=bar");
-    await writeFile(r(".env.local"), "BASE=local");
-    await writeFile(r(".env.dev"), "BASE=dev");
-    await writeFile(r(".env.dev.local"), "BASE=dev_local");
-    await setupDotenv({ cwd: tmpDir, mode: "dev" });
-    expect(process.env.BASE).toBe("dev_local");
-    expect(process.env.FOO).toBe("bar");
+    await writeFile(r(".my-env"), "fizz=buzz");
+    await writeFile(r(".my-env"), "api_key=12345678");
+    await writeFile(r(".my-env.local"), "fizz=buzz_local");
+    await setupDotenv({ cwd: tmpDir, fileName: [".my-env", ".my-env.local"] });
+    expect(process.env.api_key).toBe("12345678");
+    expect(process.env.fizz).toBe("buzz_local");
   });
 });
