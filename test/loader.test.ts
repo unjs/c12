@@ -21,7 +21,10 @@ describe("loader", () => {
     const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
       name: "test",
-      dotenv: true,
+      dotenv: {
+        cwd: r("./fixture"), // TODO: fix types
+        fileName: [".env", ".env.local"],
+      },
       packageJson: ["c12", "c12-alt"],
       globalRc: true,
       envName: "test",
@@ -76,6 +79,9 @@ describe("loader", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "dotenv": "true",
+        "dotenvLocal": "true",
+        "dotenvOverride": ".env.local",
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
@@ -187,6 +193,9 @@ describe("loader", () => {
         {
           "config": {
             "devConfig": true,
+            "dotenv": "true",
+            "dotenvLocal": "true",
+            "dotenvOverride": ".env.local",
           },
           "configFile": "<path>/fixture/test.config.dev.ts",
           "cwd": "<path>/fixture",
