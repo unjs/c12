@@ -77,22 +77,21 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // Apply process.env
   Object.assign(environment, options.env);
 
-  const { fileName = ".env" } = options;
-  const dotenvFiles = typeof fileName === "string" ? [fileName] : fileName;
+  const _fileName = options.fileName || ".env";
+  const dotenvFiles = typeof _fileName === "string" ? [_fileName] : _fileName;
 
   for (const file of dotenvFiles) {
     const dotenvFile = resolve(options.cwd, file);
-    if (statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
-      const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
-      for (const key in parsed) {
-        if (key in environment && !dotenvVars.has(key)) {
-          // do not override existing env variables
-          continue;
-        }
-
-        environment[key] = parsed[key];
-        dotenvVars.add(key);
+    if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+      continue;
+    }
+    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    for (const key in parsed) {
+      if (key in environment && !dotenvVars.has(key)) {
+        continue; // Do not override existing env variables
       }
+      environment[key] = parsed[key];
+      dotenvVars.add(key);
     }
   }
 
