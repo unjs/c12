@@ -20,6 +20,7 @@ import type {
   SourceOptions,
   InputConfig,
   ConfigSource,
+  ConfigFunctionContext,
 } from "./types";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -403,7 +404,12 @@ async function resolveConfig<
     })) as T;
   }
   if (typeof res.config === "function") {
-    res.config = await (res.config as () => Promise<any>)();
+    // Support conditional config functions
+    if (options.configContext) {
+      res.config = await (res.config as (ctx: ConfigFunctionContext) => Promise<any>)(options.configContext);
+    } else {
+      res.config = await (res.config as () => Promise<any>)();
+    }
   }
 
   // Extend env specific config

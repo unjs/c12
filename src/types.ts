@@ -87,6 +87,10 @@ export type ConfigSource =
   | "packageJson"
   | "defaultConfig";
 
+export interface ConfigFunctionContext {
+  [key: string]: any;
+}
+
 export interface ResolvableConfigContext<
   T extends UserInputConfig = UserInputConfig,
 > {
@@ -123,6 +127,9 @@ export interface LoadConfigOptions<
   overrides?: ResolvableConfig<T>;
 
   omit$Keys?: boolean;
+
+  /** Context passed to config functions */
+  configContext?: ConfigFunctionContext;
 
   resolve?: (
     id: string,

@@ -172,6 +172,11 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
+### `configContext`
+
+Context object passed to configuration functions.
+This allows you to create dynamic configurations based on the provided context:
+
 ### `resolve`
 
 You can define a custom function that resolves the config.
@@ -429,6 +434,49 @@ const { configFile, created } = await updateConfig({
 });
 
 console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
+```
+
+## API
+
+### Configuration Functions
+
+You can use a function to define your configuration dynamically based on context (similar to Vite's conditional config):
+
+```typescript
+// config.ts
+export default function defineConfig(ctx) {
+  if (ctx?.command === 'serve') {
+    return {
+      // dev specific config
+      development: true,
+      apiUrl: 'http://localhost:3000'
+    }
+  } else if (ctx?.command === 'build') {
+    return {
+      // build specific config
+      development: false,
+      apiUrl: 'https://api.example.com'
+    }
+  }
+
+  return {
+    // default config
+  }
+}
+```
+
+```typescript
+// Usage
+import { loadConfig } from 'c12'
+
+const config = await loadConfig({
+  name: 'myapp',
+  configContext: {
+    command: 'serve', // or 'build'
+    mode: 'development',
+    // any other context you want to pass
+  }
+})
 ```
 
 ## Contribution
