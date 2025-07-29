@@ -72,9 +72,11 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 /** Load environment variables into an object. */
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
-  const dotenvVars = getDotEnvVars(options.env || {});
+
   const _fileName = options.fileName || ".env";
   const dotenvFiles = typeof _fileName === "string" ? [_fileName] : _fileName;
+
+  const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
   Object.assign(environment, options.env);
