@@ -34,10 +34,10 @@
     "chokidar": "^4.0.3",
     "confbox": "^0.2.2",
     "defu": "^6.1.4",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.2.1",
     "exsolve": "^1.0.7",
     "giget": "^2.0.0",
-    "jiti": "^2.4.2",
+    "jiti": "^2.5.1",
     "ohash": "^2.0.11",
     "pathe": "^2.0.3",
     "perfect-debounce": "^1.0.0",
@@ -45,17 +45,17 @@
     "rc9": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^24.0.13",
+    "@types/node": "^24.1.0",
     "@vitest/coverage-v8": "^3.2.4",
     "automd": "^0.4.0",
     "changelogen": "^0.6.2",
-    "eslint": "^9.31.0",
+    "eslint": "^9.32.0",
     "eslint-config-unjs": "^0.5.0",
     "expect-type": "^1.2.2",
     "magicast": "^0.3.5",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3",
-    "unbuild": "^3.5.0",
+    "unbuild": "^3.6.0",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
