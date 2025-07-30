@@ -439,32 +439,23 @@ console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
 
 You can use a function to define your configuration dynamically based on context.
 
-```typescript
+```ts
 // config.ts
 export default defineConfig((ctx) => {
-  if (ctx?.command === "serve") {
-    return {
-      apiUrl: "http://localhost:3000",
-    };
-  } else if (ctx?.command === "build") {
-    return {
-      apiUrl: "https://api.example.com",
-    };
-  }
   return {
-    // default config
+    apiUrl: ctx?.dev ? "http://localhost:3000" : "https://api.example.com",
   };
 });
 ```
 
-```typescript
+```ts
 // Usage
 import { loadConfig } from "c12";
 
 const config = await loadConfig({
   name: "myapp",
   configContext: {
-    command: "serve",
+    dev: true,
   },
 });
 ```
