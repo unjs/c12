@@ -390,29 +390,10 @@ Update or create a new configuration files.
 
 Add `magicast` peer dependency:
 
-<!-- automd:pm-install name="magicast" dev -->
-
 ```sh
 # ✨ Auto-detect
 npx nypm install -D magicast
-
-# npm
-npm install -D magicast
-
-# yarn
-yarn add -D magicast
-
-# pnpm
-pnpm install -D magicast
-
-# bun
-bun install -D magicast
-
-# deno
-deno install --dev magicast
 ```
-
-<!-- /automd -->
 
 Import util from `c12/update`
 
