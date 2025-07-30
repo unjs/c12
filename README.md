@@ -180,7 +180,6 @@ Context object passed to dynamic config functions.
 
 You can define a custom function that resolves the config.
 
-
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.
@@ -453,10 +452,7 @@ export default defineConfig((ctx) => {
 import { loadConfig } from "c12";
 
 const config = await loadConfig({
-  name: "myapp",
-  configContext: {
-    dev: true,
-  },
+  context: { dev: true },
 });
 ```
 
