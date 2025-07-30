@@ -79,15 +79,25 @@ export interface ResolvedConfig<
   config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
+  _configFile?: string;
+}
+
+export type ConfigSource =
+  | "overrides"
+  | "main"
+  | "rc"
+  | "packageJson"
+  | "defaultConfig";
+
+export interface ConfigFunctionContext {
+  [key: string]: any;
 }
 
 export interface ResolvableConfigContext<
   T extends UserInputConfig = UserInputConfig,
 > {
-  configs: Record<
-    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
-    T | null | undefined
-  >;
+  configs: Record<ConfigSource, T | null | undefined>;
+  rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
 
 type MaybePromise<T> = T | Promise<T>;
@@ -121,6 +131,9 @@ export interface LoadConfigOptions<
 
   omit$Keys?: boolean;
 
+  /** Context passed to config functions */
+  context?: ConfigFunctionContext;
+
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT, S>,
@@ -143,8 +156,9 @@ export interface LoadConfigOptions<
         extendKey?: string | string[];
       };
 
-  schema?: S;
+  configFileRequired?: boolean;
 
+  schema?: S;
   validate?: (schema: S, input: ResolvedConfig<T, MT>) => void;
 }
 

@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.1.0
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.4...v3.1.0)
+
+### 🚀 Enhancements
+
+- Pass raw configs to function sources ([#253](https://github.com/unjs/c12/pull/253))
+
+### 📖 Documentation
+
+- Update nitro link ([#248](https://github.com/unjs/c12/pull/248))
+
+### 🏡 Chore
+
+- Update deps ([998de19](https://github.com/unjs/c12/commit/998de19))
+- Lint ([2a6a251](https://github.com/unjs/c12/commit/2a6a251))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- @beer ([@iiio2](https://github.com/iiio2))
+
+## v3.0.4
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.3...v3.0.4)
+
+### 🩹 Fixes
+
+- Handle watcher reload errors ([#247](https://github.com/unjs/c12/pull/247))
+
+### 🏡 Chore
+
+- Update deps ([1891b2e](https://github.com/unjs/c12/commit/1891b2e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v3.0.3
+
+[compare changes](https://github.com/unjs/c12/compare/v3.0.2...v3.0.3)
+
+### 🩹 Fixes
+
+- Check if `.env/` is a directory before accessing ([#238](https://github.com/unjs/c12/pull/238))
+- Update dotenv assigned env variables on subsequent calls ([#243](https://github.com/unjs/c12/pull/243))
+
+### 📖 Documentation
+
+- Add `resolve` option ([#240](https://github.com/unjs/c12/pull/240))
+- Remove unsupported `configFile: false` ([#239](https://github.com/unjs/c12/pull/239))
+
+### 🏡 Chore
+
+- Update deps ([b5b3e43](https://github.com/unjs/c12/commit/b5b3e43))
+- Update confbox to 0.2x ([cbbf9a5](https://github.com/unjs/c12/commit/cbbf9a5))
+
+### ✅ Tests
+
+- Only include `src` for coverage report ([#242](https://github.com/unjs/c12/pull/242))
+
+### ❤️ Contributors
+
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+- Kanon ([@ysknsid25](https://github.com/ysknsid25))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.0.2
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.1...v3.0.2)
