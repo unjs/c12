@@ -172,10 +172,13 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
+### `context`
+
+Context object passed to dynamic config functions.
+
 ### `resolve`
 
 You can define a custom function that resolves the config.
-
 
 ## Extending configuration
 
@@ -429,6 +432,28 @@ const { configFile, created } = await updateConfig({
 });
 
 console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
+```
+
+## Configuration functions
+
+You can use a function to define your configuration dynamically based on context.
+
+```ts
+// config.ts
+export default (ctx) => {
+  return {
+    apiUrl: ctx?.dev ? "http://localhost:3000" : "https://api.example.com",
+  };
+};
+```
+
+```ts
+// Usage
+import { loadConfig } from "c12";
+
+const config = await loadConfig({
+  context: { dev: true },
+});
 ```
 
 ## Contribution
