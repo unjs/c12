@@ -154,7 +154,7 @@ export interface LoadConfigOptions<
         extendKey?: string | string[];
       };
 
-  configFileRequired?: true;
+  configFileRequired?: boolean;
 }
 
 export type DefineConfig<
