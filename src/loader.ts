@@ -88,6 +88,7 @@ export async function loadConfig<
     cwd: options.cwd,
     configFile: resolve(options.cwd, options.configFile),
     layers: [],
+    _configFile: undefined,
   };
 
   // prettier-ignore
@@ -115,6 +116,7 @@ export async function loadConfig<
   if (_mainConfig.configFile) {
     rawConfigs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
+    r._configFile = _mainConfig._configFile;
   }
 
   if (_mainConfig.meta) {
@@ -210,6 +212,11 @@ export async function loadConfig<
         delete r.config[key];
       }
     }
+  }
+
+  // Fail if no config loaded
+  if (options.configFileRequired && !r._configFile) {
+    throw new Error(`Required config (${r.configFile}) cannot be resolved.`);
   }
 
   // Return resolved config
@@ -391,6 +398,8 @@ async function resolveConfig<
   if (!existsSync(res.configFile!)) {
     return res;
   }
+
+  res._configFile = res.configFile;
 
   const configFileExt = extname(res.configFile!) || "";
   if (configFileExt in ASYNC_LOADERS) {

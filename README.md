@@ -161,6 +161,10 @@ Context object passed to dynamic config functions.
 
 You can define a custom function that resolves the config.
 
+### `configFileRequired`
+
+If this option is set to `true`, loader fails if the main config file does not exists.
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.

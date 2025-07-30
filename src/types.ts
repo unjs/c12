@@ -78,6 +78,7 @@ export interface ResolvedConfig<
   config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
+  _configFile?: string;
 }
 
 export type ConfigSource =
@@ -152,6 +153,8 @@ export interface LoadConfigOptions<
     | {
         extendKey?: string | string[];
       };
+
+  configFileRequired?: boolean;
 }
 
 export type DefineConfig<
