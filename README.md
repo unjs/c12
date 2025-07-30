@@ -180,6 +180,7 @@ Context object passed to dynamic config functions.
 
 You can define a custom function that resolves the config.
 
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.
