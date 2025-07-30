@@ -1,6 +1,7 @@
 import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 export interface ConfigLayerMeta {
   name?: string;
@@ -107,6 +108,7 @@ export type ResolvableConfig<T extends UserInputConfig = UserInputConfig> =
 export interface LoadConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
+  S extends StandardSchemaV1 = StandardSchemaV1,
 > {
   name?: string;
   cwd?: string;
@@ -134,7 +136,7 @@ export interface LoadConfigOptions<
 
   resolve?: (
     id: string,
-    options: LoadConfigOptions<T, MT>,
+    options: LoadConfigOptions<T, MT, S>,
   ) =>
     | null
     | undefined
@@ -155,6 +157,9 @@ export interface LoadConfigOptions<
       };
 
   configFileRequired?: boolean;
+
+  schema?: S;
+  validate?: (schema: S, input: ResolvedConfig<T, MT>) => void;
 }
 
 export type DefineConfig<
