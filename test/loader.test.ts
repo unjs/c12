@@ -683,7 +683,7 @@ describe("loader", () => {
     ).rejects.toThrow();
   });
 
-  it("load fixture config with validate for zod - not.toThrow", async () => {
+  describe("load fixture config with validate for zod - not.toThrow", async () => {
     const ColorsSchema = object({
       primary: optional(string()),
       text: optional(string()),
@@ -793,6 +793,7 @@ describe("loader", () => {
         },
       }),
     ).resolves.not.toThrow();
+
     it("no config loaded and configFileRequired is default setting", async () => {
       await expect(
         loadConfig({
