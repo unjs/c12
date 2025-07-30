@@ -4,7 +4,12 @@ import unjs from "eslint-config-unjs";
 export default unjs({
   ignores: [],
   rules: {
-  "unicorn/prevent-abbreviations": 0,
-  "@typescript-eslint/no-non-null-assertion": 0
-},
+    "unicorn/prevent-abbreviations": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
+  },
+  markdown: {
+    rules: {
+      "unicorn/no-anonymous-default-export": 0,
+    },
+  },
 });

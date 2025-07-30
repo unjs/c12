@@ -440,11 +440,11 @@ You can use a function to define your configuration dynamically based on context
 
 ```ts
 // config.ts
-export default defineConfig((ctx) => {
+export default (ctx) => {
   return {
     apiUrl: ctx?.dev ? "http://localhost:3000" : "https://api.example.com",
   };
-});
+};
 ```
 
 ```ts
