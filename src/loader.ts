@@ -19,7 +19,8 @@ import type {
   ConfigLayer,
   SourceOptions,
   InputConfig,
-  ResolvableConfigContext,
+  ConfigSource,
+  ConfigFunctionContext,
 } from "./types";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -91,15 +92,16 @@ export async function loadConfig<
   };
 
   // prettier-ignore
-  type _ConfigName = keyof ResolvableConfigContext["configs"]
-  const _configs: Record<_ConfigName, ResolvableConfig<T> | null | undefined> =
-    {
-      overrides: options.overrides,
-      main: undefined,
-      rc: undefined,
-      packageJson: undefined,
-      defaultConfig: options.defaultConfig,
-    };
+  const rawConfigs: Record<
+    ConfigSource,
+    ResolvableConfig<T> | null | undefined
+  > = {
+    overrides: options.overrides,
+    main: undefined,
+    rc: undefined,
+    packageJson: undefined,
+    defaultConfig: options.defaultConfig,
+  };
 
   // Load dotenv
   if (options.dotenv) {
@@ -112,7 +114,7 @@ export async function loadConfig<
   // Load main config file
   const _mainConfig = await resolveConfig(".", options);
   if (_mainConfig.configFile) {
-    _configs.main = _mainConfig.config;
+    rawConfigs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
     r.notFoundConfig = _mainConfig.notFoundConfig;
   }
@@ -135,7 +137,7 @@ export async function loadConfig<
       // 3. user home
       rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    _configs.rc = _merger({} as T, ...rcSources);
+    rawConfigs.rc = _merger({} as T, ...rcSources);
   }
 
   // Load config from package.json
@@ -151,15 +153,16 @@ export async function loadConfig<
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
-    _configs.packageJson = _merger({} as T, ...values);
+    rawConfigs.packageJson = _merger({} as T, ...values);
   }
 
   // Resolve config sources
-  const configs = {} as Record<_ConfigName, T | null | undefined>;
-  for (const key in _configs) {
-    const value = _configs[key as _ConfigName];
-    configs[key as _ConfigName] = await (typeof value === "function"
-      ? value({ configs })
+  const configs = {} as Record<ConfigSource, T | null | undefined>;
+  // TODO: #253 change order from defaults to overrides in next major version
+  for (const key in rawConfigs) {
+    const value = rawConfigs[key as ConfigSource];
+    configs[key as ConfigSource] = await (typeof value === "function"
+      ? value({ configs, rawConfigs })
       : value);
   }
 
@@ -408,8 +411,10 @@ async function resolveConfig<
       default: true,
     })) as T;
   }
-  if (res.config instanceof Function) {
-    res.config = await res.config();
+  if (typeof res.config === "function") {
+    res.config = await (
+      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
+    )(options.context);
   }
 
   // Extend env specific config

@@ -81,13 +81,22 @@ export interface ResolvedConfig<
   notFoundConfig?: boolean;
 }
 
+export type ConfigSource =
+  | "overrides"
+  | "main"
+  | "rc"
+  | "packageJson"
+  | "defaultConfig";
+
+export interface ConfigFunctionContext {
+  [key: string]: any;
+}
+
 export interface ResolvableConfigContext<
   T extends UserInputConfig = UserInputConfig,
 > {
-  configs: Record<
-    "overrides" | "main" | "rc" | "packageJson" | "defaultConfig",
-    T | null | undefined
-  >;
+  configs: Record<ConfigSource, T | null | undefined>;
+  rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
 
 type MaybePromise<T> = T | Promise<T>;
@@ -119,6 +128,9 @@ export interface LoadConfigOptions<
   overrides?: ResolvableConfig<T>;
 
   omit$Keys?: boolean;
+
+  /** Context passed to config functions */
+  context?: ConfigFunctionContext;
 
   resolve?: (
     id: string,
