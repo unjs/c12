@@ -78,7 +78,7 @@ export interface ResolvedConfig<
   config: T;
   layers?: ConfigLayer<T, MT>[];
   cwd?: string;
-  notFoundConfig?: boolean;
+  _configFile?: string;
 }
 
 export type ConfigSource =
@@ -154,7 +154,7 @@ export interface LoadConfigOptions<
         extendKey?: string | string[];
       };
 
-  failOnNotFound?: true;
+  configFileRequired?: true;
 }
 
 export type DefineConfig<

@@ -152,6 +152,7 @@ describe("loader", () => {
           "configFile": "package.json",
         },
         {
+          "_configFile": "<path>/fixture/theme/.config/test.config.json5",
           "config": {
             "colors": {
               "primary": "theme_primary",
@@ -165,6 +166,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/.base/test.config.jsonc",
           "config": {
             "$env": {
               "test": {
@@ -191,6 +193,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/test.config.dev.ts",
           "config": {
             "devConfig": true,
             "dotenv": "true",
@@ -204,6 +207,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/node_modules/c12-npm-test/test.config.ts",
           "config": {
             "npmConfig": true,
           },
@@ -214,6 +218,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/test.config.ts",
           "config": {
             "githubLayer": true,
           },
@@ -317,20 +322,20 @@ describe("loader", () => {
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
 
-  it("no config loaded and failOnNotFound is default setting", async () => {
-    expect(
+  it("no config loaded and configFileRequired is default setting", async () => {
+    await expect(
       loadConfig({
-        configFile: "THIS_FILE_DOES_NOT_EXIST.ts",
+        configFile: "CUSTOM",
       }),
-    ).resolves.not.toThrowError("config not loaded");
+    ).resolves.not.toThrowError();
   });
 
-  it("no config loaded and failOnNotFound is true", async () => {
+  it("no config loaded and configFileRequired is true", async () => {
     expect(
       loadConfig({
-        configFile: "THIS_FILE_DOES_NOT_EXIST.ts",
-        failOnNotFound: true,
+        configFile: "CUSTOM",
+        configFileRequired: true,
       }),
-    ).rejects.toThrowError("config not loaded");
+    ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
   });
 });

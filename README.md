@@ -161,9 +161,9 @@ Context object passed to dynamic config functions.
 
 You can define a custom function that resolves the config.
 
-### `failOnNotFound`
+### `configFileRequired`
 
-If the config fails to load, an Error can be thrown
+If this option is set to `true`, loader fails if no config file is found.
 
 ## Extending configuration
 
