@@ -40,29 +40,10 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 Install package:
 
-<!-- automd:pm-install -->
-
 ```sh
 # ✨ Auto-detect
 npx nypm install c12
-
-# npm
-npm install c12
-
-# yarn
-yarn add c12
-
-# pnpm
-pnpm install c12
-
-# bun
-bun install c12
-
-# deno
-deno install c12
 ```
-
-<!-- /automd -->
 
 Import:
 
