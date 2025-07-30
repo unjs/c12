@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.2.0
+
+[compare changes](https://github.com/unjs/c12/compare/v3.1.0...v3.2.0)
+
+### 🚀 Enhancements
+
+- Support scoped env files ([#256](https://github.com/unjs/c12/pull/256))
+- Support `context` for function config ([#258](https://github.com/unjs/c12/pull/258))
+- Support `configFileRequired` ([#241](https://github.com/unjs/c12/pull/241))
+
+### 🏡 Chore
+
+- **readme:** Add prisma to the "used by" list ([#255](https://github.com/unjs/c12/pull/255))
+- Update deps ([bb49bc2](https://github.com/unjs/c12/commit/bb49bc2))
+- Update dotenv to v17 ([9044e56](https://github.com/unjs/c12/commit/9044e56))
+- Simplify readme ([61fdae7](https://github.com/unjs/c12/commit/61fdae7))
+- Simplify docs ([e896c6a](https://github.com/unjs/c12/commit/e896c6a))
+
+### ✅ Tests
+
+- Update snapshot ([c4db5e5](https://github.com/unjs/c12/commit/c4db5e5))
+
+### ❤️ Contributors
+
+- Kanon ([@ysknsid25](https://github.com/ysknsid25))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- SilverSnow <1664816390@qq.com>
+- Giorgio Boa ([@gioboa](https://github.com/gioboa))
+- Alberto Schiabel ([@jkomyno](https://github.com/jkomyno))
+
 ## v3.1.0
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.4...v3.1.0)
