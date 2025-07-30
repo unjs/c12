@@ -163,7 +163,7 @@ You can define a custom function that resolves the config.
 
 ### `configFileRequired`
 
-If this option is set to `true`, loader fails if no config file is found.
+If this option is set to `true`, loader fails if the main config file does not exists.
 
 ## Extending configuration
 
