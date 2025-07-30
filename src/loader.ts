@@ -404,12 +404,9 @@ async function resolveConfig<
     })) as T;
   }
   if (typeof res.config === "function") {
-    // Support conditional config functions
-    res.config = await (options.configContext
-      ? (res.config as (ctx: ConfigFunctionContext) => Promise<any>)(
-          options.configContext,
-        )
-      : (res.config as () => Promise<any>)());
+    res.config = await (
+      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
+    )(options.context);
   }
 
   // Extend env specific config

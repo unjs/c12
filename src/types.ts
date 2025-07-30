@@ -129,7 +129,7 @@ export interface LoadConfigOptions<
   omit$Keys?: boolean;
 
   /** Context passed to config functions */
-  configContext?: ConfigFunctionContext;
+  context?: ConfigFunctionContext;
 
   resolve?: (
     id: string,
