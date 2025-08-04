@@ -27,13 +27,13 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 ## 🦴 Used by
 
 - [Hey API](https://github.com/hey-api/openapi-ts)
+- [Kysely](https://github.com/kysely-org/kysely-ctl)
 - [Nitro](https://nitro.build/)
 - [Nuxt](https://nuxt.com/)
 - [Prisma](https://github.com/prisma/prisma)
 - [Trigger.dev](https://github.com/triggerdotdev/trigger.dev)
 - [UnJS](https://github.com/unjs)
 - [WXT](https://github.com/wxt-dev/wxt)
-- [Kysely](https://github.com/kysely-org/kysely-ctl)
 
 ## Usage
 
