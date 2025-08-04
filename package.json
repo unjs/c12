@@ -31,6 +31,7 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
     "confbox": "^0.2.2",
     "defu": "^6.1.4",
@@ -53,6 +54,8 @@
     "eslint-config-unjs": "^0.5.0",
     "expect-type": "^1.2.2",
     "magicast": "^0.3.5",
+    "valibot": "^1.0.0",
+    "zod": "^3.24.2",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3",
     "unbuild": "^3.6.0",
