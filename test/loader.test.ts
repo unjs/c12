@@ -2,12 +2,13 @@ import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
-import { loadConfig } from "../src";
+import { loadConfig, resolveConfigPath } from "../src";
 
 const r = (path: string) =>
   normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
+const transformPath = (path: string) => path.replaceAll(r("."), "<path>/");
 
 describe("loader", () => {
   it("load fixture config", async () => {
@@ -337,5 +338,162 @@ describe("loader", () => {
         configFileRequired: true,
       }),
     ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
+  });
+
+  describe("resolveConfigPath", () => {
+    it("resolves config file path for existing config", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "test",
+      });
+
+      expect(transformPath(configPath!)).toBe("<path>/fixture/.config/test.ts");
+    });
+
+    it("resolves config file path with custom configFile option", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        configFile: "test.config.dev",
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/test.config.dev.ts",
+      );
+    });
+
+    it("resolves config file path from .config directory", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture/theme"),
+        name: "test",
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/theme/.config/test.config.json5",
+      );
+    });
+
+    it("resolves config file path from base directory", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture/.base"),
+        name: "test",
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/.base/test.config.jsonc",
+      );
+    });
+
+    it("returns fallback path for non-existent config file", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "nonexistent",
+      });
+
+      // When config doesn't exist, it returns the fallback filename
+      expect(configPath).toBe("nonexistent.config");
+    });
+
+    it("resolves with dotenv loading", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "test",
+        dotenv: true,
+      });
+
+      expect(transformPath(configPath!)).toBe("<path>/fixture/.config/test.ts");
+    });
+
+    it("resolves config path with custom name", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "custom",
+        configFile: "test.config.dev",
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/test.config.dev.ts",
+      );
+    });
+
+    it("handles missing cwd gracefully", async () => {
+      const configPath = await resolveConfigPath({
+        name: "test",
+      });
+
+      // Should return a fallback path
+      expect(configPath).toBe("test.config");
+    });
+
+    it("resolves config path with normalized options", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+      });
+
+      // Should use default name "config" and return fallback since config.ts doesn't exist
+      expect(configPath).toBe("config");
+    });
+
+    it("resolves custom config path", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "test",
+        resolve: (id, options) => {
+          if (id === ".") {
+            return Promise.resolve({
+              config: {} as any,
+              configFile: r("./fixture/custom.config.ts"),
+              cwd: options.cwd!,
+            });
+          }
+          return undefined;
+        },
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/custom.config.ts",
+      );
+    });
+
+    it("resolves absolute paths correctly", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "test",
+        configFile: r("./fixture/test.config.dev"),
+      });
+
+      expect(transformPath(configPath!)).toBe(
+        "<path>/fixture/test.config.dev.ts",
+      );
+    });
+
+    it("resolves config with different supported extensions", async () => {
+      const jsonConfigPath = await resolveConfigPath({
+        cwd: r("./fixture/theme"),
+        configFile: "test.config",
+      });
+
+      expect(transformPath(jsonConfigPath!)).toBe(
+        "<path>/fixture/theme/.config/test.config.json5",
+      );
+
+      const jsoncConfigPath = await resolveConfigPath({
+        cwd: r("./fixture/.base"),
+        configFile: "test.config",
+      });
+
+      expect(transformPath(jsoncConfigPath!)).toBe(
+        "<path>/fixture/.base/test.config.jsonc",
+      );
+    });
+
+    it("resolves with specific environment name", async () => {
+      const configPath = await resolveConfigPath({
+        cwd: r("./fixture"),
+        name: "test",
+        envName: "development",
+      });
+
+      expect(transformPath(configPath!)).toBe("<path>/fixture/.config/test.ts");
+    });
   });
 });

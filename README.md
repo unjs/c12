@@ -64,6 +64,13 @@ const { config } = await loadConfig({});
 const { config, configFile, layers } = await loadConfig({});
 ```
 
+Resolve configuration file path:
+
+```js
+// Resolve the path to the configuration file without loading it
+const configPath = await resolveConfigPath({});
+```
+
 ## Loading priority
 
 c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
