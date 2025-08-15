@@ -1,6 +1,6 @@
+export { createDefineConfig } from "./types";
 export type { DotenvOptions, Env } from "./dotenv";
-export { loadDotenv, setupDotenv } from "./dotenv";
-export { SUPPORTED_EXTENSIONS, loadConfig, resolveConfigPath } from "./loader";
+export type { ConfigWatcher, WatchConfigOptions } from "./watch";
 export type {
   C12InputConfig,
   ConfigFunctionContext,
@@ -16,6 +16,7 @@ export type {
   SourceOptions,
   UserInputConfig,
 } from "./types";
-export { createDefineConfig } from "./types";
-export type { ConfigWatcher, WatchConfigOptions } from "./watch";
+
+export { loadDotenv, setupDotenv } from "./dotenv";
+export { SUPPORTED_EXTENSIONS, loadConfig, resolveConfigPath } from "./loader";
 export { watchConfig } from "./watch";
