@@ -305,6 +305,7 @@ async function resolveConfig<
   options: LoadConfigOptions<T, MT>,
   sourceOptions: SourceOptions<T, MT> = {},
 ): Promise<ResolvedConfig<T, MT>> {
+  const originalSource = source;
   // Custom user resolver
   if (options.resolve) {
     const res = await options.resolve(source, options);
@@ -393,6 +394,7 @@ async function resolveConfig<
       options,
     ) ||
     tryResolve(resolve(cwd, ".config", source), options) ||
+    tryResolve(resolve(options.cwd || cwd, originalSource), options) ||
     source;
 
   if (!existsSync(res.configFile!)) {
