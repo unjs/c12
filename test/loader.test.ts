@@ -338,4 +338,29 @@ describe("loader", () => {
       }),
     ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
   });
+
+  it("loads arrays exported from config without merging", async () => {
+    const { config, configFile, _configFile } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/array"),
+      // ensure rc/package.json/defaults do not interfere
+      rcFile: false,
+      packageJson: false,
+      defaults: undefined as any,
+      overrides: undefined as any,
+      extend: false,
+    });
+
+    expect(Array.isArray(config)).toBe(true);
+    expect(config).toEqual([
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+    ]);
+
+    // Ensure it resolved a config file path
+    expect(configFile).toBeDefined();
+    // _configFile should be set when file exists
+    expect(_configFile).toBeDefined();
+  });
 });
