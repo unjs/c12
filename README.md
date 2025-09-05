@@ -102,7 +102,9 @@ Load RC config from the workspace directory and the user's home directory. Only 
 
 ### `dotenv`
 
-Loads `.env` file if enabled. It is disabled by default.
+Loads `.env` file when `true` or an options object is passed. It is disabled by default.
+
+Supports loading multiple files that extend eachother in left-to-right order when a `fileName`s array is passed in the options object.
 
 ### `packageJson`
 
