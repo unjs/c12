@@ -110,6 +110,7 @@ Supports loading multiple files that extend eachother in left-to-right order whe
 
 ```ini
 # .env
+CONNECTION_POOL_MAX="10"
 DATABASE_URL="<...rds...>"
 ```
 
@@ -120,6 +121,7 @@ DATABASE_URL="<...localhost...>"
 
 ```js
 export default {
+  connectionPoolMax: process.env.CONNECTION_POOL_MAX,
   databaseURL: process.env.DATABASE_URL,
 };
 ```
@@ -134,6 +136,7 @@ const config = await loadConfig({
   },
 });
 
+console.log(config.config.connectionPoolMax); // "10"
 console.log(config.config.databaseURL); // "<...localhost...>"
 ```
 
