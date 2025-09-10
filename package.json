@@ -1,8 +1,8 @@
 {
-  "name": "c12",
-  "version": "3.2.0",
+  "name": "@hey-api/c12",
+  "version": "3.2.1",
   "description": "Smart Config Loader",
-  "repository": "unjs/c12",
+  "repository": "hey-api/c12",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
