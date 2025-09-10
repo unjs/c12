@@ -14,7 +14,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 - `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with [unjs/jiti](https://jiti.unjs.io)
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
-- `.config/` directory support following [config dir proposal](https://github.com/pi0/config-dir)
+- `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
@@ -26,42 +26,23 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## 🦴 Used by
 
-- [Nuxt](https://nuxt.com/)
-- [Nitro](https://nitro.unjs.io/)
-- [Unbuild](https://unbuild.unjs.io)
-- [Automd](https://automd.unjs.io)
-- [Changelogen](https://changelogen.unjs.io)
-- [RemixKit](https://github.com/jrestall/remix-kit)
 - [Hey API](https://github.com/hey-api/openapi-ts)
-- [kysely-ctl](https://github.com/kysely-org/kysely-ctl)
+- [Kysely](https://github.com/kysely-org/kysely-ctl)
+- [Nitro](https://nitro.build/)
+- [Nuxt](https://nuxt.com/)
+- [Prisma](https://github.com/prisma/prisma)
+- [Trigger.dev](https://github.com/triggerdotdev/trigger.dev)
+- [UnJS](https://github.com/unjs)
+- [WXT](https://github.com/wxt-dev/wxt)
 
 ## Usage
 
 Install package:
 
-<!-- automd:pm-install -->
-
 ```sh
 # ✨ Auto-detect
 npx nypm install c12
-
-# npm
-npm install c12
-
-# yarn
-yarn add c12
-
-# pnpm
-pnpm install c12
-
-# bun
-bun install c12
-
-# deno
-deno install c12
 ```
-
-<!-- /automd -->
 
 Import:
 
@@ -108,8 +89,6 @@ Configuration base name. The default is `config`.
 ### `configFile`
 
 Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).
-
-Set to `false` to avoid loading the config file.
 
 ### `rcFile`
 
@@ -172,6 +151,18 @@ Custom options merger function. Default is [defu](https://github.com/unjs/defu).
 Environment name used for [environment specific configuration](#environment-specific-configuration).
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
+
+### `context`
+
+Context object passed to dynamic config functions.
+
+### `resolve`
+
+You can define a custom function that resolves the config.
+
+### `configFileRequired`
+
+If this option is set to `true`, loader fails if the main config file does not exists.
 
 ## Extending configuration
 
@@ -383,29 +374,10 @@ Update or create a new configuration files.
 
 Add `magicast` peer dependency:
 
-<!-- automd:pm-install name="magicast" dev -->
-
 ```sh
 # ✨ Auto-detect
 npx nypm install -D magicast
-
-# npm
-npm install -D magicast
-
-# yarn
-yarn add -D magicast
-
-# pnpm
-pnpm install -D magicast
-
-# bun
-bun install -D magicast
-
-# deno
-deno install --dev magicast
 ```
-
-<!-- /automd -->
 
 Import util from `c12/update`
 
@@ -425,6 +397,28 @@ const { configFile, created } = await updateConfig({
 });
 
 console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
+```
+
+## Configuration functions
+
+You can use a function to define your configuration dynamically based on context.
+
+```ts
+// config.ts
+export default (ctx) => {
+  return {
+    apiUrl: ctx?.dev ? "http://localhost:3000" : "https://api.example.com",
+  };
+};
+```
+
+```ts
+// Usage
+import { loadConfig } from "c12";
+
+const config = await loadConfig({
+  context: { dev: true },
+});
 ```
 
 ## Contribution

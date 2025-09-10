@@ -109,10 +109,14 @@ export async function watchConfig<
       });
     }
     const oldConfig = config;
-    const newConfig = await loadConfig(options);
-    config = newConfig;
+    try {
+      config = await loadConfig(options);
+    } catch (error) {
+      console.warn(`Failed to load config ${path}\n${error}`);
+      return;
+    }
     const changeCtx = {
-      newConfig,
+      newConfig: config,
       oldConfig,
       getDiff: () => diff(oldConfig.config, config.config),
     };

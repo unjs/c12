@@ -21,7 +21,10 @@ describe("loader", () => {
     const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
       name: "test",
-      dotenv: true,
+      dotenv: {
+        cwd: r("./fixture"), // TODO: fix types
+        fileName: [".env", ".env.local"],
+      },
       packageJson: ["c12", "c12-alt"],
       globalRc: true,
       envName: "test",
@@ -76,6 +79,9 @@ describe("loader", () => {
         "configFile": true,
         "defaultConfig": true,
         "devConfig": true,
+        "dotenv": "true",
+        "dotenvLocal": "true",
+        "dotenvOverride": ".env.local",
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
@@ -146,6 +152,7 @@ describe("loader", () => {
           "configFile": "package.json",
         },
         {
+          "_configFile": "<path>/fixture/theme/.config/test.config.json5",
           "config": {
             "colors": {
               "primary": "theme_primary",
@@ -159,6 +166,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/.base/test.config.jsonc",
           "config": {
             "$env": {
               "test": {
@@ -185,8 +193,12 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/test.config.dev.ts",
           "config": {
             "devConfig": true,
+            "dotenv": "true",
+            "dotenvLocal": "true",
+            "dotenvOverride": ".env.local",
           },
           "configFile": "<path>/fixture/test.config.dev.ts",
           "cwd": "<path>/fixture",
@@ -195,6 +207,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/node_modules/c12-npm-test/test.config.ts",
           "config": {
             "npmConfig": true,
           },
@@ -205,6 +218,7 @@ describe("loader", () => {
           "sourceOptions": {},
         },
         {
+          "_configFile": "<path>/fixture/node_modules/.c12/gh_unjs_c12_vsPD2sVEDo/test.config.ts",
           "config": {
             "githubLayer": true,
           },
@@ -258,6 +272,9 @@ describe("loader", () => {
         },
         "configFile": true,
         "devConfig": true,
+        "dotenv": "true",
+        "dotenvLocal": "true",
+        "dotenvOverride": ".env.local",
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
@@ -303,5 +320,47 @@ describe("loader", () => {
       (layer) => layer.configFile === "<path>/fixture/.base/test.config.jsonc",
     )!;
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
+  });
+
+  it("no config loaded and configFileRequired is default setting", async () => {
+    await expect(
+      loadConfig({
+        configFile: "CUSTOM",
+      }),
+    ).resolves.not.toThrowError();
+  });
+
+  it("no config loaded and configFileRequired is true", async () => {
+    expect(
+      loadConfig({
+        configFile: "CUSTOM",
+        configFileRequired: true,
+      }),
+    ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
+  });
+
+  it("loads arrays exported from config without merging", async () => {
+    const { config, configFile, _configFile } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/array"),
+      // ensure rc/package.json/defaults do not interfere
+      rcFile: false,
+      packageJson: false,
+      defaults: undefined as any,
+      overrides: undefined as any,
+      extend: false,
+    });
+
+    expect(Array.isArray(config)).toBe(true);
+    expect(config).toEqual([
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+    ]);
+
+    // Ensure it resolved a config file path
+    expect(configFile).toBeDefined();
+    // _configFile should be set when file exists
+    expect(_configFile).toBeDefined();
   });
 });

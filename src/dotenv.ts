@@ -1,4 +1,4 @@
-import { promises as fsp, existsSync } from "node:fs";
+import { promises as fsp, statSync } from "node:fs";
 import { resolve } from "pathe";
 import * as dotenv from "dotenv";
 
@@ -9,10 +9,11 @@ export interface DotenvOptions {
   cwd: string;
 
   /**
-   * What file to look in for environment variables (either absolute or relative
+   * What file or files to look in for environment variables (either absolute or relative
    * to the current working directory). For example, `.env`.
+   * With the array type, the order enforce the env loading priority (last one overrides).
    */
-  fileName?: string;
+  fileName?: string | string[];
 
   /**
    * Whether to interpolate variables within .env.
@@ -51,9 +52,16 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     interpolate: options.interpolate ?? true,
   });
 
+  const dotenvVars = getDotEnvVars(targetEnvironment);
+
   // Fill process.env
   for (const key in environment) {
-    if (!key.startsWith("_") && targetEnvironment[key] === undefined) {
+    // Skip private variables
+    if (key.startsWith("_")) {
+      continue;
+    }
+    // Override if variables are not already set or come from `.env`
+    if (targetEnvironment[key] === undefined || dotenvVars.has(key)) {
       targetEnvironment[key] = environment[key];
     }
   }
@@ -65,17 +73,27 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
 
-  const dotenvFile = resolve(options.cwd, options.fileName!);
+  const _fileName = options.fileName || ".env";
+  const dotenvFiles = typeof _fileName === "string" ? [_fileName] : _fileName;
 
-  if (existsSync(dotenvFile)) {
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
-    Object.assign(environment, parsed);
-  }
+  const dotenvVars = getDotEnvVars(options.env || {});
 
   // Apply process.env
-  if (!options.env?._applied) {
-    Object.assign(environment, options.env);
-    environment._applied = true;
+  Object.assign(environment, options.env);
+
+  for (const file of dotenvFiles) {
+    const dotenvFile = resolve(options.cwd, file);
+    if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
+      continue;
+    }
+    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    for (const key in parsed) {
+      if (key in environment && !dotenvVars.has(key)) {
+        continue; // Do not override existing env variables
+      }
+      environment[key] = parsed[key];
+      dotenvVars.add(key);
+    }
   }
 
   // Interpolate env
@@ -143,4 +161,18 @@ function interpolate(
   for (const key in target) {
     target[key] = interpolate(getValue(key));
   }
+}
+
+// Internal: Keep track of which variables that are set by dotenv
+
+declare global {
+  var __c12_dotenv_vars__: Map<Record<string, any>, Set<string>>;
+}
+
+function getDotEnvVars(targetEnvironment: Record<string, any>) {
+  const globalRegistry = (globalThis.__c12_dotenv_vars__ ||= new Map());
+  if (!globalRegistry.has(targetEnvironment)) {
+    globalRegistry.set(targetEnvironment, new Set());
+  }
+  return globalRegistry.get(targetEnvironment)!;
 }
