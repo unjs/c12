@@ -6,6 +6,10 @@
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",

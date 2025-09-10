@@ -2,9 +2,9 @@
 
 <!-- automd:badges color=yellow codecov -->
 
-[![npm version](https://img.shields.io/npm/v/c12?color=yellow)](https://npmjs.com/package/c12)
-[![npm downloads](https://img.shields.io/npm/dm/c12?color=yellow)](https://npm.chart.dev/c12)
-[![codecov](https://img.shields.io/codecov/c/gh/unjs/c12?color=yellow)](https://codecov.io/gh/unjs/c12)
+[![npm version](https://img.shields.io/npm/v/@hey-api/c12?color=yellow)](https://npmjs.com/package/@hey-api/c12)
+[![npm downloads](https://img.shields.io/npm/dm/@hey-api/c12?color=yellow)](https://npm.chart.dev/@hey-api/c12)
+[![codecov](https://img.shields.io/codecov/c/gh/hey-api/c12?color=yellow)](https://codecov.io/gh/hey-api/c12)
 
 <!-- /automd -->
 
@@ -440,11 +440,11 @@ const config = await loadConfig({
 
 <!-- automd:contributors license=MIT author="pi0" -->
 
-Published under the [MIT](https://github.com/unjs/c12/blob/main/LICENSE) license.
-Made by [@pi0](https://github.com/pi0) and [community](https://github.com/unjs/c12/graphs/contributors) 💛
+Published under the [MIT](https://github.com/hey-api/c12/blob/main/LICENSE) license.
+Made by [@pi0](https://github.com/pi0) and [community](https://github.com/hey-api/c12/graphs/contributors) 💛
 <br><br>
-<a href="https://github.com/unjs/c12/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=unjs/c12" />
+<a href="https://github.com/hey-api/c12/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=hey-api/c12" />
 </a>
 
 <!-- /automd -->
