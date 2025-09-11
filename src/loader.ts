@@ -114,6 +114,7 @@ export async function loadConfig<
   // Load main config file
   const _mainConfig = await resolveConfig(".", options);
   if (_mainConfig.configFile) {
+    rawConfigs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
     r._configFile = _mainConfig._configFile;
   }
@@ -147,9 +148,6 @@ export async function loadConfig<
 
     return r;
   }
-
-  // Only set raw main config if it is not an array
-  rawConfigs.main = _mainConfig.config;
 
   // Load rc files
   if (options.rcFile) {
@@ -206,10 +204,9 @@ export async function loadConfig<
   // Allow extending
   if (options.extend) {
     await extendConfig(r.config, options);
-    const layers = r.config._layers;
-    r.layers = layers;
+    r.layers = r.config._layers;
     delete r.config._layers;
-    r.config = _merger(r.config, ...layers.map((e: any) => e.config)) as T;
+    r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
   }
 
   // Preserve unmerged sources as layers
@@ -219,7 +216,7 @@ export async function loadConfig<
       configFile: undefined,
       cwd: undefined,
     },
-    { config: configs.main!, configFile: options.configFile, cwd: options.cwd },
+    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
     configs.rc && { config: configs.rc, configFile: options.rcFile },
     configs.packageJson && {
       config: configs.packageJson,
@@ -227,7 +224,7 @@ export async function loadConfig<
     },
   ].filter((l) => l && l.config) as ConfigLayer<T, MT>[];
 
-  r.layers = [...baseLayers, ...(r.layers || [])];
+  r.layers = [...baseLayers, ...r.layers!];
 
   // Apply defaults
   if (options.defaults) {
@@ -260,29 +257,23 @@ async function extendConfig<
   if (!options.extend) {
     return;
   }
-  let keys = options.extend.extendKey || [];
+  let keys = options.extend.extendKey;
   if (typeof keys === "string") {
     keys = [keys];
   }
-  const extendSources: Array<
-    | string
-    | [string, SourceOptions<T, MT>?]
-    | { source: string; options?: SourceOptions<T, MT> }
-  > = [];
-  for (const key of keys) {
-    const value = config[key];
-    const list = Array.isArray(value) ? value : [value];
-    extendSources.push(...(list.filter(Boolean) as any[]));
+  const extendSources = [];
+  for (const key of keys as string[]) {
+    extendSources.push(
+      ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(
+        Boolean,
+      ),
+    );
     delete config[key];
   }
   for (let extendSource of extendSources) {
     const originalExtendSource = extendSource;
-    let sourceOptions: SourceOptions<T, MT> = {};
-    if (
-      typeof extendSource === "object" &&
-      extendSource !== null &&
-      "source" in extendSource
-    ) {
+    let sourceOptions = {};
+    if (extendSource.source) {
       sourceOptions = extendSource.options || {};
       extendSource = extendSource.source;
     }
@@ -309,14 +300,10 @@ async function extendConfig<
       );
       continue;
     }
-    await extendConfig(_config.config, {
-      ...options,
-      cwd: _config.cwd,
-    });
-    config._layers!.push(_config);
-    const childLayers = _config.config._layers;
-    if (childLayers) {
-      config._layers!.push(...childLayers);
+    await extendConfig(_config.config, { ...options, cwd: _config.cwd });
+    config._layers.push(_config);
+    if (_config.config._layers) {
+      config._layers.push(..._config.config._layers);
       delete _config.config._layers;
     }
   }
