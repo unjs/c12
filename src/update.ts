@@ -9,39 +9,24 @@ const UPDATABLE_EXTS = [".js", ".ts", ".mjs", ".cjs", ".mts", ".cts"] as const;
 /**
  * @experimental Update a config file or create a new one.
  */
-export async function updateConfig(
-  opts: UpdateConfigOptions,
-): Promise<UpdateConfigResult> {
+export async function updateConfig(opts: UpdateConfigOptions): Promise<UpdateConfigResult> {
   const { parseModule } = await import("magicast");
 
   // Try to find an existing config file
   let configFile =
     tryResolve(`./${opts.configFile}`, opts.cwd, SUPPORTED_EXTENSIONS) ||
-    tryResolve(
-      `./.config/${opts.configFile}`,
-      opts.cwd,
-      SUPPORTED_EXTENSIONS,
-    ) ||
-    tryResolve(
-      `./.config/${opts.configFile.split(".")[0]}`,
-      opts.cwd,
-      SUPPORTED_EXTENSIONS,
-    );
+    tryResolve(`./.config/${opts.configFile}`, opts.cwd, SUPPORTED_EXTENSIONS) ||
+    tryResolve(`./.config/${opts.configFile.split(".")[0]}`, opts.cwd, SUPPORTED_EXTENSIONS);
 
   // If not found
   let created = false;
   if (!configFile) {
-    configFile = join(
-      opts.cwd,
-      opts.configFile + (opts.createExtension || ".ts"),
-    );
-    const createResult =
-      (await opts.onCreate?.({ configFile: configFile })) ?? true;
+    configFile = join(opts.cwd, opts.configFile + (opts.createExtension || ".ts"));
+    const createResult = (await opts.onCreate?.({ configFile: configFile })) ?? true;
     if (!createResult) {
       throw new Error("Config file creation aborted.");
     }
-    const content =
-      typeof createResult === "string" ? createResult : `export default {}\n`;
+    const content = typeof createResult === "string" ? createResult : `export default {}\n`;
     await mkdir(dirname(configFile), { recursive: true });
     await writeFile(configFile, content, "utf8");
     created = true;
@@ -62,10 +47,7 @@ export async function updateConfig(
   if (!defaultExport) {
     throw new Error("Default export is missing in the config file!");
   }
-  const configObj =
-    defaultExport.$type === "function-call"
-      ? defaultExport.$args[0]
-      : defaultExport;
+  const configObj = defaultExport.$type === "function-call" ? defaultExport.$args[0] : defaultExport;
 
   await opts.onUpdate?.(configObj);
 
@@ -99,10 +81,7 @@ export interface UpdateConfigResult {
 
 type MaybePromise<T> = T | Promise<T>;
 
-type MagicAstOptions = Exclude<
-  Parameters<(typeof import("magicast"))["parseModule"]>[1],
-  undefined
->;
+type MagicAstOptions = Exclude<Parameters<(typeof import("magicast"))["parseModule"]>[1], undefined>;
 
 export interface UpdateConfigOptions {
   /**

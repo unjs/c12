@@ -2,12 +2,7 @@ import type { ChokidarOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
 import type { diff } from "ohash/utils";
-import type {
-  UserInputConfig,
-  ConfigLayerMeta,
-  ResolvedConfig,
-  LoadConfigOptions,
-} from "./types";
+import type { UserInputConfig, ConfigLayerMeta, ResolvedConfig, LoadConfigOptions } from "./types";
 import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader";
 
 type DiffEntries = ReturnType<typeof diff>;
@@ -27,10 +22,7 @@ export interface WatchConfigOptions<
   chokidarOptions?: ChokidarOptions;
   debounce?: false | number;
 
-  onWatch?: (event: {
-    type: "created" | "updated" | "removed";
-    path: string;
-  }) => void | Promise<void>;
+  onWatch?: (event: { type: "created" | "updated" | "removed"; path: string }) => void | Promise<void>;
 
   acceptHMR?: (context: {
     getDiff: () => DiffEntries;
@@ -58,9 +50,7 @@ export async function watchConfig<
   let config = await loadConfig<T, MT>(options);
 
   const configName = options.name || "config";
-  const configFileName =
-    options.configFile ??
-    (options.name === "config" ? "config" : `${options.name}.config`);
+  const configFileName = options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
   const watchingFiles = [
     ...new Set(
       (config.layers || [])
@@ -69,21 +59,11 @@ export async function watchConfig<
           ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
             resolve(l.cwd!, configFileName + ext),
             resolve(l.cwd!, ".config", configFileName + ext),
-            resolve(
-              l.cwd!,
-              ".config",
-              configFileName.replace(/\.config$/, "") + ext,
-            ),
+            resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
           ]),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
-          options.rcFile &&
-            resolve(
-              l.cwd!,
-              typeof options.rcFile === "string"
-                ? options.rcFile
-                : `.${configName}rc`,
-            ),
+          options.rcFile && resolve(l.cwd!, typeof options.rcFile === "string" ? options.rcFile : `.${configName}rc`),
           options.packageJson && resolve(l.cwd!, "package.json"),
         ])
         .filter(Boolean),

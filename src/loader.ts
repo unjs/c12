@@ -58,9 +58,7 @@ export async function loadConfig<
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
   options.envName = options.envName ?? process.env.NODE_ENV;
-  options.configFile =
-    options.configFile ??
-    (options.name === "config" ? "config" : `${options.name}.config`);
+  options.configFile = options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
   if (options.extend !== false) {
     options.extend = {
@@ -173,11 +171,7 @@ export async function loadConfig<
     const keys = (
       Array.isArray(options.packageJson)
         ? options.packageJson
-        : [
-            typeof options.packageJson === "string"
-              ? options.packageJson
-              : options.name,
-          ]
+        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
@@ -189,19 +183,11 @@ export async function loadConfig<
   // TODO: #253 change order from defaults to overrides in next major version
   for (const key in rawConfigs) {
     const value = rawConfigs[key as ConfigSource];
-    configs[key as ConfigSource] = await (typeof value === "function"
-      ? value({ configs, rawConfigs })
-      : value);
+    configs[key as ConfigSource] = await (typeof value === "function" ? value({ configs, rawConfigs }) : value);
   }
 
   // Combine sources
-  r.config = _merger(
-    configs.overrides,
-    configs.main,
-    configs.rc,
-    configs.packageJson,
-    configs.defaultConfig,
-  ) as T;
+  r.config = _merger(configs.overrides, configs.main, configs.rc, configs.packageJson, configs.defaultConfig) as T;
 
   // Allow extending
   if (options.extend) {
@@ -252,10 +238,10 @@ export async function loadConfig<
   return r;
 }
 
-async function extendConfig<
-  T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta,
->(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
+async function extendConfig<T extends UserInputConfig = UserInputConfig, MT extends ConfigLayerMeta = ConfigLayerMeta>(
+  config: InputConfig<T, MT>,
+  options: LoadConfigOptions<T, MT>,
+) {
   (config as any)._layers = config._layers || [];
   if (!options.extend) {
     return;
@@ -265,9 +251,7 @@ async function extendConfig<
     keys = [keys];
   }
   const extendSources: Array<
-    | string
-    | [string, SourceOptions<T, MT>?]
-    | { source: string; options?: SourceOptions<T, MT> }
+    string | [string, SourceOptions<T, MT>?] | { source: string; options?: SourceOptions<T, MT> }
   > = [];
   for (const key of keys) {
     const value = config[key];
@@ -278,11 +262,7 @@ async function extendConfig<
   for (let extendSource of extendSources) {
     const originalExtendSource = extendSource;
     let sourceOptions: SourceOptions<T, MT> = {};
-    if (
-      typeof extendSource === "object" &&
-      extendSource !== null &&
-      "source" in extendSource
-    ) {
+    if (typeof extendSource === "object" && extendSource !== null && "source" in extendSource) {
       sourceOptions = extendSource.options || {};
       extendSource = extendSource.source;
     }
@@ -293,20 +273,14 @@ async function extendConfig<
     if (typeof extendSource !== "string") {
       // TODO: Use error in next major versions
 
-      console.warn(
-        `Cannot extend config from \`${JSON.stringify(
-          originalExtendSource,
-        )}\` in ${options.cwd}`,
-      );
+      console.warn(`Cannot extend config from \`${JSON.stringify(originalExtendSource)}\` in ${options.cwd}`);
       continue;
     }
     const _config = await resolveConfig(extendSource, options, sourceOptions);
     if (!_config.config) {
       // TODO: Use error in next major versions
 
-      console.warn(
-        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`,
-      );
+      console.warn(`Cannot extend config from \`${extendSource}\` in ${options.cwd}`);
       continue;
     }
     await extendConfig(_config.config, {
@@ -323,23 +297,12 @@ async function extendConfig<
 }
 
 // TODO: Either expose from giget directly or redirect all non file:// protocols to giget
-const GIGET_PREFIXES = [
-  "gh:",
-  "github:",
-  "gitlab:",
-  "bitbucket:",
-  "https://",
-  "http://",
-];
+const GIGET_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://", "http://"];
 
 // https://github.com/dword-design/package-name-regex
-const NPM_PACKAGE_RE =
-  /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
+const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
-async function resolveConfig<
-  T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta,
->(
+async function resolveConfig<T extends UserInputConfig = UserInputConfig, MT extends ConfigLayerMeta = ConfigLayerMeta>(
   source: string,
   options: LoadConfigOptions<T, MT>,
   sourceOptions: SourceOptions<T, MT> = {},
@@ -356,18 +319,11 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
-  const customProviderKeys = Object.keys(
-    sourceOptions.giget?.providers || {},
-  ).map((key) => `${key}:`);
+  const customProviderKeys = Object.keys(sourceOptions.giget?.providers || {}).map((key) => `${key}:`);
   const gigetPrefixes =
-    customProviderKeys.length > 0
-      ? [...new Set([...customProviderKeys, ...GIGET_PREFIXES])]
-      : GIGET_PREFIXES;
+    customProviderKeys.length > 0 ? [...new Set([...customProviderKeys, ...GIGET_PREFIXES])] : GIGET_PREFIXES;
 
-  if (
-    options.giget !== false &&
-    gigetPrefixes.some((prefix) => source.startsWith(prefix))
-  ) {
+  if (options.giget !== false && gigetPrefixes.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
     const { digest } = await import("ohash");
 
@@ -427,10 +383,7 @@ async function resolveConfig<
 
   res.configFile =
     tryResolve(resolve(cwd, source), options) ||
-    tryResolve(
-      resolve(cwd, ".config", source.replace(/\.config$/, "")),
-      options,
-    ) ||
+    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, "")), options) ||
     tryResolve(resolve(cwd, ".config", source), options) ||
     source;
 
@@ -442,8 +395,7 @@ async function resolveConfig<
 
   const configFileExt = extname(res.configFile!) || "";
   if (configFileExt in ASYNC_LOADERS) {
-    const asyncLoader =
-      await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
+    const asyncLoader = await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
@@ -452,9 +404,7 @@ async function resolveConfig<
     })) as T;
   }
   if (typeof res.config === "function") {
-    res.config = await (
-      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
-    )(options.context);
+    res.config = await (res.config as (ctx?: ConfigFunctionContext) => Promise<any>)(options.context);
   }
 
   // Extend env specific config

@@ -105,11 +105,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 }
 
 // Based on https://github.com/motdotla/dotenv-expand
-function interpolate(
-  target: Record<string, any>,
-  source: Record<string, any> = {},
-  parse = (v: any) => v,
-) {
+function interpolate(target: Record<string, any>, source: Record<string, any> = {}, parse = (v: any) => v) {
   function getValue(key: string) {
     // Source value 'wins' over target value
     return source[key] === undefined ? target[key] : source[key];
@@ -137,11 +133,7 @@ function interpolate(
 
           // Avoid recursion
           if (parents.includes(key)) {
-            console.warn(
-              `Please avoid recursive environment variables ( loop: ${parents.join(
-                " > ",
-              )} > ${key} )`,
-            );
+            console.warn(`Please avoid recursive environment variables ( loop: ${parents.join(" > ")} > ${key} )`);
             return "";
           }
 
@@ -151,9 +143,7 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value === undefined
-          ? newValue
-          : newValue.replace(replacePart, value);
+        return value === undefined ? newValue : newValue.replace(replacePart, value);
       }, value),
     );
   }

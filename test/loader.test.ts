@@ -4,10 +4,8 @@ import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
 import { loadConfig } from "../src";
 
-const r = (path: string) =>
-  normalize(fileURLToPath(new URL(path, import.meta.url)));
-const transformPaths = (object: object) =>
-  JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
+const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
+const transformPaths = (object: object) => JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
 describe("loader", () => {
   it("load fixture config", async () => {
@@ -306,14 +304,9 @@ describe("loader", () => {
     expect(resolvedConfigKeys).not.toContain("$meta");
     expect(resolvedConfigKeys).not.toContain("$test");
 
-    const transformdLayers = transformPaths(layers!) as ConfigLayer<
-      UserInputConfig,
-      ConfigLayerMeta
-    >[];
+    const transformdLayers = transformPaths(layers!) as ConfigLayer<UserInputConfig, ConfigLayerMeta>[];
 
-    const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "test.config",
-    )!;
+    const configLayer = transformdLayers.find((layer) => layer.configFile === "test.config")!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseLayerConfig = transformdLayers.find(
