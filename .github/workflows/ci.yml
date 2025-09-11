@@ -16,17 +16,54 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+
       - run: npm i -fg corepack && corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
-      - run: pnpm install
+
+      - name: Install dependencies
+        run: pnpm install
+
       - run: pnpm lint
         if: ${{ matrix.os != 'windows-latest' }}
-      - run: pnpm build
+
+      - name: Prepare Package
+        run: pnpm build
         if: ${{ matrix.os != 'windows-latest' }}
+
       - run: pnpm test:types
         if: ${{ matrix.os != 'windows-latest' }}
+
       - run: pnpm vitest --coverage
+
       - uses: codecov/codecov-action@v5
+
+  release:
+    name: Release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - ci
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Prepare Package
+        run: pnpm build
+
+      - name: Publish to NPM
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
