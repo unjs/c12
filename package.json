@@ -2,14 +2,23 @@
   "name": "@hey-api/c12",
   "version": "3.2.1",
   "description": "Smart Config Loader",
-  "repository": "hey-api/c12",
+  "homepage": "https://heyapi.dev/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hey-api/c12.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hey-api/c12/issues"
+  },
   "license": "MIT",
+  "author": {
+    "email": "lubos@heyapi.dev",
+    "name": "Hey API",
+    "url": "https://heyapi.dev"
+  },
+  "funding": "https://github.com/sponsors/hey-api",
   "sideEffects": false,
   "type": "module",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
