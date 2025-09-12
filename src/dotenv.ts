@@ -6,7 +6,7 @@ export interface DotenvOptions {
   /**
    * The project root directory (either absolute or relative to the current working directory).
    *
-   * Defaults to main `cwd` in `loadConfig` context, or `process.cwd()` when used as standalone.
+   * Defaults to `options.cwd` in `loadConfig` context, or `process.cwd()` when used as standalone.
    */
   cwd?: string;
 
