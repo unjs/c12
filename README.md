@@ -131,7 +131,6 @@ import { loadConfig } from "c12";
 
 const config = await loadConfig({
   dotenv: {
-    cwd: process.cwd(),
     fileName: [".env", ".env.local"],
   },
 });
