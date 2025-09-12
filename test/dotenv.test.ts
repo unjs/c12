@@ -1,13 +1,16 @@
 import { fileURLToPath } from "node:url";
 import { beforeEach, expect, it, describe, afterAll } from "vitest";
 import { join, normalize } from "pathe";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
 
 const tmpDir = normalize(
   fileURLToPath(new URL(".tmp-dotenv", import.meta.url)),
 );
 const r = (path: string) => join(tmpDir, path);
+
+const cwdEnvFileName = ".env.12345";
+const cwdEnvPath = join(process.cwd(), cwdEnvFileName);
 
 describe("update config file", () => {
   beforeEach(async () => {
@@ -16,6 +19,7 @@ describe("update config file", () => {
   });
   afterAll(async () => {
     await rm(tmpDir, { recursive: true, force: true });
+    await unlink(cwdEnvPath).catch(console.error);
   });
   it("should read .env file into process.env", async () => {
     await setupDotenv({ cwd: tmpDir });
@@ -52,5 +56,13 @@ describe("update config file", () => {
     await setupDotenv({ cwd: tmpDir, fileName: [".my-env", ".my-env.local"] });
     expect(process.env.api_key).toBe("12345678");
     expect(process.env.fizz).toBe("buzz_local");
+  });
+
+  it("should default to `process.cwd()` when `options.cwd` is not provided", async () => {
+    await writeFile(cwdEnvPath, "fizz=buzz");
+
+    await setupDotenv({ fileName: [cwdEnvFileName] });
+
+    expect(process.env.fizz).toBe("buzz");
   });
 });

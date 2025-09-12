@@ -5,8 +5,10 @@ import * as dotenv from "dotenv";
 export interface DotenvOptions {
   /**
    * The project root directory (either absolute or relative to the current working directory).
+   *
+   * Defaults to main `cwd` in `loadConfig` context, or `process.cwd()` when used as standalone.
    */
-  cwd: string;
+  cwd?: string;
 
   /**
    * What file or files to look in for environment variables (either absolute or relative
@@ -30,7 +32,6 @@ export interface DotenvOptions {
   /**
    * An object describing environment variables (key, value pairs).
    */
-
   env?: NodeJS.ProcessEnv;
 }
 
@@ -73,6 +74,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
 export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   const environment = Object.create(null);
 
+  const cwd = resolve(process.cwd(), options.cwd || ".");
   const _fileName = options.fileName || ".env";
   const dotenvFiles = typeof _fileName === "string" ? [_fileName] : _fileName;
 
@@ -82,7 +84,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   Object.assign(environment, options.env);
 
   for (const file of dotenvFiles) {
-    const dotenvFile = resolve(options.cwd, file);
+    const dotenvFile = resolve(cwd, file);
     if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
       continue;
     }
