@@ -59,10 +59,10 @@ describe("update config file", () => {
   });
 
   it("should default to `process.cwd()` when `options.cwd` is not provided", async () => {
-    await writeFile(cwdEnvPath, "fizz=buzz");
+    await writeFile(cwdEnvPath, "humpty=dumpty");
 
     await setupDotenv({ fileName: [cwdEnvFileName] });
 
-    expect(process.env.fizz).toBe("buzz");
+    expect(process.env.humpty).toBe("dumpty");
   });
 });
