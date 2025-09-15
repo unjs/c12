@@ -344,7 +344,7 @@ describe("loader", () => {
   });
 
   it("no config loaded and configFileRequired is true", async () => {
-    expect(
+    await expect(
       loadConfig({
         configFile: "CUSTOM",
         configFileRequired: true,
