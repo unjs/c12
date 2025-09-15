@@ -85,6 +85,7 @@ describe("loader", () => {
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
+        "not_a_folder": true,
         "npmConfig": true,
         "overridden": true,
         "packageJSON": true,
@@ -130,6 +131,7 @@ describe("loader", () => {
                   "giget": {},
                 },
               ],
+              "./not-a-folder",
             ],
             "overridden": false,
             "theme": "./theme",
@@ -229,6 +231,17 @@ describe("loader", () => {
           "sourceOptions": {
             "giget": {},
           },
+        },
+        {
+          "_configFile": "<path>/fixture/not-a-folder.ts",
+          "config": {
+            "not_a_folder": true,
+          },
+          "configFile": "<path>/fixture/not-a-folder.ts",
+          "cwd": "<path>/fixture/not-a-folder",
+          "meta": {},
+          "source": "test.config",
+          "sourceOptions": {},
         },
         {
           "config": {
