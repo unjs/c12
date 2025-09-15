@@ -123,32 +123,6 @@ export async function loadConfig<
     r.meta = _mainConfig.meta;
   }
 
-  // If main config exports an array, return it directly without merging
-  if (Array.isArray(_mainConfig.config)) {
-    const arr = _mainConfig.config;
-    // Assign array as-is (typed through unknown to keep generic signature intact)
-    r.config = arr;
-    r.layers = [
-      {
-        config: undefined,
-        configFile: options.configFile,
-        cwd: options.cwd,
-      },
-    ];
-
-    // Always windows paths
-    if (r.configFile) {
-      r.configFile = _normalize(r.configFile);
-    }
-
-    // Fail if no config loaded
-    if (options.configFileRequired && !r._configFile) {
-      throw new Error(`Required config (${r.configFile}) cannot be resolved.`);
-    }
-
-    return r;
-  }
-
   // Load rc files
   if (options.rcFile) {
     const rcSources: T[] = [];
@@ -192,21 +166,26 @@ export async function loadConfig<
       : value);
   }
 
-  // Combine sources
-  r.config = _merger(
-    configs.overrides,
-    configs.main,
-    configs.rc,
-    configs.packageJson,
-    configs.defaultConfig,
-  ) as T;
+  if (Array.isArray(configs.main)) {
+    // If the main config exports an array, use it directly without merging or extending
+    r.config = configs.main;
+  } else {
+    // Combine sources
+    r.config = _merger(
+      configs.overrides,
+      configs.main,
+      configs.rc,
+      configs.packageJson,
+      configs.defaultConfig,
+    ) as T;
 
-  // Allow extending
-  if (options.extend) {
-    await extendConfig(r.config, options);
-    r.layers = r.config._layers;
-    delete r.config._layers;
-    r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
+    // Allow extending
+    if (options.extend) {
+      await extendConfig(r.config, options);
+      r.layers = r.config._layers;
+      delete r.config._layers;
+      r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
+    }
   }
 
   // Preserve unmerged sources as layers

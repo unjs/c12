@@ -63,7 +63,7 @@ export interface ConfigLayer<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
-  config: T | undefined;
+  config: T | null;
   source?: string;
   sourceOptions?: SourceOptions<T, MT>;
   meta?: MT;
