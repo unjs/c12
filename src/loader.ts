@@ -55,19 +55,7 @@ export async function loadConfig<
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
-  options.cwd = resolve(process.cwd(), options.cwd || ".");
-  options.name = options.name || "config";
-  options.envName = options.envName ?? process.env.NODE_ENV;
-  options.configFile =
-    options.configFile ??
-    (options.name === "config" ? "config" : `${options.name}.config`);
-  options.rcFile = options.rcFile ?? `.${options.name}rc`;
-  if (options.extend !== false) {
-    options.extend = {
-      extendKey: "extends",
-      ...options.extend,
-    };
-  }
+  normalizeLoadOptions(options);
 
   // Custom merger
   const _merger = options.merger || defu;
@@ -223,6 +211,25 @@ export async function loadConfig<
   return r;
 }
 
+export async function resolveConfigPath<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(options: LoadConfigOptions<T, MT>): Promise<string | undefined> {
+  normalizeLoadOptions(options);
+
+  // Load dotenv
+  if (options.dotenv) {
+    await setupDotenv({
+      cwd: options.cwd,
+      ...(options.dotenv === true ? {} : options.dotenv),
+    });
+  }
+
+  const res = await resolveSources(".", options);
+
+  return res.configFile;
+}
+
 async function extendConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
@@ -297,7 +304,97 @@ const GIGET_PREFIXES = [
 const NPM_PACKAGE_RE =
   /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
+// --- internal ---
+
+type NormalizedKeys = "cwd" | "name" | "envName" | "configFile" | "rcFile";
+
+function normalizeLoadOptions<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(
+  options: LoadConfigOptions<T, MT>,
+): asserts options is Omit<LoadConfigOptions<T, MT>, NormalizedKeys> &
+  Record<NormalizedKeys, string> {
+  options.cwd = resolve(process.cwd(), options.cwd || ".");
+  options.name = options.name || "config";
+  options.envName = options.envName ?? process.env.NODE_ENV;
+  options.configFile =
+    options.configFile ??
+    (options.name === "config" ? "config" : `${options.name}.config`);
+  options.rcFile = options.rcFile ?? `.${options.name}rc`;
+
+  if (options.extend !== false) {
+    options.extend = {
+      extendKey: "extends",
+      ...options.extend,
+    };
+  }
+}
+
 async function resolveConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(
+  source: string,
+  options: LoadConfigOptions<T, MT>,
+  sourceOptions: SourceOptions<T, MT> = {},
+): Promise<ResolvedConfig<T, MT>> {
+  const res = await resolveSources(source, options, sourceOptions);
+
+  if (!existsSync(res.configFile!)) {
+    return res;
+  }
+
+  res._configFile = res.configFile;
+
+  const configFileExt = extname(res.configFile!) || "";
+  if (configFileExt in ASYNC_LOADERS) {
+    const asyncLoader =
+      await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
+    const contents = await readFile(res.configFile!, "utf8");
+    res.config = asyncLoader(contents);
+  } else {
+    res.config = (await options.jiti!.import(res.configFile!, {
+      default: true,
+    })) as T;
+  }
+  if (typeof res.config === "function") {
+    res.config = await (
+      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
+    )(options.context);
+  }
+
+  // Custom merger
+  const _merger = options.merger || defu;
+
+  // Extend env specific config
+  if (options.envName) {
+    const envConfig = {
+      ...res.config!["$" + options.envName],
+      ...res.config!.$env?.[options.envName],
+    };
+    if (Object.keys(envConfig).length > 0) {
+      res.config = _merger(envConfig, res.config);
+    }
+  }
+
+  // Meta
+  res.meta = defu(res.sourceOptions!.meta, res.config!.$meta) as MT;
+  delete res.config!.$meta;
+
+  // Overrides
+  if (res.sourceOptions!.overrides) {
+    res.config = _merger(res.sourceOptions!.overrides, res.config) as T;
+  }
+
+  // Always windows paths
+  res.configFile = _normalize(res.configFile);
+  res.source = _normalize(res.source);
+
+  return res;
+}
+
+async function resolveSources<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 >(
@@ -312,9 +409,6 @@ async function resolveConfig<
       return res;
     }
   }
-
-  // Custom merger
-  const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
   const customProviderKeys = Object.keys(
@@ -378,15 +472,8 @@ async function resolveConfig<
   if (isDir) {
     source = options.configFile!;
   }
-  const res: ResolvedConfig<T, MT> = {
-    config: undefined as unknown as T,
-    configFile: undefined,
-    cwd,
-    source,
-    sourceOptions,
-  };
 
-  res.configFile =
+  const configFile =
     tryResolve(resolve(cwd, source), options) ||
     tryResolve(
       resolve(cwd, ".config", source.replace(/\.config$/, "")),
@@ -395,57 +482,14 @@ async function resolveConfig<
     tryResolve(resolve(cwd, ".config", source), options) ||
     source;
 
-  if (!existsSync(res.configFile!)) {
-    return res;
-  }
-
-  res._configFile = res.configFile;
-
-  const configFileExt = extname(res.configFile!) || "";
-  if (configFileExt in ASYNC_LOADERS) {
-    const asyncLoader =
-      await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
-    const contents = await readFile(res.configFile!, "utf8");
-    res.config = asyncLoader(contents);
-  } else {
-    res.config = (await options.jiti!.import(res.configFile!, {
-      default: true,
-    })) as T;
-  }
-  if (typeof res.config === "function") {
-    res.config = await (
-      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
-    )(options.context);
-  }
-
-  // Extend env specific config
-  if (options.envName) {
-    const envConfig = {
-      ...res.config!["$" + options.envName],
-      ...res.config!.$env?.[options.envName],
-    };
-    if (Object.keys(envConfig).length > 0) {
-      res.config = _merger(envConfig, res.config);
-    }
-  }
-
-  // Meta
-  res.meta = defu(res.sourceOptions!.meta, res.config!.$meta) as MT;
-  delete res.config!.$meta;
-
-  // Overrides
-  if (res.sourceOptions!.overrides) {
-    res.config = _merger(res.sourceOptions!.overrides, res.config) as T;
-  }
-
-  // Always windows paths
-  res.configFile = _normalize(res.configFile);
-  res.source = _normalize(res.source);
-
-  return res;
+  return {
+    config: undefined as unknown as T,
+    configFile,
+    cwd,
+    source,
+    sourceOptions,
+  } satisfies ResolvedConfig<T, MT>;
 }
-
-// --- internal ---
 
 function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
   const res = resolveModulePath(id, {
