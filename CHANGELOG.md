@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.0
+
+[compare changes](https://github.com/unjs/c12/compare/v3.2.0...v3.3.0)
+
+### 🚀 Enhancements
+
+- Support loading config with array exports ([#272](https://github.com/unjs/c12/pull/272))
+- Allow extends without extension ([#268](https://github.com/unjs/c12/pull/268))
+
+### 🩹 Fixes
+
+- **loadDotenv:** `cwd` is optional ([#273](https://github.com/unjs/c12/pull/273))
+
+### 📖 Documentation
+
+- Improve `dotenv` section with multiple files example ([#270](https://github.com/unjs/c12/pull/270))
+
+### 🏡 Chore
+
+- Update readme ([5f803d6](https://github.com/unjs/c12/commit/5f803d6))
+- Sort a-z ([40207d2](https://github.com/unjs/c12/commit/40207d2))
+- Update lockfile ([2cc4f5e](https://github.com/unjs/c12/commit/2cc4f5e))
+- Update lockfile ([38e04db](https://github.com/unjs/c12/commit/38e04db))
+
+### ✅ Tests
+
+- Add missing await ([63e5b5e](https://github.com/unjs/c12/commit/63e5b5e))
+- Update snapshot ([bc671c4](https://github.com/unjs/c12/commit/bc671c4))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Devbro1 <farzadk@gmail.com>
+- Carson ([@carson2222](https://github.com/carson2222))
+- Igal Klebanov <igalklebanov@gmail.com>
+
 ## v3.2.0
 
 [compare changes](https://github.com/unjs/c12/compare/v3.1.0...v3.2.0)
