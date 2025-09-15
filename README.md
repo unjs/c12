@@ -102,7 +102,42 @@ Load RC config from the workspace directory and the user's home directory. Only 
 
 ### `dotenv`
 
-Loads `.env` file if enabled. It is disabled by default.
+Loads `.env` file when `true` or an options object is passed. It is disabled by default.
+
+Supports loading multiple files that extend eachother in left-to-right order when a `fileName`s array of relative/absolute paths is passed in the options object.
+
+**Example:**
+
+```ini
+# .env
+CONNECTION_POOL_MAX="10"
+DATABASE_URL="<...rds...>"
+```
+
+```ini
+# .env.local
+DATABASE_URL="<...localhost...>"
+```
+
+```js
+export default {
+  connectionPoolMax: process.env.CONNECTION_POOL_MAX,
+  databaseURL: process.env.DATABASE_URL,
+};
+```
+
+```ts
+import { loadConfig } from "c12";
+
+const config = await loadConfig({
+  dotenv: {
+    fileName: [".env", ".env.local"],
+  },
+});
+
+console.log(config.config.connectionPoolMax); // "10"
+console.log(config.config.databaseURL); // "<...localhost...>"
+```
 
 ### `packageJson`
 
