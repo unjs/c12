@@ -344,16 +344,19 @@ describe("loader", () => {
       name: "test",
       cwd: r("./fixture/array"),
     });
-
-    expect(Array.isArray(loaded.config)).toBe(true);
+    expect(loaded.configFile).toBe(r("./fixture/array/test.config.ts"));
+    expect(loaded._configFile).toEqual(loaded.configFile);
     expect(loaded.config).toEqual([
       { a: "boo", b: "foo" },
       { a: "boo", b: "foo" },
       { a: "boo", b: "foo" },
     ]);
-
-    // Ensure it resolved a config file path
-    expect(loaded.configFile).toBe(r("./fixture/array/test.config.ts"));
-    expect(loaded._configFile).toEqual(loaded.configFile);
+    expect(loaded.layers![0].config).toEqual(loaded.config);
+    expect(loaded.layers![1]).toEqual({
+      config: {
+        rcFile: true,
+      },
+      configFile: ".testrc",
+    });
   });
 });
