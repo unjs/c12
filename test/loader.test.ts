@@ -373,4 +373,11 @@ describe("loader", () => {
       configFile: ".testrc",
     });
   });
+
+  it("try reproduce error with index.js on root importing jsx/tsx", async () => {
+    await loadConfig({
+      name: "test",
+      cwd: r("./fixture/jsx"),
+    });
+  });
 });
