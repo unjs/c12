@@ -1,3 +1,3 @@
-import { hello } from './src';
+import { hello } from "./src";
 
 hello();
