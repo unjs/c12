@@ -291,6 +291,7 @@ describe("loader", () => {
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
+        "not_a_folder": true,
         "npmConfig": true,
         "overridden": false,
         "theme": "./theme",
