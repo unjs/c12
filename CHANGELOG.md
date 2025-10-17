@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.1
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.0...v3.3.1)
+
+### 🩹 Fixes
+
+- Extend with explicit extensions only ([#268](https://github.com/unjs/c12/pull/268), [#276](https://github.com/unjs/c12/pull/276))
+
+### 🏡 Chore
+
+- Update lockfile ([7dc6386](https://github.com/unjs/c12/commit/7dc6386))
+- Update fixture ([128f2f6](https://github.com/unjs/c12/commit/128f2f6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Ígor Jacaúna ([@igorjacauna](https://github.com/igorjacauna))
+
 ## v3.3.0
 
 [compare changes](https://github.com/unjs/c12/compare/v3.2.0...v3.3.0)
