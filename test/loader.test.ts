@@ -131,7 +131,7 @@ describe("loader", () => {
                   "giget": {},
                 },
               ],
-              "./not-a-folder",
+              "./not-a-folder.ts",
             ],
             "overridden": false,
             "theme": "./theme",
@@ -238,9 +238,9 @@ describe("loader", () => {
             "not_a_folder": true,
           },
           "configFile": "<path>/fixture/not-a-folder.ts",
-          "cwd": "<path>/fixture/not-a-folder",
+          "cwd": "<path>/fixture",
           "meta": {},
-          "source": "test.config",
+          "source": "./not-a-folder.ts",
           "sourceOptions": {},
         },
         {
@@ -291,7 +291,6 @@ describe("loader", () => {
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
-        "not_a_folder": true,
         "npmConfig": true,
         "overridden": false,
         "theme": "./theme",
@@ -371,6 +370,13 @@ describe("loader", () => {
         rcFile: true,
       },
       configFile: ".testrc",
+    });
+  });
+
+  it("try reproduce error with index.js on root importing jsx/tsx", async () => {
+    await loadConfig({
+      name: "test",
+      cwd: r("./fixture/jsx"),
     });
   });
 });
