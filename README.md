@@ -96,7 +96,7 @@ RC Config file name. Default is generated from `name` (name=foo => `.foorc`).
 
 Set to `false` to disable loading RC config.
 
-### `globalRC`
+### `globalRc`
 
 Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
