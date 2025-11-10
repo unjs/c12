@@ -59,7 +59,7 @@
     "vitest": "^4.0.8"
   },
   "peerDependencies": {
-    "magicast": "^0.5.0"
+    "magicast": "*"
   },
   "peerDependenciesMeta": {
     "magicast": {
