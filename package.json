@@ -35,7 +35,7 @@
     "confbox": "^0.2.2",
     "defu": "^6.1.4",
     "dotenv": "^17.2.3",
-    "exsolve": "^1.0.7",
+    "exsolve": "^1.0.8",
     "giget": "^2.0.0",
     "jiti": "^2.6.1",
     "ohash": "^2.0.11",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
-    "@vitest/coverage-v8": "^4.0.6",
+    "@vitest/coverage-v8": "^4.0.8",
     "automd": "^0.4.2",
     "changelogen": "^0.6.2",
     "eslint": "^9.39.1",
@@ -56,7 +56,7 @@
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "unbuild": "^3.6.1",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.8"
   },
   "peerDependencies": {
     "magicast": "^0.5.0"
@@ -66,5 +66,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.20.0"
+  "packageManager": "pnpm@10.21.0"
 }
