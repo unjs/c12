@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.2
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.1...v3.3.2)
+
+### 📖 Documentation
+
+- Fix typo in `globalRc` option ([#281](https://github.com/unjs/c12/pull/281))
+
+### 📦 Build
+
+- Switch to obuild (rolldown) ([9addbb1](https://github.com/unjs/c12/commit/9addbb1))
+- Relax `magicast` peer dependency range ([eae6be1](https://github.com/unjs/c12/commit/eae6be1))
+
+### 🏡 Chore
+
+- Update dev deps ([26fe8fe](https://github.com/unjs/c12/commit/26fe8fe))
+- Update deps ([16fd49d](https://github.com/unjs/c12/commit/16fd49d))
+- Update deps ([120c0e6](https://github.com/unjs/c12/commit/120c0e6))
+- Update scripts ([543b39c](https://github.com/unjs/c12/commit/543b39c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Jan T. Sott <git@idleberg.com>
+
 ## v3.3.1
 
 [compare changes](https://github.com/unjs/c12/compare/v3.3.0...v3.3.1)
