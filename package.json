@@ -21,10 +21,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "automd && unbuild",
+    "build": "obuild",
     "dev": "vitest dev",
     "lint": "eslint . && prettier -c src test",
-    "lint:fix": "eslint . --fix && prettier -w src test",
+    "lint:fix": "automd && eslint . --fix && prettier -w src test",
     "prepack": "unbuild",
     "release": "pnpm build && pnpm test && changelogen --release --push --publish",
     "test": "pnpm lint && vitest run --coverage && pnpm test:types",
