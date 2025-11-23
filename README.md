@@ -14,7 +14,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 - `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with [unjs/jiti](https://jiti.unjs.io)
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
-- `.config/` directory support following [config dir proposal](https://github.com/pi0/config-dir)
+- `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with [dotenv](https://www.npmjs.com/package/dotenv)
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
@@ -26,15 +26,14 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## 🦴 Used by
 
-- [Nuxt](https://nuxt.com/)
-- [Nitro](https://nitro.build/)
-- [Unbuild](https://unbuild.unjs.io)
-- [Automd](https://automd.unjs.io)
-- [Changelogen](https://changelogen.unjs.io)
-- [RemixKit](https://github.com/jrestall/remix-kit)
 - [Hey API](https://github.com/hey-api/openapi-ts)
-- [kysely-ctl](https://github.com/kysely-org/kysely-ctl)
+- [Kysely](https://github.com/kysely-org/kysely-ctl)
+- [Nitro](https://nitro.build/)
+- [Nuxt](https://nuxt.com/)
 - [Prisma](https://github.com/prisma/prisma)
+- [Trigger.dev](https://github.com/triggerdotdev/trigger.dev)
+- [UnJS](https://github.com/unjs)
+- [WXT](https://github.com/wxt-dev/wxt)
 
 ## Usage
 
@@ -97,13 +96,48 @@ RC Config file name. Default is generated from `name` (name=foo => `.foorc`).
 
 Set to `false` to disable loading RC config.
 
-### `globalRC`
+### `globalRc`
 
 Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
 ### `dotenv`
 
-Loads `.env` file if enabled. It is disabled by default.
+Loads `.env` file when `true` or an options object is passed. It is disabled by default.
+
+Supports loading multiple files that extend eachother in left-to-right order when a `fileName`s array of relative/absolute paths is passed in the options object.
+
+**Example:**
+
+```ini
+# .env
+CONNECTION_POOL_MAX="10"
+DATABASE_URL="<...rds...>"
+```
+
+```ini
+# .env.local
+DATABASE_URL="<...localhost...>"
+```
+
+```js
+export default {
+  connectionPoolMax: process.env.CONNECTION_POOL_MAX,
+  databaseURL: process.env.DATABASE_URL,
+};
+```
+
+```ts
+import { loadConfig } from "c12";
+
+const config = await loadConfig({
+  dotenv: {
+    fileName: [".env", ".env.local"],
+  },
+});
+
+console.log(config.config.connectionPoolMax); // "10"
+console.log(config.config.databaseURL); // "<...localhost...>"
+```
 
 ### `packageJson`
 

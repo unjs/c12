@@ -3,6 +3,7 @@ export default {
   extends: [
     ["c12-npm-test"],
     ["gh:unjs/c12/test/fixture/_github#main", { giget: {} }],
+    "./not-a-folder.ts",
   ],
   $test: {
     extends: ["./test.config.dev"],

@@ -97,6 +97,7 @@ describe("loader", () => {
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
+        "not_a_folder": true,
         "npmConfig": true,
         "overridden": true,
         "packageJSON": true,
@@ -142,6 +143,7 @@ describe("loader", () => {
                   "giget": {},
                 },
               ],
+              "./not-a-folder.ts",
             ],
             "overridden": false,
             "theme": "./theme",
@@ -243,6 +245,17 @@ describe("loader", () => {
           },
         },
         {
+          "_configFile": "<path>/fixture/not-a-folder.ts",
+          "config": {
+            "not_a_folder": true,
+          },
+          "configFile": "<path>/fixture/not-a-folder.ts",
+          "cwd": "<path>/fixture",
+          "meta": {},
+          "source": "./not-a-folder.ts",
+          "sourceOptions": {},
+        },
+        {
           "config": {
             "virtual": true,
           },
@@ -290,6 +303,7 @@ describe("loader", () => {
         "enableDefault": true,
         "envConfig": true,
         "githubLayer": true,
+        "not_a_folder": true,
         "npmConfig": true,
         "overridden": false,
         "theme": "./theme",
@@ -568,6 +582,11 @@ describe("loader", () => {
             throw new Error(result.error.errors.join("\n"));
           }
         },
+  it("no config loaded and configFileRequired is true", async () => {
+    await expect(
+      loadConfig({
+        configFile: "CUSTOM",
+        configFileRequired: true,
       }),
     ).resolves.not.toThrow();
   });
@@ -809,6 +828,34 @@ describe("loader", () => {
           configFileRequired: true,
         }),
       ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
+    });
+  });
+
+  it("loads arrays exported from config without merging", async () => {
+    const loaded = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/array"),
+    });
+    expect(loaded.configFile).toBe(r("./fixture/array/test.config.ts"));
+    expect(loaded._configFile).toEqual(loaded.configFile);
+    expect(loaded.config).toEqual([
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+      { a: "boo", b: "foo" },
+    ]);
+    expect(loaded.layers![0].config).toEqual(loaded.config);
+    expect(loaded.layers![1]).toEqual({
+      config: {
+        rcFile: true,
+      },
+      configFile: ".testrc",
+    });
+  });
+
+  it("try reproduce error with index.js on root importing jsx/tsx", async () => {
+    await loadConfig({
+      name: "test",
+      cwd: r("./fixture/jsx"),
     });
   });
 });

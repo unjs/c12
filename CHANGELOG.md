@@ -2,6 +2,115 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.2
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.1...v3.3.2)
+
+### 📖 Documentation
+
+- Fix typo in `globalRc` option ([#281](https://github.com/unjs/c12/pull/281))
+
+### 📦 Build
+
+- Switch to obuild (rolldown) ([9addbb1](https://github.com/unjs/c12/commit/9addbb1))
+- Relax `magicast` peer dependency range ([eae6be1](https://github.com/unjs/c12/commit/eae6be1))
+
+### 🏡 Chore
+
+- Update dev deps ([26fe8fe](https://github.com/unjs/c12/commit/26fe8fe))
+- Update deps ([16fd49d](https://github.com/unjs/c12/commit/16fd49d))
+- Update deps ([120c0e6](https://github.com/unjs/c12/commit/120c0e6))
+- Update scripts ([543b39c](https://github.com/unjs/c12/commit/543b39c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Jan T. Sott <git@idleberg.com>
+
+## v3.3.1
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.0...v3.3.1)
+
+### 🩹 Fixes
+
+- Extend with explicit extensions only ([#268](https://github.com/unjs/c12/pull/268), [#276](https://github.com/unjs/c12/pull/276))
+
+### 🏡 Chore
+
+- Update lockfile ([7dc6386](https://github.com/unjs/c12/commit/7dc6386))
+- Update fixture ([128f2f6](https://github.com/unjs/c12/commit/128f2f6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Ígor Jacaúna ([@igorjacauna](https://github.com/igorjacauna))
+
+## v3.3.0
+
+[compare changes](https://github.com/unjs/c12/compare/v3.2.0...v3.3.0)
+
+### 🚀 Enhancements
+
+- Support loading config with array exports ([#272](https://github.com/unjs/c12/pull/272))
+- Allow extends without extension ([#268](https://github.com/unjs/c12/pull/268))
+
+### 🩹 Fixes
+
+- **loadDotenv:** `cwd` is optional ([#273](https://github.com/unjs/c12/pull/273))
+
+### 📖 Documentation
+
+- Improve `dotenv` section with multiple files example ([#270](https://github.com/unjs/c12/pull/270))
+
+### 🏡 Chore
+
+- Update readme ([5f803d6](https://github.com/unjs/c12/commit/5f803d6))
+- Sort a-z ([40207d2](https://github.com/unjs/c12/commit/40207d2))
+- Update lockfile ([2cc4f5e](https://github.com/unjs/c12/commit/2cc4f5e))
+- Update lockfile ([38e04db](https://github.com/unjs/c12/commit/38e04db))
+
+### ✅ Tests
+
+- Add missing await ([63e5b5e](https://github.com/unjs/c12/commit/63e5b5e))
+- Update snapshot ([bc671c4](https://github.com/unjs/c12/commit/bc671c4))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Devbro1 <farzadk@gmail.com>
+- Carson ([@carson2222](https://github.com/carson2222))
+- Igal Klebanov <igalklebanov@gmail.com>
+
+## v3.2.0
+
+[compare changes](https://github.com/unjs/c12/compare/v3.1.0...v3.2.0)
+
+### 🚀 Enhancements
+
+- Support scoped env files ([#256](https://github.com/unjs/c12/pull/256))
+- Support `context` for function config ([#258](https://github.com/unjs/c12/pull/258))
+- Support `configFileRequired` ([#241](https://github.com/unjs/c12/pull/241))
+
+### 🏡 Chore
+
+- **readme:** Add prisma to the "used by" list ([#255](https://github.com/unjs/c12/pull/255))
+- Update deps ([bb49bc2](https://github.com/unjs/c12/commit/bb49bc2))
+- Update dotenv to v17 ([9044e56](https://github.com/unjs/c12/commit/9044e56))
+- Simplify readme ([61fdae7](https://github.com/unjs/c12/commit/61fdae7))
+- Simplify docs ([e896c6a](https://github.com/unjs/c12/commit/e896c6a))
+
+### ✅ Tests
+
+- Update snapshot ([c4db5e5](https://github.com/unjs/c12/commit/c4db5e5))
+
+### ❤️ Contributors
+
+- Kanon ([@ysknsid25](https://github.com/ysknsid25))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- SilverSnow <1664816390@qq.com>
+- Giorgio Boa ([@gioboa](https://github.com/gioboa))
+- Alberto Schiabel ([@jkomyno](https://github.com/jkomyno))
+
 ## v3.1.0
 
 [compare changes](https://github.com/unjs/c12/compare/v3.0.4...v3.1.0)
