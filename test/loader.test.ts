@@ -582,13 +582,16 @@ describe("loader", () => {
             throw new Error(result.error.errors.join("\n"));
           }
         },
+      }),
+    ).resolves.not.toThrow();
+  });
   it("no config loaded and configFileRequired is true", async () => {
     await expect(
       loadConfig({
         configFile: "CUSTOM",
         configFileRequired: true,
       }),
-    ).resolves.not.toThrow();
+    ).rejects.toThrow();
   });
 
   it("load fixture config with validate for valibot - toThrow", async () => {
