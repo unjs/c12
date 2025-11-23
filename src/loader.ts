@@ -10,7 +10,6 @@ import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv";
 
-import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type {
   UserInputConfig,
   ConfigLayerMeta,
@@ -22,6 +21,7 @@ import type {
   InputConfig,
   ConfigSource,
   ConfigFunctionContext,
+  StandardSchemaV1,
 } from "./types";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");

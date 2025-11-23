@@ -1,7 +1,35 @@
 import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv";
-import type { StandardSchemaV1 } from "@standard-schema/spec";
+
+// https://github.com/unjs/std-schema
+export interface StandardSchemaV1<Input = unknown, Output = Input> {
+  readonly "~standard": StandardSchemaV1.Props<Input, Output>;
+}
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export declare namespace StandardSchemaV1 {
+  export interface Props<Input = unknown, Output = Input> {
+    readonly version: 1;
+    readonly vendor: string;
+    readonly validate: (
+      value: unknown,
+    ) => Result<Output> | Promise<Result<Output>>;
+  }
+  export type Result<T> =
+    | {
+        success: true;
+        value: T;
+      }
+    | {
+        success: false;
+        issues: Issue[];
+      };
+  export type Issue = {
+    message: string;
+    path?: (string | number)[];
+    fatal?: boolean;
+  };
+}
 
 export interface ConfigLayerMeta {
   name?: string;
