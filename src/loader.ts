@@ -21,6 +21,7 @@ import type {
   InputConfig,
   ConfigSource,
   ConfigFunctionContext,
+  StandardSchemaV1,
 } from "./types";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -53,7 +54,8 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
+  S extends StandardSchemaV1 = StandardSchemaV1,
+>(options: LoadConfigOptions<T, MT, S>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
@@ -224,6 +226,15 @@ export async function loadConfig<
     throw new Error(`Required config (${r.configFile}) cannot be resolved.`);
   }
 
+  // Validate config
+  if (options.schema) {
+    let result = options.schema["~standard"].validate(r);
+    if (result instanceof Promise) result = await result;
+    if (result.issues) {
+      throw new Error(JSON.stringify(result.issues, undefined, 2));
+    }
+  }
+
   // Return resolved config
   return r;
 }
@@ -231,7 +242,8 @@ export async function loadConfig<
 async function extendConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
+  S extends StandardSchemaV1 = StandardSchemaV1,
+>(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT, S>) {
   (config as any)._layers = config._layers || [];
   if (!options.extend) {
     return;
@@ -305,9 +317,10 @@ const NPM_PACKAGE_RE =
 async function resolveConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
+  S extends StandardSchemaV1 = StandardSchemaV1,
 >(
   source: string,
-  options: LoadConfigOptions<T, MT>,
+  options: LoadConfigOptions<T, MT, S>,
   sourceOptions: SourceOptions<T, MT> = {},
 ): Promise<ResolvedConfig<T, MT>> {
   // Custom user resolver
@@ -452,7 +465,7 @@ async function resolveConfig<
 
 // --- internal ---
 
-function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
+function tryResolve(id: string, options: LoadConfigOptions<any, any, any>) {
   const res = resolveModulePath(id, {
     try: true,
     from: pathToFileURL(join(options.cwd || ".", options.configFile || "/")),
