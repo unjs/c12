@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
-import { expect, it, describe } from "vitest";
-import { normalize } from "pathe";
+import { rmSync } from "node:fs";
+import { expect, it, describe, beforeEach } from "vitest";
+import { normalize, resolve } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
 import { loadConfig } from "../src";
 import { z } from "zod";
@@ -13,7 +14,6 @@ import {
   union,
   record,
   any,
-  safeParse,
 } from "valibot";
 
 const r = (path: string) =>
@@ -22,6 +22,13 @@ const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
 describe("loader", () => {
+  beforeEach(() => {
+    rmSync(resolve(r("./fixture"), "node_modules", ".c12"), {
+      recursive: true,
+      force: true,
+    });
+  });
+
   it("load fixture config", async () => {
     type UserConfig = Partial<{
       virtual: boolean;
@@ -454,12 +461,6 @@ describe("loader", () => {
           return {};
         },
         schema: MainSchema,
-        validate: (schema, input) => {
-          const result = schema.safeParse(input);
-          if (!result.success) {
-            throw new Error(result.error.errors.join("\n"));
-          }
-        },
       }),
     ).rejects.toThrow();
   });
@@ -576,12 +577,6 @@ describe("loader", () => {
           return {};
         },
         schema: MainSchema,
-        validate: (schema, input) => {
-          const result = schema.safeParse(input);
-          if (!result.success) {
-            throw new Error(result.error.errors.join("\n"));
-          }
-        },
       }),
     ).resolves.not.toThrow();
   });
@@ -695,12 +690,6 @@ describe("loader", () => {
           return {};
         },
         schema: MainSchema,
-        validate: (schema, input) => {
-          const result = safeParse(schema, input);
-          if (!result.success) {
-            throw new Error(result.issues.join("\n"));
-          }
-        },
       }),
     ).rejects.toThrow();
   });
@@ -807,12 +796,6 @@ describe("loader", () => {
           return {};
         },
         schema: MainSchema,
-        validate: (schema, input) => {
-          const result = safeParse(schema, input);
-          if (!result.success) {
-            throw new Error(result.issues.join("\n"));
-          }
-        },
       }),
     ).resolves.not.toThrow();
 

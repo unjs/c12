@@ -234,7 +234,6 @@ export interface LoadConfigOptions<
   configFileRequired?: boolean;
 
   schema?: S;
-  validate?: (schema: S, input: ResolvedConfig<T, MT>) => void;
 }
 
 export type DefineConfig<

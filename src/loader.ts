@@ -227,8 +227,12 @@ export async function loadConfig<
   }
 
   // Validate config
-  if (options.schema && options.validate) {
-    options.validate(options.schema, r);
+  if (options.schema) {
+    let result = options.schema["~standard"].validate(r);
+    if (result instanceof Promise) result = await result;
+    if (result.issues) {
+      throw new Error(JSON.stringify(result.issues, undefined, 2));
+    }
   }
 
   // Return resolved config
