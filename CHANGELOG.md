@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.3
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.2...v3.3.3)
+
+### 📦 Build
+
+- Update chokidar to 5.x ([0dcf338](https://github.com/unjs/c12/commit/0dcf338))
+
+### 🏡 Chore
+
+- Update dev deps ([78ca00b](https://github.com/unjs/c12/commit/78ca00b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.3.2
 
 [compare changes](https://github.com/unjs/c12/compare/v3.3.1...v3.3.2)
