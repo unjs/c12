@@ -58,6 +58,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
+    expandEnvFiles: options.expandEnvFiles,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -71,26 +72,6 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     // Override if variables are not already set or come from `.env`
     if (targetEnvironment[key] === undefined || dotenvVars.has(key)) {
       targetEnvironment[key] = environment[key];
-    }
-  }
-
-  // Support _FILE environment variables
-  if (options.expandEnvFiles) {
-    for (const key in targetEnvironment) {
-      if (key.endsWith("_FILE")) {
-        const targetKey = key.slice(0, -5);
-        if (targetEnvironment[targetKey] === undefined) {
-          const filePath = targetEnvironment[key];
-          if (
-            filePath &&
-            statSync(filePath, { throwIfNoEntry: false })?.isFile()
-          ) {
-            const value = await fsp.readFile(filePath, "utf8");
-            targetEnvironment[targetKey] = value.trim();
-            dotenvVars.add(targetKey);
-          }
-        }
-      }
     }
   }
 
@@ -122,6 +103,26 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
       }
       environment[key] = parsed[key];
       dotenvVars.add(key);
+    }
+  }
+
+  // Support _FILE environment variables
+  if (options.expandEnvFiles) {
+    for (const key in environment) {
+      if (key.endsWith("_FILE")) {
+        const targetKey = key.slice(0, -5);
+        if (environment[targetKey] === undefined) {
+          const filePath = environment[key];
+          if (
+            filePath &&
+            statSync(filePath, { throwIfNoEntry: false })?.isFile()
+          ) {
+            const value = await fsp.readFile(filePath, "utf8");
+            environment[targetKey] = value.trim();
+            dotenvVars.add(targetKey);
+          }
+        }
+      }
     }
   }
 
