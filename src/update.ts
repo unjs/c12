@@ -115,6 +115,9 @@ export async function updateConfigRC(
     flat: opts.flat,
   };
 
+  // Ensure directory exists
+  await mkdir(rcOptions.dir, { recursive: true });
+
   // Read existing config (returns empty object if file doesn't exist)
   const existingConfig = rc9.read(rcOptions);
 
