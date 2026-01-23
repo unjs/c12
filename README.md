@@ -441,10 +441,10 @@ Update or create RC configuration files using [rc9](https://github.com/unjs/rc9)
 Import utils from `c12/update`:
 
 ```js
-import { updateConfigRC, updateConfigUserRC } from "c12/update";
+import { updateConfigRC } from "c12/update";
 ```
 
-**Update RC config in current directory:**
+**Update RC config:**
 
 ```js
 const configFile = await updateConfigRC({
@@ -457,20 +457,6 @@ const configFile = await updateConfigRC({
 });
 
 console.log(`RC config updated in ${configFile}`);
-```
-
-**Update RC config in user home directory:**
-
-```js
-const configFile = await updateConfigUserRC({
-  name: ".myapprc",
-  onUpdate: (config) => {
-    config.token = "user-secret-token";
-    config.theme = "dark";
-  },
-});
-
-console.log(`User RC config updated in ${configFile}`);
 ```
 
 RC files use a simple key-value format with automatic flattening/unflattening:

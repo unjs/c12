@@ -3,7 +3,6 @@ import { SUPPORTED_EXTENSIONS } from "./loader";
 import { join, normalize } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, extname } from "node:path";
-import { homedir } from "node:os";
 import * as rc9 from "rc9";
 
 const UPDATABLE_EXTS = [".js", ".ts", ".mjs", ".cjs", ".mts", ".cts"] as const;
@@ -132,56 +131,6 @@ export async function updateConfigRC(
   return configPath;
 }
 
-/**
- * Update an RC config file in the user's home directory.
- *
- * Uses rc9 to read, merge, and write RC configuration files in the user's home directory.
- * This is useful for user-specific configuration that should persist across projects.
- *
- * @param opts - Configuration options
- * @returns Path to the user RC config file
- *
- * @example
- * ```ts
- * import { updateConfigUserRC } from "c12/update";
- *
- * const configFile = await updateConfigUserRC({
- *   name: ".myapprc",
- *   onUpdate: (config) => {
- *     config.token = "user-secret-token";
- *     config.theme = "dark";
- *   },
- * });
- * ```
- */
-export async function updateConfigUserRC(
-  opts: UpdateConfigUserRCOptions,
-): Promise<string> {
-  if (!opts.name) {
-    throw new Error("RC config file name is required");
-  }
-
-  const rcOptions: rc9.RCOptions = {
-    name: opts.name,
-    dir: opts.dir,
-    flat: opts.flat,
-  };
-
-  // Read existing user config (returns empty object if file doesn't exist)
-  const existingConfig = rc9.readUser(rcOptions);
-
-  // Allow user to update the config
-  await opts.onUpdate?.(existingConfig);
-
-  // Write updated config using rc9.updateUser
-  rc9.updateUser(existingConfig, rcOptions);
-
-  // Return the full path to the config file
-  const configDir = process.env.XDG_CONFIG_HOME || homedir();
-  const configPath = join(configDir, rcOptions.name);
-  return configPath;
-}
-
 // --- Internal ---
 
 function tryResolve(path: string, cwd: string, extensions: string[]) {
@@ -260,32 +209,6 @@ export interface UpdateConfigRCOptions {
   /**
    * Directory to read/write the RC config file.
    * Defaults to current working directory.
-   */
-  dir?: string;
-
-  /**
-   * If true, disables automatic flattening/unflattening of config values.
-   * Default is false.
-   *
-   * @see https://github.com/unjs/rc9#unflatten
-   */
-  flat?: boolean;
-
-  /**
-   * Update function called with the current config object.
-   * Modify the config object to update values.
-   */
-  onUpdate?: (config: any) => MaybePromise<void>;
-}
-
-export interface UpdateConfigUserRCOptions {
-  /**
-   * RC config file name (e.g., ".myapprc")
-   */
-  name: string;
-
-  /**
-   * Optional directory override. If not specified, uses user's home directory.
    */
   dir?: string;
 

@@ -1,14 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe, beforeAll } from "vitest";
 import { normalize } from "pathe";
-import {
-  updateConfig,
-  updateConfigRC,
-  updateConfigUserRC,
-} from "../src/update";
+import { updateConfig, updateConfigRC } from "../src/update";
 import { readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
 
 const r = (path: string) =>
   normalize(fileURLToPath(new URL(path, import.meta.url)));
@@ -170,64 +165,6 @@ describe("update RC config file", () => {
       updateConfigRC({
         name: "",
         dir: tmpDir,
-      }),
-    ).rejects.toThrow("RC config file name is required");
-  });
-});
-
-describe("update user RC config file", () => {
-  const testRcName = ".c12-test-userrc";
-  const configDir = process.env.XDG_CONFIG_HOME || homedir();
-  const userConfigPath = normalize(`${configDir}/${testRcName}`);
-
-  beforeAll(async () => {
-    // Clean up any existing test file
-    await rm(userConfigPath).catch(() => {});
-  });
-
-  it("create new user RC config", async () => {
-    const configPath = await updateConfigUserRC({
-      name: testRcName,
-      onUpdate: (config) => {
-        config.userToken = "secret-token";
-        config.theme = "dark";
-      },
-    });
-
-    expect(configPath).toBe(userConfigPath);
-    expect(existsSync(configPath)).toBe(true);
-
-    const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain('userToken="secret-token"');
-    expect(contents).toContain('theme="dark"');
-
-    // Cleanup
-    await rm(userConfigPath).catch(() => {});
-  });
-
-  it("update existing user RC config", async () => {
-    // Create initial RC file
-    await writeFile(userConfigPath, "existing=true\n");
-
-    const configPath = await updateConfigUserRC({
-      name: testRcName,
-      onUpdate: (config) => {
-        config.newSetting = "value";
-      },
-    });
-
-    const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain("existing=true");
-    expect(contents).toContain('newSetting="value"');
-
-    // Cleanup
-    await rm(userConfigPath).catch(() => {});
-  });
-
-  it("throws error when name is missing", async () => {
-    await expect(
-      updateConfigUserRC({
-        name: "",
       }),
     ).rejects.toThrow("RC config file name is required");
   });
