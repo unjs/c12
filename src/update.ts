@@ -166,7 +166,8 @@ export async function updateConfigUserRC(
 
   // Return the full path to the config file
   const { homedir } = await import("node:os");
-  const configPath = join(homedir(), rcOptions.name!);
+  const configDir = process.env.XDG_CONFIG_HOME || homedir();
+  const configPath = join(configDir, rcOptions.name!);
   return configPath;
 }
 

@@ -1,7 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe, beforeAll } from "vitest";
 import { normalize } from "pathe";
-import { updateConfig, updateConfigRC, updateConfigUserRC } from "../src/update";
+import {
+  updateConfig,
+  updateConfigRC,
+  updateConfigUserRC,
+} from "../src/update";
 import { readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
@@ -94,7 +98,7 @@ describe("update RC config file", () => {
     expect(existsSync(configPath)).toBe(true);
 
     const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain("apiUrl=https://api.example.com");
+    expect(contents).toContain('apiUrl="https://api.example.com"');
     expect(contents).toContain("enabled=true");
     expect(contents).toContain("port=3000");
   });
@@ -102,7 +106,7 @@ describe("update RC config file", () => {
   it("update existing RC config", async () => {
     const rcFile = ".updaterc";
     const configPath = normalize(`${tmpDir}/${rcFile}`);
-    
+
     // Create initial RC file
     await writeFile(configPath, "existing=true\nvalue=123\n");
 
@@ -117,7 +121,7 @@ describe("update RC config file", () => {
 
     const contents = await readFile(configPath, "utf8");
     expect(contents).toContain("existing=true");
-    expect(contents).toContain("newValue=added");
+    expect(contents).toContain('newValue="added"');
     expect(contents).toContain("value=456");
   });
 
@@ -139,7 +143,7 @@ describe("update RC config file", () => {
     });
 
     const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain("database.host=localhost");
+    expect(contents).toContain('database.host="localhost"');
     expect(contents).toContain("database.port=5432");
     expect(contents).toContain("features.auth=true");
     expect(contents).toContain("features.logging=false");
@@ -156,15 +160,16 @@ describe("update RC config file", () => {
     });
 
     const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain("tags.0=tag1");
-    expect(contents).toContain("tags.1=tag2");
-    expect(contents).toContain("tags.2=tag3");
+    expect(contents).toContain('tags.0="tag1"');
+    expect(contents).toContain('tags.1="tag2"');
+    expect(contents).toContain('tags.2="tag3"');
   });
 });
 
 describe("update user RC config file", () => {
   const testRcName = ".c12-test-userrc";
-  const userConfigPath = normalize(`${homedir()}/${testRcName}`);
+  const configDir = process.env.XDG_CONFIG_HOME || homedir();
+  const userConfigPath = normalize(`${configDir}/${testRcName}`);
 
   beforeAll(async () => {
     // Clean up any existing test file
@@ -184,8 +189,8 @@ describe("update user RC config file", () => {
     expect(existsSync(configPath)).toBe(true);
 
     const contents = await readFile(configPath, "utf8");
-    expect(contents).toContain("userToken=secret-token");
-    expect(contents).toContain("theme=dark");
+    expect(contents).toContain('userToken="secret-token"');
+    expect(contents).toContain('theme="dark"');
 
     // Cleanup
     await rm(userConfigPath).catch(() => {});
@@ -204,7 +209,7 @@ describe("update user RC config file", () => {
 
     const contents = await readFile(configPath, "utf8");
     expect(contents).toContain("existing=true");
-    expect(contents).toContain("newSetting=value");
+    expect(contents).toContain('newSetting="value"');
 
     // Cleanup
     await rm(userConfigPath).catch(() => {});
