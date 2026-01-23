@@ -3,6 +3,7 @@ import { SUPPORTED_EXTENSIONS } from "./loader";
 import { join, normalize } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, extname } from "node:path";
+import { homedir } from "node:os";
 import * as rc9 from "rc9";
 
 const UPDATABLE_EXTS = [".js", ".ts", ".mjs", ".cjs", ".mts", ".cts"] as const;
@@ -104,6 +105,10 @@ export async function updateConfig(
 export async function updateConfigRC(
   opts: UpdateConfigRCOptions,
 ): Promise<string> {
+  if (!opts.name) {
+    throw new Error("RC config file name is required");
+  }
+
   const rcOptions: rc9.RCOptions = {
     name: opts.name,
     dir: opts.dir || process.cwd(),
@@ -120,7 +125,7 @@ export async function updateConfigRC(
   rc9.update(existingConfig, rcOptions);
 
   // Return the full path to the config file
-  const configPath = join(rcOptions.dir!, rcOptions.name!);
+  const configPath = join(rcOptions.dir, rcOptions.name);
   return configPath;
 }
 
@@ -149,6 +154,10 @@ export async function updateConfigRC(
 export async function updateConfigUserRC(
   opts: UpdateConfigUserRCOptions,
 ): Promise<string> {
+  if (!opts.name) {
+    throw new Error("RC config file name is required");
+  }
+
   const rcOptions: rc9.RCOptions = {
     name: opts.name,
     dir: opts.dir,
@@ -165,9 +174,8 @@ export async function updateConfigUserRC(
   rc9.updateUser(existingConfig, rcOptions);
 
   // Return the full path to the config file
-  const { homedir } = await import("node:os");
   const configDir = process.env.XDG_CONFIG_HOME || homedir();
-  const configPath = join(configDir, rcOptions.name!);
+  const configPath = join(configDir, rcOptions.name);
   return configPath;
 }
 

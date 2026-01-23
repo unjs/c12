@@ -164,6 +164,15 @@ describe("update RC config file", () => {
     expect(contents).toContain('tags.1="tag2"');
     expect(contents).toContain('tags.2="tag3"');
   });
+
+  it("throws error when name is missing", async () => {
+    await expect(
+      updateConfigRC({
+        name: "",
+        dir: tmpDir,
+      }),
+    ).rejects.toThrow("RC config file name is required");
+  });
 });
 
 describe("update user RC config file", () => {
@@ -213,5 +222,13 @@ describe("update user RC config file", () => {
 
     // Cleanup
     await rm(userConfigPath).catch(() => {});
+  });
+
+  it("throws error when name is missing", async () => {
+    await expect(
+      updateConfigUserRC({
+        name: "",
+      }),
+    ).rejects.toThrow("RC config file name is required");
   });
 });
