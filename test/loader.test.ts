@@ -4,9 +4,31 @@ import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
+import { z } from "zod";
+
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
+
+const ConfigSchema = z.object({
+  defaultConfig: z.boolean().optional(),
+  virtual: z.boolean().optional(),
+  githubLayer: z.boolean().optional(),
+  npmConfig: z.boolean().optional(),
+  devConfig: z.boolean().optional(),
+  baseConfig: z.boolean().optional(),
+  array: z.array(z.string()).optional(),
+  baseEnvConfig: z.boolean().optional(),
+  packageJSON2: z.boolean().optional(),
+  packageJSON: z.boolean().optional(),
+  testConfig: z.boolean().optional(),
+  rcFile: z.boolean().optional(),
+  configFile: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
+  overridden: z.boolean().optional(),
+  enableDefault: z.boolean().optional(),
+  envConfig: z.boolean().optional(),
+  theme: z.string().optional(),
+});
 
 describe("loader", () => {
   it("load fixture config", async () => {
@@ -18,6 +40,9 @@ describe("loader", () => {
       extends: string[];
     }>;
     const { config, layers } = await loadConfig<UserConfig>({
+      schema: z.object({
+        config: ConfigSchema,
+      }),
       cwd: r("./fixture"),
       name: "test",
       dotenv: {
