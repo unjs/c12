@@ -2,8 +2,13 @@ import type { ChokidarOptions } from "chokidar";
 import { debounce } from "perfect-debounce";
 import { resolve } from "pathe";
 import type { diff } from "ohash/utils";
-import type { UserInputConfig, ConfigLayerMeta, ResolvedConfig, LoadConfigOptions } from "./types";
-import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader";
+import type {
+  UserInputConfig,
+  ConfigLayerMeta,
+  ResolvedConfig,
+  LoadConfigOptions,
+} from "./types.ts";
+import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader.ts";
 
 type DiffEntries = ReturnType<typeof diff>;
 

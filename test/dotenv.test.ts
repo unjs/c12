@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, expect, it, describe, afterAll } from "vitest";
 import { join, normalize } from "pathe";
 import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
-import { setupDotenv } from "../src";
+import { setupDotenv } from "../src/index.ts";
 
 const tmpDir = normalize(fileURLToPath(new URL(".tmp-dotenv", import.meta.url)));
 const r = (path: string) => join(tmpDir, path);

@@ -1,5 +1,5 @@
 import { resolveModulePath } from "exsolve";
-import { SUPPORTED_EXTENSIONS } from "./loader";
+import { SUPPORTED_EXTENSIONS } from "./loader.ts";
 import { join, normalize } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, extname } from "node:path";

@@ -1,5 +1,5 @@
 import type { DownloadTemplateOptions } from "giget";
-import type { DotenvOptions } from "./dotenv";
+import type { DotenvOptions } from "./dotenv.ts";
 
 export interface ConfigLayerMeta {
   name?: string;

@@ -126,7 +126,7 @@ function interpolate(
       // eslint-disable-next-line unicorn/no-array-reduce
       matches.reduce((newValue, match) => {
         const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
-        const prefix = parts[1];
+        const prefix = parts[1]!;
 
         let value, replacePart: string;
 
@@ -134,7 +134,7 @@ function interpolate(
           replacePart = parts[0] || "";
           value = replacePart.replace(String.raw`\$`, "$");
         } else {
-          const key = parts[2];
+          const key = parts[2]!;
           replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe, beforeAll } from "vitest";
 import { normalize } from "pathe";
-import { updateConfig } from "../src/update";
+import { updateConfig } from "../src/update.ts";
 import { readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 

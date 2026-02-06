@@ -7,7 +7,7 @@ import { resolveModulePath } from "exsolve";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
-import { setupDotenv } from "./dotenv";
+import { setupDotenv } from "./dotenv.ts";
 
 import type {
   UserInputConfig,
@@ -20,7 +20,7 @@ import type {
   InputConfig,
   ConfigSource,
   ConfigFunctionContext,
-} from "./types";
+} from "./types.ts";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
