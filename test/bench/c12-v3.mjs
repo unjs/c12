@@ -4,7 +4,8 @@ import { loadConfig } from "c12-v3";
 
 const { config } = await loadConfig({
   cwd: fileURLToPath(new URL("./", import.meta.url)),
+  dotenv: true,
   jitiOptions: { fsCache: false },
 });
 
-assert.deepEqual(config, { test: true });
+assert.deepEqual(config, { test: "ok" });
