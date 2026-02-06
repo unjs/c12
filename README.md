@@ -172,7 +172,9 @@ Custom import function used to load configuration files. By default, c12 uses na
 ```js
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { /* jiti options */ });
+const jiti = createJiti(import.meta.url, {
+  /* jiti options */
+});
 
 const { config } = await loadConfig({
   import: (id) => jiti.import(id),
@@ -314,6 +316,14 @@ Layers:
 ```
 
 ## Extending config layer from remote sources
+
+> [!NOTE]
+> Extending from remote sources requires the [`giget`](https://giget.unjs.io) peer dependency to be installed.
+>
+> ```sh
+> # ✨ Auto-detect
+> npx nypm install giget
+> ```
 
 You can also extend configuration from remote sources such as npm or github.
 

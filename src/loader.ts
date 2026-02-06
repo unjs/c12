@@ -301,7 +301,12 @@ async function resolveConfig<
       : GIGET_PREFIXES;
 
   if (options.giget !== false && gigetPrefixes.some((prefix) => source.startsWith(prefix))) {
-    const { downloadTemplate } = await import("giget");
+    const { downloadTemplate } = await import("giget").catch((error) => {
+      throw new Error(
+        `Extending config from \`${source}\` requires \`giget\` peer dependency to be installed.\n\nInstall it with: \`npx nypm i giget\``,
+        { cause: error },
+      );
+    });
     const { digest } = await import("ohash");
 
     const cloneName =
