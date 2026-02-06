@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-beta.2
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.1...v4.0.0-beta.2)
+
+### 🚀 Enhancements
+
+- Support expanding env with `_FILE` references ([#297](https://github.com/unjs/c12/pull/297))
+
+### 🔥 Performance
+
+- Use native dotenv parser ([#296](https://github.com/unjs/c12/pull/296))
+
+### 📦 Build
+
+- Optional giget peer dependency ([25ee78f](https://github.com/unjs/c12/commit/25ee78f))
+
+### 🏡 Chore
+
+- Strict esm-ts syntax ([46703bc](https://github.com/unjs/c12/commit/46703bc))
+- Add bench ([cd3f225](https://github.com/unjs/c12/commit/cd3f225))
+- Use named exports ([c9d6b25](https://github.com/unjs/c12/commit/c9d6b25))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v4.0.0-beta.1
 
 [compare changes](https://github.com/unjs/c12/compare/v3.3.3...v4.0.0-beta.1)
