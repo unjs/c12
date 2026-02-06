@@ -1,23 +1,13 @@
 import { fileURLToPath } from "node:url";
-import { rmSync } from "node:fs";
-import { expect, it, describe, beforeEach } from "vitest";
-import { normalize, resolve } from "pathe";
-import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
-import { loadConfig } from "../src";
-import { z } from "zod";
-import {
-  object,
-  string,
-  boolean,
-  array,
-  optional,
-  union,
-  record,
-  any,
-} from "valibot";
+import { expect, it, describe } from "vitest";
+import { normalize } from "pathe";
+import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
+import { loadConfig } from "../src/index.ts";
 
-const r = (path: string) =>
-  normalize(fileURLToPath(new URL(path, import.meta.url)));
+import { z } from "zod";
+import { object, string, boolean, array, optional, union, record, any } from "valibot";
+
+const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
@@ -344,9 +334,7 @@ describe("loader", () => {
       ConfigLayerMeta
     >[];
 
-    const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "test.config",
-    )!;
+    const configLayer = transformdLayers.find((layer) => layer.configFile === "test.config")!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseLayerConfig = transformdLayers.find(
@@ -484,13 +472,7 @@ describe("loader", () => {
 
     const TestSchema = z
       .object({
-        extends: z.array(
-          z.union([
-            z.string(),
-            z.array(z.any()),
-            z.record(z.string(), z.any()),
-          ]),
-        ),
+        extends: z.array(z.union([z.string(), z.array(z.any()), z.record(z.string(), z.any())])),
         envConfig: z.boolean(),
       })
       .optional();
@@ -829,8 +811,8 @@ describe("loader", () => {
       { a: "boo", b: "foo" },
       { a: "boo", b: "foo" },
     ]);
-    expect(loaded.layers![0].config).toEqual(loaded.config);
-    expect(loaded.layers![1]).toEqual({
+    expect(loaded.layers![0]!.config).toEqual(loaded.config);
+    expect(loaded.layers![1]!).toEqual({
       config: {
         rcFile: true,
       },

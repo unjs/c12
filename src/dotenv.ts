@@ -1,6 +1,6 @@
-import { promises as fsp, statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
+import * as nodeUtil from "node:util";
 import { resolve } from "pathe";
-import * as dotenv from "dotenv";
 
 export interface DotenvOptions {
   /**
@@ -33,6 +33,23 @@ export interface DotenvOptions {
    * An object describing environment variables (key, value pairs).
    */
   env?: NodeJS.ProcessEnv;
+
+  /**
+   * Resolve `_FILE` suffixed environment variables by reading the file at the
+   * specified path and assigning its trimmed content to the base key.
+   *
+   * This is useful for container secrets (e.g. Docker, Kubernetes) where
+   * sensitive values are mounted as files.
+   *
+   * @default true
+   *
+   * @example
+   * ```env
+   * DATABASE_PASSWORD_FILE="/run/secrets/db_password"
+   * # resolves to DATABASE_PASSWORD=<contents of /run/secrets/db_password>
+   * ```
+   */
+  expandFileReferences?: boolean;
 }
 
 export type Env = typeof process.env;
@@ -51,6 +68,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
+    expandFileReferences: options.expandFileReferences ?? true,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -88,7 +106,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
     if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
       continue;
     }
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    const parsed = await readEnvFile(dotenvFile);
     for (const key in parsed) {
       if (key in environment && !dotenvVars.has(key)) {
         continue; // Do not override existing env variables
@@ -98,12 +116,50 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
     }
   }
 
+  // Support _FILE environment variables
+  if (options.expandFileReferences !== false) {
+    for (const key in environment) {
+      if (key.endsWith("_FILE")) {
+        const targetKey = key.slice(0, -5);
+        if (environment[targetKey] === undefined) {
+          const filePath = environment[key];
+          if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
+            const value = readFileSync(filePath, "utf8");
+            environment[targetKey] = value.trim();
+            dotenvVars.add(targetKey);
+          }
+        }
+      }
+    }
+  }
+
   // Interpolate env
   if (options.interpolate) {
     interpolate(environment);
   }
 
   return environment;
+}
+
+// --- readEnvFile ---
+
+type ParseEnvFn = (src: string) => Record<string, string>;
+
+let _parseEnv = nodeUtil.parseEnv as ParseEnvFn | undefined;
+
+async function readEnvFile(path: string): Promise<Record<string, string>> {
+  const src = readFileSync(path, "utf8");
+  if (!_parseEnv) {
+    try {
+      const dotenv = await import("dotenv");
+      _parseEnv = (src: string) => dotenv.parse(src) as Record<string, string>;
+    } catch {
+      throw new Error(
+        "Failed to parse .env file: `node:util.parseEnv` is not available and `dotenv` package is not installed. Please upgrade your runtime or install `dotenv` as a dependency.",
+      );
+    }
+  }
+  return _parseEnv(src);
 }
 
 // Based on https://github.com/motdotla/dotenv-expand
@@ -126,7 +182,7 @@ function interpolate(
       // eslint-disable-next-line unicorn/no-array-reduce
       matches.reduce((newValue, match) => {
         const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
-        const prefix = parts[1];
+        const prefix = parts[1]!;
 
         let value, replacePart: string;
 
@@ -134,7 +190,7 @@ function interpolate(
           replacePart = parts[0] || "";
           value = replacePart.replace(String.raw`\$`, "$");
         } else {
-          const key = parts[2];
+          const key = parts[2]!;
           replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion
@@ -153,9 +209,7 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value === undefined
-          ? newValue
-          : newValue.replace(replacePart, value);
+        return value === undefined ? newValue : newValue.replace(replacePart, value);
       }, value),
     );
   }

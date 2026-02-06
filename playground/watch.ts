@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { watchConfig } from "../src";
+import { watchConfig } from "../src/index.ts";
 
 const r = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 

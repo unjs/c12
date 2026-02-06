@@ -1,6 +1,5 @@
-import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
-import type { DotenvOptions } from "./dotenv";
+import type { DotenvOptions } from "./dotenv.ts";
 
 // https://github.com/standard-schema/standard-schema/blob/main/packages/spec/src/index.ts
 /** The Standard Schema interface. */
@@ -18,9 +17,7 @@ export declare namespace StandardSchemaV1 {
     /** The vendor name of the schema library. */
     readonly vendor: string;
     /** Validates unknown input values. */
-    readonly validate: (
-      value: unknown,
-    ) => Result<Output> | Promise<Result<Output>>;
+    readonly validate: (value: unknown) => Result<Output> | Promise<Result<Output>>;
     /** Inferred types associated with the schema. */
     readonly types?: Types<Input, Output> | undefined;
   }
@@ -75,7 +72,6 @@ export declare namespace StandardSchemaV1 {
   >["output"];
 
   // biome-ignore lint/complexity/noUselessEmptyExport: needed for granular visibility control of TS namespace
-  export {};
 }
 
 export interface ConfigLayerMeta {
@@ -157,20 +153,13 @@ export interface ResolvedConfig<
   _configFile?: string;
 }
 
-export type ConfigSource =
-  | "overrides"
-  | "main"
-  | "rc"
-  | "packageJson"
-  | "defaultConfig";
+export type ConfigSource = "overrides" | "main" | "rc" | "packageJson" | "defaultConfig";
 
 export interface ConfigFunctionContext {
   [key: string]: any;
 }
 
-export interface ResolvableConfigContext<
-  T extends UserInputConfig = UserInputConfig,
-> {
+export interface ResolvableConfigContext<T extends UserInputConfig = UserInputConfig> {
   configs: Record<ConfigSource, T | null | undefined>;
   rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
@@ -212,14 +201,13 @@ export interface LoadConfigOptions<
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT, S>,
-  ) =>
-    | null
-    | undefined
-    | ResolvedConfig<T, MT>
-    | Promise<ResolvedConfig<T, MT> | undefined | null>;
+  ) => null | undefined | ResolvedConfig<T, MT> | Promise<ResolvedConfig<T, MT> | undefined | null>;
 
-  jiti?: Jiti;
-  jitiOptions?: JitiOptions;
+  /** Custom import function used to load configuration files */
+  import?: (id: string) => Promise<unknown>;
+
+  /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
+  resolveModule?: (mod: any) => any;
 
   giget?: false | DownloadTemplateOptions;
 

@@ -2,11 +2,9 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, expect, it, describe, afterAll } from "vitest";
 import { join, normalize } from "pathe";
 import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
-import { setupDotenv } from "../src";
+import { setupDotenv } from "../src/index.ts";
 
-const tmpDir = normalize(
-  fileURLToPath(new URL(".tmp-dotenv", import.meta.url)),
-);
+const tmpDir = normalize(fileURLToPath(new URL(".tmp-dotenv", import.meta.url)));
 const r = (path: string) => join(tmpDir, path);
 
 const cwdEnvFileName = ".env.12345";
@@ -14,11 +12,11 @@ const cwdEnvPath = join(process.cwd(), cwdEnvFileName);
 
 describe("update config file", () => {
   beforeEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
     await mkdir(tmpDir, { recursive: true });
   });
   afterAll(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    // await rm(tmpDir, { recursive: true, force: true });
     await unlink(cwdEnvPath).catch(console.error);
   });
   it("should read .env file into process.env", async () => {
@@ -64,5 +62,21 @@ describe("update config file", () => {
     await setupDotenv({ fileName: [cwdEnvFileName] });
 
     expect(process.env.humpty).toBe("dumpty");
+  });
+
+  it("should support _FILE env vars by default", async () => {
+    const secretPath = r(".secret");
+    await writeFile(secretPath, "my-secret-value");
+    process.env.TEST_SECRET_FILE = secretPath;
+
+    await setupDotenv({ cwd: tmpDir });
+    expect(process.env.TEST_SECRET).toBe("my-secret-value");
+  });
+
+  it("should not expand _FILE env vars when disabled", async () => {
+    process.env.TEST_SECRET_FILE = "normal-secret-into-key-with-file-suffix";
+
+    await setupDotenv({ cwd: tmpDir, expandFileReferences: false });
+    expect(process.env.TEST_SECRET_FILE).toBe("normal-secret-into-key-with-file-suffix");
   });
 });

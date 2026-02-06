@@ -1,12 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe, beforeAll } from "vitest";
 import { normalize } from "pathe";
-import { updateConfig } from "../src/update";
+import { updateConfig } from "../src/update.ts";
 import { readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const r = (path: string) =>
-  normalize(fileURLToPath(new URL(path, import.meta.url)));
+const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 
 describe("update config file", () => {
   const tmpDir = r("./.tmp");
@@ -42,10 +41,7 @@ describe("update config file", () => {
   it("update existing in .config folder", async () => {
     const tmpDotConfig = r("./.tmp/.config");
     await mkdir(tmpDotConfig, { recursive: true });
-    await writeFile(
-      r("./.tmp/.config/foobar.ts"),
-      "export default { test: true }",
-    );
+    await writeFile(r("./.tmp/.config/foobar.ts"), "export default { test: true }");
     const res = await updateConfig({
       cwd: tmpDir,
       configFile: "foobar.config",
