@@ -12,11 +12,11 @@ const cwdEnvPath = join(process.cwd(), cwdEnvFileName);
 
 describe("update config file", () => {
   beforeEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
     await mkdir(tmpDir, { recursive: true });
   });
   afterAll(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    // await rm(tmpDir, { recursive: true, force: true });
     await unlink(cwdEnvPath).catch(console.error);
   });
   it("should read .env file into process.env", async () => {
