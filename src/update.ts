@@ -3,6 +3,7 @@ import { SUPPORTED_EXTENSIONS } from "./loader";
 import { join, normalize } from "pathe";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, extname } from "node:path";
+import * as rc9 from "rc9";
 
 const UPDATABLE_EXTS = [".js", ".ts", ".mjs", ".cjs", ".mts", ".cts"] as const;
 
@@ -58,6 +59,59 @@ export async function updateConfig(opts: UpdateConfigOptions): Promise<UpdateCon
     configFile,
     created,
   };
+}
+
+/**
+ * Update an RC config file in the current working directory.
+ *
+ * Uses rc9 to read, merge, and write RC configuration files.
+ * RC files use a simple key-value format with automatic flattening/unflattening.
+ *
+ * @param opts - Configuration options
+ * @returns Path to the RC config file
+ *
+ * @example
+ * ```ts
+ * import { updateConfigRC } from "c12/update";
+ *
+ * const configFile = await updateConfigRC({
+ *   name: ".myapprc",
+ *   dir: process.cwd(),
+ *   onUpdate: (config) => {
+ *     config.apiUrl = "https://api.example.com";
+ *     config.enabled = true;
+ *   },
+ * });
+ * ```
+ */
+export async function updateConfigRC(
+  opts: UpdateConfigRCOptions,
+): Promise<string> {
+  if (!opts.name) {
+    throw new Error("RC config file name is required");
+  }
+
+  const rcOptions: rc9.RCOptions = {
+    name: opts.name,
+    dir: opts.dir || process.cwd(),
+    flat: opts.flat,
+  };
+
+  // Ensure directory exists
+  await mkdir(rcOptions.dir, { recursive: true });
+
+  // Read existing config (returns empty object if file doesn't exist)
+  const existingConfig = rc9.read(rcOptions);
+
+  // Allow user to update the config
+  await opts.onUpdate?.(existingConfig);
+
+  // Write updated config using rc9.update
+  rc9.update(existingConfig, rcOptions);
+
+  // Return the full path to the config file
+  const configPath = join(rcOptions.dir, rcOptions.name);
+  return configPath;
 }
 
 // --- Internal ---
@@ -127,4 +181,31 @@ export interface UpdateConfigOptions {
    *  - false: abort the operation
    */
   onCreate?: (ctx: { configFile: string }) => MaybePromise<string | boolean>;
+}
+
+export interface UpdateConfigRCOptions {
+  /**
+   * RC config file name (e.g., ".myapprc")
+   */
+  name: string;
+
+  /**
+   * Directory to read/write the RC config file.
+   * Defaults to current working directory.
+   */
+  dir?: string;
+
+  /**
+   * If true, disables automatic flattening/unflattening of config values.
+   * Default is false.
+   *
+   * @see https://github.com/unjs/rc9#unflatten
+   */
+  flat?: boolean;
+
+  /**
+   * Update function called with the current config object.
+   * Modify the config object to update values.
+   */
+  onUpdate?: (config: any) => MaybePromise<void>;
 }

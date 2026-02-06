@@ -462,6 +462,43 @@ const { configFile, created } = await updateConfig({
 console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
 ```
 
+### Updating RC config files
+
+Update or create RC configuration files using [rc9](https://github.com/unjs/rc9).
+
+Import utils from `c12/update`:
+
+```js
+import { updateConfigRC } from "c12/update";
+```
+
+**Update RC config:**
+
+```js
+const configFile = await updateConfigRC({
+  name: ".myapprc",
+  dir: process.cwd(), // optional, defaults to cwd
+  onUpdate: (config) => {
+    config.apiUrl = "https://api.example.com";
+    config.enabled = true;
+  },
+});
+
+console.log(`RC config updated in ${configFile}`);
+```
+
+RC files use a simple key-value format with automatic flattening/unflattening:
+
+```ini
+# .myapprc
+apiUrl=https://api.example.com
+enabled=true
+database.host=localhost
+database.port=5432
+```
+
+Learn more about RC file format in [rc9 documentation](https://github.com/unjs/rc9).
+
 ## Configuration functions
 
 You can use a function to define your configuration dynamically based on context.
