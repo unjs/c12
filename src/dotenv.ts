@@ -35,11 +35,21 @@ export interface DotenvOptions {
   env?: NodeJS.ProcessEnv;
 
   /**
-   * Automatically load env variables from files when the key ends with `_FILE`.
+   * Resolve `_FILE` suffixed environment variables by reading the file at the
+   * specified path and assigning its trimmed content to the base key.
    *
-   * @default false
+   * This is useful for container secrets (e.g. Docker, Kubernetes) where
+   * sensitive values are mounted as files.
+   *
+   * @default true
+   *
+   * @example
+   * ```env
+   * DATABASE_PASSWORD_FILE="/run/secrets/db_password"
+   * # resolves to DATABASE_PASSWORD=<contents of /run/secrets/db_password>
+   * ```
    */
-  expandEnvFiles?: boolean;
+  expandFileReferences?: boolean;
 }
 
 export type Env = typeof process.env;
@@ -58,7 +68,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
-    expandEnvFiles: options.expandEnvFiles,
+    expandFileReferences: options.expandFileReferences ?? true,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -107,17 +117,14 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Support _FILE environment variables
-  if (options.expandEnvFiles) {
+  if (options.expandFileReferences !== false) {
     for (const key in environment) {
       if (key.endsWith("_FILE")) {
         const targetKey = key.slice(0, -5);
         if (environment[targetKey] === undefined) {
           const filePath = environment[key];
-          if (
-            filePath &&
-            statSync(filePath, { throwIfNoEntry: false })?.isFile()
-          ) {
-            const value = await fsp.readFile(filePath, "utf8");
+          if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
+            const value = readFileSync(filePath, "utf8");
             environment[targetKey] = value.trim();
             dotenvVars.add(targetKey);
           }

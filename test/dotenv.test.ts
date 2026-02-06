@@ -64,30 +64,19 @@ describe("update config file", () => {
     expect(process.env.humpty).toBe("dumpty");
   });
 
-  it("should support _FILE env vars", async () => {
+  it("should support _FILE env vars by default", async () => {
     const secretPath = r(".secret");
     await writeFile(secretPath, "my-secret-value");
     process.env.TEST_SECRET_FILE = secretPath;
 
-    await setupDotenv({ cwd: tmpDir, expandEnvFiles: true });
+    await setupDotenv({ cwd: tmpDir });
     expect(process.env.TEST_SECRET).toBe("my-secret-value");
   });
 
-  it("should not support _FILE env vars by default (turn off feature)", async () => {
+  it("should not expand _FILE env vars when disabled", async () => {
     process.env.TEST_SECRET_FILE = "normal-secret-into-key-with-file-suffix";
 
-    await setupDotenv({ cwd: tmpDir, expandEnvFiles: false });
-    expect(process.env.TEST_SECRET_FILE).toBe(
-      "normal-secret-into-key-with-file-suffix",
-    );
-  });
-
-  it("should not support _FILE env vars by default (backward compatibility)", async () => {
-    process.env.TEST_SECRET_FILE = "normal-secret-into-key-with-file-suffix";
-
-    await setupDotenv({ cwd: tmpDir });
-    expect(process.env.TEST_SECRET_FILE).toBe(
-      "normal-secret-into-key-with-file-suffix",
-    );
+    await setupDotenv({ cwd: tmpDir, expandFileReferences: false });
+    expect(process.env.TEST_SECRET_FILE).toBe("normal-secret-into-key-with-file-suffix");
   });
 });
