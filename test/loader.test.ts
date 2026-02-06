@@ -4,8 +4,7 @@ import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
 import { loadConfig } from "../src";
 
-const r = (path: string) =>
-  normalize(fileURLToPath(new URL(path, import.meta.url)));
+const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
@@ -325,9 +324,7 @@ describe("loader", () => {
       ConfigLayerMeta
     >[];
 
-    const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "test.config",
-    )!;
+    const configLayer = transformdLayers.find((layer) => layer.configFile === "test.config")!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseLayerConfig = transformdLayers.find(

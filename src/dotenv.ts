@@ -153,9 +153,7 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value === undefined
-          ? newValue
-          : newValue.replace(replacePart, value);
+        return value === undefined ? newValue : newValue.replace(replacePart, value);
       }, value),
     );
   }

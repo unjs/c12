@@ -59,8 +59,7 @@ export async function loadConfig<
   options.name = options.name || "config";
   options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
-    options.configFile ??
-    (options.name === "config" ? "config" : `${options.name}.config`);
+    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
   if (options.extend !== false) {
     options.extend = {
@@ -145,11 +144,7 @@ export async function loadConfig<
     const keys = (
       Array.isArray(options.packageJson)
         ? options.packageJson
-        : [
-            typeof options.packageJson === "string"
-              ? options.packageJson
-              : options.name,
-          ]
+        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
@@ -243,9 +238,7 @@ async function extendConfig<
   const extendSources = [];
   for (const key of keys as string[]) {
     extendSources.push(
-      ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(
-        Boolean,
-      ),
+      ...(Array.isArray(config[key]) ? config[key] : [config[key]]).filter(Boolean),
     );
     delete config[key];
   }
@@ -264,9 +257,7 @@ async function extendConfig<
       // TODO: Use error in next major versions
 
       console.warn(
-        `Cannot extend config from \`${JSON.stringify(
-          originalExtendSource,
-        )}\` in ${options.cwd}`,
+        `Cannot extend config from \`${JSON.stringify(originalExtendSource)}\` in ${options.cwd}`,
       );
       continue;
     }
@@ -274,9 +265,7 @@ async function extendConfig<
     if (!_config.config) {
       // TODO: Use error in next major versions
 
-      console.warn(
-        `Cannot extend config from \`${extendSource}\` in ${options.cwd}`,
-      );
+      console.warn(`Cannot extend config from \`${extendSource}\` in ${options.cwd}`);
       continue;
     }
     await extendConfig(_config.config, { ...options, cwd: _config.cwd });
@@ -289,18 +278,10 @@ async function extendConfig<
 }
 
 // TODO: Either expose from giget directly or redirect all non file:// protocols to giget
-const GIGET_PREFIXES = [
-  "gh:",
-  "github:",
-  "gitlab:",
-  "bitbucket:",
-  "https://",
-  "http://",
-];
+const GIGET_PREFIXES = ["gh:", "github:", "gitlab:", "bitbucket:", "https://", "http://"];
 
 // https://github.com/dword-design/package-name-regex
-const NPM_PACKAGE_RE =
-  /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
+const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*)/;
 
 async function resolveConfig<
   T extends UserInputConfig = UserInputConfig,
@@ -322,18 +303,15 @@ async function resolveConfig<
   const _merger = options.merger || defu;
 
   // Download giget URIs and resolve to local path
-  const customProviderKeys = Object.keys(
-    sourceOptions.giget?.providers || {},
-  ).map((key) => `${key}:`);
+  const customProviderKeys = Object.keys(sourceOptions.giget?.providers || {}).map(
+    (key) => `${key}:`,
+  );
   const gigetPrefixes =
     customProviderKeys.length > 0
       ? [...new Set([...customProviderKeys, ...GIGET_PREFIXES])]
       : GIGET_PREFIXES;
 
-  if (
-    options.giget !== false &&
-    gigetPrefixes.some((prefix) => source.startsWith(prefix))
-  ) {
+  if (options.giget !== false && gigetPrefixes.some((prefix) => source.startsWith(prefix))) {
     const { downloadTemplate } = await import("giget");
     const { digest } = await import("ohash");
 
@@ -393,10 +371,7 @@ async function resolveConfig<
 
   res.configFile =
     tryResolve(resolve(cwd, source), options) ||
-    tryResolve(
-      resolve(cwd, ".config", source.replace(/\.config$/, "")),
-      options,
-    ) ||
+    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, "")), options) ||
     tryResolve(resolve(cwd, ".config", source), options) ||
     source;
 
@@ -408,8 +383,7 @@ async function resolveConfig<
 
   const configFileExt = extname(res.configFile!) || "";
   if (configFileExt in ASYNC_LOADERS) {
-    const asyncLoader =
-      await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
+    const asyncLoader = await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
@@ -418,9 +392,9 @@ async function resolveConfig<
     })) as T;
   }
   if (typeof res.config === "function") {
-    res.config = await (
-      res.config as (ctx?: ConfigFunctionContext) => Promise<any>
-    )(options.context);
+    res.config = await (res.config as (ctx?: ConfigFunctionContext) => Promise<any>)(
+      options.context,
+    );
   }
 
   // Extend env specific config

@@ -4,9 +4,7 @@ import { join, normalize } from "pathe";
 import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
 import { setupDotenv } from "../src";
 
-const tmpDir = normalize(
-  fileURLToPath(new URL(".tmp-dotenv", import.meta.url)),
-);
+const tmpDir = normalize(fileURLToPath(new URL(".tmp-dotenv", import.meta.url)));
 const r = (path: string) => join(tmpDir, path);
 
 const cwdEnvFileName = ".env.12345";

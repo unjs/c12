@@ -81,20 +81,13 @@ export interface ResolvedConfig<
   _configFile?: string;
 }
 
-export type ConfigSource =
-  | "overrides"
-  | "main"
-  | "rc"
-  | "packageJson"
-  | "defaultConfig";
+export type ConfigSource = "overrides" | "main" | "rc" | "packageJson" | "defaultConfig";
 
 export interface ConfigFunctionContext {
   [key: string]: any;
 }
 
-export interface ResolvableConfigContext<
-  T extends UserInputConfig = UserInputConfig,
-> {
+export interface ResolvableConfigContext<T extends UserInputConfig = UserInputConfig> {
   configs: Record<ConfigSource, T | null | undefined>;
   rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
@@ -135,11 +128,7 @@ export interface LoadConfigOptions<
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>,
-  ) =>
-    | null
-    | undefined
-    | ResolvedConfig<T, MT>
-    | Promise<ResolvedConfig<T, MT> | undefined | null>;
+  ) => null | undefined | ResolvedConfig<T, MT> | Promise<ResolvedConfig<T, MT> | undefined | null>;
 
   jiti?: Jiti;
   jitiOptions?: JitiOptions;
