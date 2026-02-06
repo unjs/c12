@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      chokidar:
-        specifier: ^5.0.0
-        version: 5.0.0
       confbox:
         specifier: ^0.2.4
         version: 0.2.4
@@ -29,15 +26,9 @@ importers:
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
-      ohash:
-        specifier: ^2.0.11
-        version: 2.0.11
       pathe:
         specifier: ^2.0.3
         version: 2.0.3
-      perfect-debounce:
-        specifier: ^2.1.0
-        version: 2.1.0
       pkg-types:
         specifier: ^2.3.0
         version: 2.3.0
@@ -60,6 +51,9 @@ importers:
       changelogen:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.2)
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
       eslint-config-unjs:
         specifier: ^0.6.2
         version: 0.6.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
@@ -72,12 +66,18 @@ importers:
       obuild:
         specifier: ^0.4.27
         version: 0.4.27(@typescript/native-preview@7.0.0-dev.20260206.1)(magicast@0.5.2)(picomatch@4.0.3)(rollup@4.57.1)(typescript@5.9.3)
+      ohash:
+        specifier: ^2.0.11
+        version: 2.0.11
       oxfmt:
         specifier: ^0.28.0
         version: 0.28.0
       oxlint:
         specifier: ^1.43.0
         version: 1.43.0
+      perfect-debounce:
+        specifier: ^2.1.0
+        version: 2.1.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

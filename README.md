@@ -364,6 +364,14 @@ export default {
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
 
+> [!NOTE]
+> Watching requires the [`chokidar`](https://github.com/paulmillr/chokidar) peer dependency to be installed.
+>
+> ```sh
+> # ✨ Auto-detect
+> npx nypm install chokidar
+> ```
+
 ### Lifecycle hooks
 
 - `onWatch`: This function is always called when config is updated, added, or removed before attempting to reload the config.
