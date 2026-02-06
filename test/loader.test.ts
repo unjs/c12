@@ -1,7 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { rmSync } from "node:fs";
-import { resolve } from "node:path";
-import { expect, it, beforeEach, describe } from "vitest";
+import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
@@ -12,14 +10,27 @@ const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.ur
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
-describe("loader", () => {
-  beforeEach(() => {
-    rmSync(resolve(r("./fixture"), "node_modules", ".c12"), {
-      recursive: true,
-      force: true,
-    });
-  });
+const ConfigSchema = z.object({
+  defaultConfig: z.boolean().optional(),
+  virtual: z.boolean().optional(),
+  githubLayer: z.boolean().optional(),
+  npmConfig: z.boolean().optional(),
+  devConfig: z.boolean().optional(),
+  baseConfig: z.boolean().optional(),
+  array: z.array(z.string()).optional(),
+  baseEnvConfig: z.boolean().optional(),
+  packageJSON2: z.boolean().optional(),
+  packageJSON: z.boolean().optional(),
+  testConfig: z.boolean().optional(),
+  rcFile: z.boolean().optional(),
+  configFile: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
+  overridden: z.boolean().optional(),
+  enableDefault: z.boolean().optional(),
+  envConfig: z.boolean().optional(),
+  theme: z.string().optional(),
+});
 
+describe("loader", () => {
   it("load fixture config", async () => {
     type UserConfig = Partial<{
       virtual: boolean;
@@ -29,6 +40,9 @@ describe("loader", () => {
       extends: string[];
     }>;
     const { config, layers } = await loadConfig<UserConfig>({
+      schema: z.object({
+        config: ConfigSchema,
+      }),
       cwd: r("./fixture"),
       name: "test",
       dotenv: {
@@ -344,355 +358,21 @@ describe("loader", () => {
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
 
-  it("load fixture config with validate for zod - toThrow", async () => {
-    const ColorsSchema = z.object({
-      primary: z.string().optional(),
-      text: z.number().optional(), // error cause
-      secondary: z.string().optional(),
-    });
-
-    const EnvSchema = z.object({
-      test: z
-        .object({
-          baseEnvConfig: z.boolean(),
-        })
-        .optional(),
-    });
-
-    const TestSchema = z.object({
-      extends: z.array(z.union([z.string(), z.array(z.any())])),
-      envConfig: z.boolean(),
-    });
-
-    const ConfigSchema = z.object({
-      defaultConfig: z.boolean().optional(),
-      virtual: z.boolean().optional(),
-      githubLayer: z.boolean().optional(),
-      npmConfig: z.boolean().optional(),
-      devConfig: z.boolean().optional(),
-      baseConfig: z.boolean().optional(),
-      colors: ColorsSchema.optional(),
-      array: z.array(z.string()).optional(),
-      $env: EnvSchema.optional(),
-      baseEnvConfig: z.boolean().optional(),
-      packageJSON2: z.boolean().optional(),
-      packageJSON: z.boolean().optional(),
-      testConfig: z.boolean().optional(),
-      rcFile: z.boolean().optional(),
-      $test: TestSchema.optional(),
-      configFile: z.union([z.string(), z.boolean()]).optional(),
-      overridden: z.boolean().optional(),
-      enableDefault: z.boolean().optional(),
-      envConfig: z.boolean().optional(),
-      theme: z.string().optional(),
-    });
-
-    const LayerSchema = z.object({
-      config: ConfigSchema,
-      configFile: z.string().optional(),
-      cwd: z.string().optional(),
-      source: z.string().optional(),
-      sourceOptions: z
-        .object({
-          giget: z.record(z.string(), z.any()).optional(),
-        })
-        .optional(),
-      meta: z
-        .object({
-          name: z.string().optional(),
-          version: z.string().optional(),
-        })
-        .optional(),
-    });
-
-    const MainSchema = z.object({
-      config: ConfigSchema,
-      cwd: z.string(),
-      configFile: z.string(),
-      layers: z.array(LayerSchema),
-      meta: z.object({}).optional(),
-    });
-    type UserConfig = Partial<{
-      virtual: boolean;
-      overridden: boolean;
-      enableDefault: boolean;
-      defaultConfig: boolean;
-      extends: string[];
-    }>;
-    expect(
-      loadConfig<UserConfig, ConfigLayerMeta, typeof MainSchema>({
-        cwd: r("./fixture"),
-        name: "test",
-        dotenv: true,
-        packageJson: ["c12", "c12-alt"],
-        globalRc: true,
-        envName: "test",
-        extend: {
-          extendKey: ["theme", "extends"],
-        },
-        resolve: (id) => {
-          if (id === "virtual") {
-            return { config: { virtual: true } };
-          }
-        },
-        overrides: {
-          overridden: true,
-        },
-        defaults: {
-          defaultConfig: true,
-        },
-        defaultConfig: ({ configs }) => {
-          if (configs?.main?.enableDefault) {
-            return Promise.resolve({
-              extends: ["virtual"],
-            });
-          }
-          return {};
-        },
-        schema: MainSchema,
+  it("no config loaded and configFileRequired is default setting", async () => {
+    await expect(
+      loadConfig({
+        configFile: "CUSTOM",
       }),
-    ).rejects.toThrow();
+    ).resolves.not.toThrowError();
   });
 
-  it("load fixture config with validate for zod - not.toThrow", async () => {
-    const ColorsSchema = z.object({
-      primary: z.string().optional(),
-      text: z.string().optional(),
-      secondary: z.string().optional(),
-    });
-
-    const EnvSchema = z
-      .object({
-        test: z
-          .object({
-            baseEnvConfig: z.boolean(),
-          })
-          .optional(),
-      })
-      .optional();
-
-    const TestSchema = z
-      .object({
-        extends: z.array(z.union([z.string(), z.array(z.any()), z.record(z.string(), z.any())])),
-        envConfig: z.boolean(),
-      })
-      .optional();
-
-    const ConfigSchema = z.object({
-      defaultConfig: z.boolean().optional(),
-      virtual: z.boolean().optional(),
-      githubLayer: z.boolean().optional(),
-      npmConfig: z.boolean().optional(),
-      devConfig: z.boolean().optional(),
-      baseConfig: z.boolean().optional(),
-      colors: ColorsSchema.optional(),
-      array: z.array(z.string()).optional(),
-      $env: EnvSchema,
-      baseEnvConfig: z.boolean().optional(),
-      packageJSON2: z.boolean().optional(),
-      packageJSON: z.boolean().optional(),
-      testConfig: z.boolean().optional(),
-      rcFile: z.boolean().optional(),
-      $test: TestSchema,
-      configFile: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
-      overridden: z.boolean().optional(),
-      enableDefault: z.boolean().optional(),
-      envConfig: z.boolean().optional(),
-      theme: z.string().optional(),
-    });
-
-    const LayerSchema = z.object({
-      config: ConfigSchema,
-      configFile: z.union([z.string(), z.undefined()]).optional(),
-      cwd: z.union([z.string(), z.undefined()]).optional(),
-      source: z.string().optional(),
-      sourceOptions: z
-        .object({
-          giget: z.record(z.string(), z.any()).optional(),
-        })
-        .optional(),
-      meta: z.record(z.string(), z.any()).optional(),
-    });
-
-    const MainSchema = z.object({
-      config: ConfigSchema,
-      cwd: z.string(),
-      configFile: z.string(),
-      layers: z.array(LayerSchema),
-      meta: z.record(z.string(), z.any()).optional(),
-    });
-
-    type UserConfig = Partial<{
-      virtual: boolean;
-      overridden: boolean;
-      enableDefault: boolean;
-      defaultConfig: boolean;
-      extends: string[];
-    }>;
-    expect(
-      loadConfig<UserConfig, ConfigLayerMeta, typeof MainSchema>({
-        cwd: r("./fixture"),
-        name: "test",
-        dotenv: true,
-        packageJson: ["c12", "c12-alt"],
-        globalRc: true,
-        envName: "test",
-        extend: {
-          extendKey: ["theme", "extends"],
-        },
-        resolve: (id) => {
-          if (id === "virtual") {
-            return { config: { virtual: true } };
-          }
-        },
-        overrides: {
-          overridden: true,
-        },
-        defaults: {
-          defaultConfig: true,
-        },
-        defaultConfig: ({ configs }) => {
-          if (configs?.main?.enableDefault) {
-            return Promise.resolve({
-              extends: ["virtual"],
-            });
-          }
-          return {};
-        },
-        schema: MainSchema,
-      }),
-    ).resolves.not.toThrow();
-  });
   it("no config loaded and configFileRequired is true", async () => {
     await expect(
       loadConfig({
         configFile: "CUSTOM",
         configFileRequired: true,
       }),
-    ).rejects.toThrow();
-  });
-
-  describe("load fixture config with validate for zod - not.toThrow", async () => {
-    const ColorsSchema = z.object({
-      primary: z.string().optional(),
-      text: z.string().optional(),
-      secondary: z.string().optional(),
-    });
-
-    const EnvSchema = z.object({
-      test: z.optional(
-        z.object({
-          baseEnvConfig: z.boolean(),
-        }),
-      ),
-    });
-
-    const TestSchema = z.object({
-      extends: z.array(z.union([z.string(), z.array(z.any()), z.record(z.string(), z.any())])),
-      envConfig: z.boolean(),
-    });
-
-    const ConfigSchema = z.object({
-      defaultConfig: z.optional(z.boolean()),
-      virtual: z.optional(z.boolean()),
-      githubLayer: z.optional(z.boolean()),
-      npmConfig: z.optional(z.boolean()),
-      devConfig: z.optional(z.boolean()),
-      baseConfig: z.optional(z.boolean()),
-      colors: z.optional(ColorsSchema),
-      array: z.optional(z.array(z.string())),
-      $env: z.optional(EnvSchema),
-      baseEnvConfig: z.optional(z.boolean()),
-      packageJSON2: z.optional(z.boolean()),
-      packageJSON: z.optional(z.boolean()),
-      testConfig: z.optional(z.boolean()),
-      rcFile: z.optional(z.boolean()),
-      $test: z.optional(TestSchema),
-      configFile: z.optional(z.union([z.string(), z.boolean()])),
-      overridden: z.optional(z.boolean()),
-      enableDefault: z.optional(z.boolean()),
-      envConfig: z.optional(z.boolean()),
-      theme: z.optional(z.string()),
-    });
-
-    const LayerSchema = z.object({
-      config: ConfigSchema,
-      configFile: z.optional(z.string()),
-      cwd: z.optional(z.string()),
-      source: z.optional(z.string()),
-      sourceOptions: z.optional(
-        z.object({
-          giget: z.optional(z.record(z.string(), z.any())),
-        }),
-      ),
-      meta: z.optional(z.record(z.string(), z.any())),
-    });
-
-    const MainSchema = z.object({
-      config: ConfigSchema,
-      cwd: z.string(),
-      configFile: z.string(),
-      layers: z.array(LayerSchema),
-      meta: z.optional(z.record(z.string(), z.any())),
-    });
-
-    type UserConfig = Partial<{
-      virtual: boolean;
-      overridden: boolean;
-      enableDefault: boolean;
-      defaultConfig: boolean;
-      extends: string[];
-    }>;
-    expect(
-      loadConfig<UserConfig, ConfigLayerMeta, typeof MainSchema>({
-        cwd: r("./fixture"),
-        name: "test",
-        dotenv: true,
-        packageJson: ["c12", "c12-alt"],
-        globalRc: true,
-        envName: "test",
-        extend: {
-          extendKey: ["theme", "extends"],
-        },
-        resolve: (id) => {
-          if (id === "virtual") {
-            return { config: { virtual: true } };
-          }
-        },
-        overrides: {
-          overridden: true,
-        },
-        defaults: {
-          defaultConfig: true,
-        },
-        defaultConfig: ({ configs }) => {
-          if (configs?.main?.enableDefault) {
-            return Promise.resolve({
-              extends: ["virtual"],
-            });
-          }
-          return {};
-        },
-        schema: MainSchema,
-      }),
-    ).resolves.not.toThrow();
-
-    it("no config loaded and configFileRequired is default setting", async () => {
-      await expect(
-        loadConfig({
-          configFile: "CUSTOM",
-        }),
-      ).resolves.not.toThrowError();
-    });
-
-    it("no config loaded and configFileRequired is true", async () => {
-      expect(
-        loadConfig({
-          configFile: "CUSTOM",
-          configFileRequired: true,
-        }),
-      ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
-    });
+    ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
   });
 
   it("loads arrays exported from config without merging", async () => {
