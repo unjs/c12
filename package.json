@@ -11,14 +11,8 @@
   "sideEffects": false,
   "types": "./dist/index.d.mts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "default": "./dist/index.mjs"
-    },
-    "./update": {
-      "types": "./dist/update.d.mts",
-      "default": "./dist/update.mjs"
-    }
+    ".": "./dist/index.mjs",
+    "./update": "./dist/update.mjs"
   },
   "scripts": {
     "build": "obuild",
