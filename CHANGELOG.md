@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-beta.1
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.3...v4.0.0-beta.1)
+
+### 🔥 Performance
+
+- ⚠️  Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
+
+### 📦 Build
+
+- Simplify exports field ([5297997](https://github.com/unjs/c12/commit/5297997))
+- Make `chokidar` optional peer dependency ([8b7c6a2](https://github.com/unjs/c12/commit/8b7c6a2))
+
+### 🏡 Chore
+
+- Update release script ([49106de](https://github.com/unjs/c12/commit/49106de))
+- Use oxlint and oxfmt ([7874678](https://github.com/unjs/c12/commit/7874678))
+- Update deps ([58e7800](https://github.com/unjs/c12/commit/58e7800))
+- Prepare for v4 ([df97bab](https://github.com/unjs/c12/commit/df97bab))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.3.3
 
 [compare changes](https://github.com/unjs/c12/compare/v3.3.2...v3.3.3)
