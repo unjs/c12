@@ -26,7 +26,6 @@
   "dependencies": {
     "confbox": "^0.2.4",
     "defu": "^6.1.4",
-    "dotenv": "^17.2.4",
     "exsolve": "^1.0.8",
     "pathe": "^2.0.3",
     "pkg-types": "^2.3.0",
@@ -56,9 +55,13 @@
     "chokidar": "^5",
     "giget": "*",
     "jiti": "*",
+    "dotenv": "*",
     "magicast": "*"
   },
   "peerDependenciesMeta": {
+    "dotenv": {
+      "optional": true
+    },
     "magicast": {
       "optional": true
     },

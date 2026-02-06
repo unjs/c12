@@ -14,15 +14,9 @@ importers:
       defu:
         specifier: ^6.1.4
         version: 6.1.4
-      dotenv:
-        specifier: ^17.2.4
-        version: 17.2.4
       exsolve:
         specifier: ^1.0.8
         version: 1.0.8
-      giget:
-        specifier: ^3.1.2
-        version: 3.1.2
       pathe:
         specifier: ^2.0.3
         version: 2.0.3
@@ -57,6 +51,9 @@ importers:
       expect-type:
         specifier: ^1.3.0
         version: 1.3.0
+      giget:
+        specifier: ^3.1.2
+        version: 3.1.2
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
