@@ -1,6 +1,6 @@
 {
   "name": "c12",
-  "version": "3.3.3",
+  "version": "4.0.0-beta.0",
   "description": "Smart Config Loader",
   "license": "MIT",
   "repository": "unjs/c12",
@@ -19,7 +19,7 @@
     "dev": "vitest dev",
     "lint": "oxlint . && oxfmt --check src test",
     "lint:fix": "automd && oxlint . --fix && oxfmt src test",
-    "release": "pnpm build && pnpm test && changelogen --release --push --publish",
+    "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish && git push --follow-tags",
     "test": "pnpm lint && vitest run --coverage && pnpm test:types",
     "test:types": "tsgo --noEmit"
   },
