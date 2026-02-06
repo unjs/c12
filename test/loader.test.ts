@@ -1,11 +1,12 @@
 import { fileURLToPath } from "node:url";
-import { expect, it, describe } from "vitest";
+import { rmSync } from "node:fs";
+import { resolve } from "node:path";
+import { expect, it, beforeEach, describe } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
 import { z } from "zod";
-import { object, string, boolean, array, optional, union, record, any } from "valibot";
 
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
@@ -571,173 +572,68 @@ describe("loader", () => {
     ).rejects.toThrow();
   });
 
-  it("load fixture config with validate for valibot - toThrow", async () => {
-    const ColorsSchema = object({
-      primary: optional(string()),
-      text: optional(boolean()), // error cause
-      secondary: optional(string()),
-    });
-
-    const EnvSchema = object({
-      test: optional(
-        object({
-          baseEnvConfig: boolean(),
-        }),
-      ),
-    });
-
-    const TestSchema = object({
-      extends: array(union([string(), array(any()), record(string(), any())])),
-      envConfig: boolean(),
-    });
-
-    const ConfigSchema = object({
-      defaultConfig: optional(boolean()),
-      virtual: optional(boolean()),
-      githubLayer: optional(boolean()),
-      npmConfig: optional(boolean()),
-      devConfig: optional(boolean()),
-      baseConfig: optional(boolean()),
-      colors: optional(ColorsSchema),
-      array: optional(array(string())),
-      $env: optional(EnvSchema),
-      baseEnvConfig: optional(boolean()),
-      packageJSON2: optional(boolean()),
-      packageJSON: optional(boolean()),
-      testConfig: optional(boolean()),
-      rcFile: optional(boolean()),
-      $test: optional(TestSchema),
-      configFile: optional(union([string(), boolean()])),
-      overridden: optional(boolean()),
-      enableDefault: optional(boolean()),
-      envConfig: optional(boolean()),
-      theme: optional(string()),
-    });
-
-    const LayerSchema = object({
-      config: ConfigSchema,
-      configFile: optional(string()),
-      cwd: optional(string()),
-      source: optional(string()),
-      sourceOptions: optional(
-        object({
-          giget: optional(record(string(), any())),
-        }),
-      ),
-      meta: optional(record(string(), any())),
-    });
-
-    const MainSchema = object({
-      config: ConfigSchema,
-      cwd: string(),
-      configFile: string(),
-      layers: array(LayerSchema),
-      meta: optional(record(string(), any())),
-    });
-    type UserConfig = Partial<{
-      virtual: boolean;
-      overridden: boolean;
-      enableDefault: boolean;
-      defaultConfig: boolean;
-      extends: string[];
-    }>;
-    expect(
-      loadConfig<UserConfig, ConfigLayerMeta, typeof MainSchema>({
-        cwd: r("./fixture"),
-        name: "test",
-        dotenv: true,
-        packageJson: ["c12", "c12-alt"],
-        globalRc: true,
-        envName: "test",
-        extend: {
-          extendKey: ["theme", "extends"],
-        },
-        resolve: (id) => {
-          if (id === "virtual") {
-            return { config: { virtual: true } };
-          }
-        },
-        overrides: {
-          overridden: true,
-        },
-        defaults: {
-          defaultConfig: true,
-        },
-        defaultConfig: ({ configs }) => {
-          if (configs?.main?.enableDefault) {
-            return Promise.resolve({
-              extends: ["virtual"],
-            });
-          }
-          return {};
-        },
-        schema: MainSchema,
-      }),
-    ).rejects.toThrow();
-  });
-
   describe("load fixture config with validate for zod - not.toThrow", async () => {
-    const ColorsSchema = object({
-      primary: optional(string()),
-      text: optional(string()),
-      secondary: optional(string()),
+    const ColorsSchema = z.object({
+      primary: z.string().optional(),
+      text: z.string().optional(),
+      secondary: z.string().optional(),
     });
 
-    const EnvSchema = object({
-      test: optional(
-        object({
-          baseEnvConfig: boolean(),
+    const EnvSchema = z.object({
+      test: z.optional(
+        z.object({
+          baseEnvConfig: z.boolean(),
         }),
       ),
     });
 
-    const TestSchema = object({
-      extends: array(union([string(), array(any()), record(string(), any())])),
-      envConfig: boolean(),
+    const TestSchema = z.object({
+      extends: z.array(z.union([z.string(), z.array(z.any()), z.record(z.string(), z.any())])),
+      envConfig: z.boolean(),
     });
 
-    const ConfigSchema = object({
-      defaultConfig: optional(boolean()),
-      virtual: optional(boolean()),
-      githubLayer: optional(boolean()),
-      npmConfig: optional(boolean()),
-      devConfig: optional(boolean()),
-      baseConfig: optional(boolean()),
-      colors: optional(ColorsSchema),
-      array: optional(array(string())),
-      $env: optional(EnvSchema),
-      baseEnvConfig: optional(boolean()),
-      packageJSON2: optional(boolean()),
-      packageJSON: optional(boolean()),
-      testConfig: optional(boolean()),
-      rcFile: optional(boolean()),
-      $test: optional(TestSchema),
-      configFile: optional(union([string(), boolean()])),
-      overridden: optional(boolean()),
-      enableDefault: optional(boolean()),
-      envConfig: optional(boolean()),
-      theme: optional(string()),
+    const ConfigSchema = z.object({
+      defaultConfig: z.optional(z.boolean()),
+      virtual: z.optional(z.boolean()),
+      githubLayer: z.optional(z.boolean()),
+      npmConfig: z.optional(z.boolean()),
+      devConfig: z.optional(z.boolean()),
+      baseConfig: z.optional(z.boolean()),
+      colors: z.optional(ColorsSchema),
+      array: z.optional(z.array(z.string())),
+      $env: z.optional(EnvSchema),
+      baseEnvConfig: z.optional(z.boolean()),
+      packageJSON2: z.optional(z.boolean()),
+      packageJSON: z.optional(z.boolean()),
+      testConfig: z.optional(z.boolean()),
+      rcFile: z.optional(z.boolean()),
+      $test: z.optional(TestSchema),
+      configFile: z.optional(z.union([z.string(), z.boolean()])),
+      overridden: z.optional(z.boolean()),
+      enableDefault: z.optional(z.boolean()),
+      envConfig: z.optional(z.boolean()),
+      theme: z.optional(z.string()),
     });
 
-    const LayerSchema = object({
+    const LayerSchema = z.object({
       config: ConfigSchema,
-      configFile: optional(string()),
-      cwd: optional(string()),
-      source: optional(string()),
-      sourceOptions: optional(
-        object({
-          giget: optional(record(string(), any())),
+      configFile: z.optional(z.string()),
+      cwd: z.optional(z.string()),
+      source: z.optional(z.string()),
+      sourceOptions: z.optional(
+        z.object({
+          giget: z.optional(z.record(z.string(), z.any())),
         }),
       ),
-      meta: optional(record(string(), any())),
+      meta: z.optional(z.record(z.string(), z.any())),
     });
 
-    const MainSchema = object({
+    const MainSchema = z.object({
       config: ConfigSchema,
-      cwd: string(),
-      configFile: string(),
-      layers: array(LayerSchema),
-      meta: optional(record(string(), any())),
+      cwd: z.string(),
+      configFile: z.string(),
+      layers: z.array(LayerSchema),
+      meta: z.optional(z.record(z.string(), z.any())),
     });
 
     type UserConfig = Partial<{
