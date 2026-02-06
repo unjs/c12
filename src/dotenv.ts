@@ -116,7 +116,6 @@ async function readEnvFile(path: string): Promise<Record<string, string>> {
   const src = readFileSync(path, "utf8");
   if (!_parseEnv) {
     try {
-      // @ts-expect-error dotenv is an optional peer dependency
       const dotenv = await import("dotenv");
       _parseEnv = (src: string) => dotenv.parse(src) as Record<string, string>;
     } catch {
