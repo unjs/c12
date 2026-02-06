@@ -12,7 +12,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## ✅ Features
 
-- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with [unjs/jiti](https://jiti.unjs.io)
+- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
@@ -163,13 +163,21 @@ Specify override configuration. It has the **highest** priority and is applied *
 
 Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
 
-### `jiti`
+### `import`
 
-Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configuration files.
+Custom import function used to load configuration files. By default, c12 uses native `import()` with [unjs/jiti](https://github.com/unjs/jiti) as fallback.
 
-### `jitiOptions`
+**Example:** Using a custom [jiti](https://github.com/unjs/jiti) instance with options:
 
-Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
+```js
+import { createJiti } from "jiti";
+
+const jiti = createJiti(import.meta.url, { /* jiti options */ });
+
+const { config } = await loadConfig({
+  import: (id) => jiti.import(id, { default: true }),
+});
+```
 
 ### `giget`
 

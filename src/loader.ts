@@ -4,7 +4,6 @@ import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
-import { createJiti } from "jiti";
 import * as rc9 from "rc9";
 import { defu } from "defu";
 import { findWorkspaceDir, readPackageJSON } from "pkg-types";
@@ -34,7 +33,7 @@ const ASYNC_LOADERS = {
 } as const;
 
 export const SUPPORTED_EXTENSIONS = Object.freeze([
-  // with jiti
+  // with import
   ".js",
   ".ts",
   ".mjs",
@@ -70,16 +69,6 @@ export async function loadConfig<
 
   // Custom merger
   const _merger = options.merger || defu;
-
-  // Create jiti instance
-  options.jiti =
-    options.jiti ||
-    createJiti(join(options.cwd, options.configFile), {
-      interopDefault: true,
-      moduleCache: false,
-      extensions: [...SUPPORTED_EXTENSIONS],
-      ...options.jitiOptions,
-    });
 
   // Create context
   const r: ResolvedConfig<T, MT> = {
@@ -387,9 +376,31 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    res.config = (await options.jiti!.import(res.configFile!, {
-      default: true,
-    })) as T;
+    if (options.import) {
+      res.config = (await options.import(res.configFile!)) as T;
+    } else {
+      res.config = (await import(res.configFile!).then(
+        (mod) => mod.default || mod,
+        async (error) => {
+          const { createJiti } = await import("jiti").catch(() => {
+            throw new Error(
+              `Failed to load config file \`${res.configFile}\`: ${error?.message}. Install \`jiti\` for TypeScript config support.`,
+              { cause: error },
+            );
+          });
+          const jiti = createJiti(
+            join(options.cwd || ".", options.configFile || "/"),
+            {
+              interopDefault: true,
+              moduleCache: false,
+              extensions: [...SUPPORTED_EXTENSIONS],
+            },
+          );
+          options.import = (id: string) => jiti.import(id, { default: true });
+          return options.import(res.configFile!);
+        },
+      )) as T;
+    }
   }
   if (typeof res.config === "function") {
     res.config = await (res.config as (ctx?: ConfigFunctionContext) => Promise<any>)(
