@@ -24,8 +24,8 @@ importers:
         specifier: ^1.0.8
         version: 1.0.8
       giget:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^3.1.2
+        version: 3.1.2
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
@@ -1306,6 +1306,10 @@ packages:
 
   giget@2.0.0:
     resolution: {integrity: sha512-L5bGsVkxJbJgdnwyuheIunkGatUF/zssUoxxjACCseZYAVbaqdh9Tsmmlkl8vYan09H7sbvKt4pS8GqKLBrEzA==}
+    hasBin: true
+
+  giget@3.1.2:
+    resolution: {integrity: sha512-T2qUpKBHeUTwHcIhydgnJzhL0Hj785ms+JkxaaWQH9SDM/llXeewnOkfJcFShAHjWI+26hOChwUfCoupaXLm8g==}
     hasBin: true
 
   github-slugger@2.0.0:
@@ -3078,6 +3082,8 @@ snapshots:
       node-fetch-native: 1.6.7
       nypm: 0.6.5
       pathe: 2.0.3
+
+  giget@3.1.2: {}
 
   github-slugger@2.0.0: {}
 
