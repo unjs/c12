@@ -383,7 +383,7 @@ async function resolveConfig<
       res.config = (await import(res.configFile!).then(_resolveModule, async (error) => {
         const { createJiti } = await import("jiti").catch(() => {
           throw new Error(
-            `Failed to natively load config file \`${res.configFile}\`: ${error?.message}. Hint install \`jiti\` for legacy TypeScript config support.`,
+            `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
             { cause: error },
           );
         });
