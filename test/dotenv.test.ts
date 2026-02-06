@@ -77,17 +77,13 @@ describe("update config file", () => {
     process.env.TEST_SECRET_FILE = "normal-secret-into-key-with-file-suffix";
 
     await setupDotenv({ cwd: tmpDir, expandEnvFiles: false });
-    expect(process.env.TEST_SECRET_FILE).toBe(
-      "normal-secret-into-key-with-file-suffix",
-    );
+    expect(process.env.TEST_SECRET_FILE).toBe("normal-secret-into-key-with-file-suffix");
   });
 
   it("should not support _FILE env vars by default (backward compatibility)", async () => {
     process.env.TEST_SECRET_FILE = "normal-secret-into-key-with-file-suffix";
 
     await setupDotenv({ cwd: tmpDir });
-    expect(process.env.TEST_SECRET_FILE).toBe(
-      "normal-secret-into-key-with-file-suffix",
-    );
+    expect(process.env.TEST_SECRET_FILE).toBe("normal-secret-into-key-with-file-suffix");
   });
 });

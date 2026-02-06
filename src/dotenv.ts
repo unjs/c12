@@ -113,10 +113,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
         const targetKey = key.slice(0, -5);
         if (environment[targetKey] === undefined) {
           const filePath = environment[key];
-          if (
-            filePath &&
-            statSync(filePath, { throwIfNoEntry: false })?.isFile()
-          ) {
+          if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
             const value = await fsp.readFile(filePath, "utf8");
             environment[targetKey] = value.trim();
             dotenvVars.add(targetKey);
