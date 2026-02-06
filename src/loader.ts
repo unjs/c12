@@ -376,30 +376,25 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
+    const _resolveModule = options.resolveModule || ((mod: any) => mod.default || mod);
     if (options.import) {
-      res.config = (await options.import(res.configFile!)) as T;
+      res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
-      res.config = (await import(res.configFile!).then(
-        (mod) => mod.default || mod,
-        async (error) => {
-          const { createJiti } = await import("jiti").catch(() => {
-            throw new Error(
-              `Failed to load config file \`${res.configFile}\`: ${error?.message}. Install \`jiti\` for TypeScript config support.`,
-              { cause: error },
-            );
-          });
-          const jiti = createJiti(
-            join(options.cwd || ".", options.configFile || "/"),
-            {
-              interopDefault: true,
-              moduleCache: false,
-              extensions: [...SUPPORTED_EXTENSIONS],
-            },
+      res.config = (await import(res.configFile!).then(_resolveModule, async (error) => {
+        const { createJiti } = await import("jiti").catch(() => {
+          throw new Error(
+            `Failed to natively load config file \`${res.configFile}\`: ${error?.message}. Hint install \`jiti\` for legacy TypeScript config support.`,
+            { cause: error },
           );
-          options.import = (id: string) => jiti.import(id, { default: true });
-          return options.import(res.configFile!);
-        },
-      )) as T;
+        });
+        const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
+          interopDefault: true,
+          moduleCache: false,
+          extensions: [...SUPPORTED_EXTENSIONS],
+        });
+        options.import = (id: string) => jiti.import(id);
+        return _resolveModule(await options.import(res.configFile!));
+      })) as T;
     }
   }
   if (typeof res.config === "function") {

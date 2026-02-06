@@ -175,7 +175,19 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { /* jiti options */ });
 
 const { config } = await loadConfig({
-  import: (id) => jiti.import(id, { default: true }),
+  import: (id) => jiti.import(id),
+});
+```
+
+### `resolveModule`
+
+Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`.
+
+**Example:** Using a named export:
+
+```js
+const { config } = await loadConfig({
+  resolveModule: (mod) => mod.myConfig,
 });
 ```
 
