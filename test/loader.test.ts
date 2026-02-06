@@ -1,11 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
-import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src";
-import { loadConfig } from "../src";
+import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
+import { loadConfig } from "../src/index.ts";
 
-const r = (path: string) =>
-  normalize(fileURLToPath(new URL(path, import.meta.url)));
+const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
@@ -325,9 +324,7 @@ describe("loader", () => {
       ConfigLayerMeta
     >[];
 
-    const configLayer = transformdLayers.find(
-      (layer) => layer.configFile === "test.config",
-    )!;
+    const configLayer = transformdLayers.find((layer) => layer.configFile === "test.config")!;
     expect(Object.keys(configLayer.config!)).toContain("$test");
 
     const baseLayerConfig = transformdLayers.find(
@@ -365,8 +362,8 @@ describe("loader", () => {
       { a: "boo", b: "foo" },
       { a: "boo", b: "foo" },
     ]);
-    expect(loaded.layers![0].config).toEqual(loaded.config);
-    expect(loaded.layers![1]).toEqual({
+    expect(loaded.layers![0]!.config).toEqual(loaded.config);
+    expect(loaded.layers![1]!).toEqual({
       config: {
         rcFile: true,
       },

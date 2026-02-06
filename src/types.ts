@@ -1,6 +1,5 @@
-import type { Jiti, JitiOptions } from "jiti";
 import type { DownloadTemplateOptions } from "giget";
-import type { DotenvOptions } from "./dotenv";
+import type { DotenvOptions } from "./dotenv.ts";
 
 export interface ConfigLayerMeta {
   name?: string;
@@ -81,20 +80,13 @@ export interface ResolvedConfig<
   _configFile?: string;
 }
 
-export type ConfigSource =
-  | "overrides"
-  | "main"
-  | "rc"
-  | "packageJson"
-  | "defaultConfig";
+export type ConfigSource = "overrides" | "main" | "rc" | "packageJson" | "defaultConfig";
 
 export interface ConfigFunctionContext {
   [key: string]: any;
 }
 
-export interface ResolvableConfigContext<
-  T extends UserInputConfig = UserInputConfig,
-> {
+export interface ResolvableConfigContext<T extends UserInputConfig = UserInputConfig> {
   configs: Record<ConfigSource, T | null | undefined>;
   rawConfigs: Record<ConfigSource, ResolvableConfig<T> | null | undefined>;
 }
@@ -135,14 +127,13 @@ export interface LoadConfigOptions<
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>,
-  ) =>
-    | null
-    | undefined
-    | ResolvedConfig<T, MT>
-    | Promise<ResolvedConfig<T, MT> | undefined | null>;
+  ) => null | undefined | ResolvedConfig<T, MT> | Promise<ResolvedConfig<T, MT> | undefined | null>;
 
-  jiti?: Jiti;
-  jitiOptions?: JitiOptions;
+  /** Custom import function used to load configuration files */
+  import?: (id: string) => Promise<unknown>;
+
+  /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
+  resolveModule?: (mod: any) => any;
 
   giget?: false | DownloadTemplateOptions;
 

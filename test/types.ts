@@ -1,5 +1,5 @@
 import { expectTypeOf } from "expect-type";
-import { loadConfig, createDefineConfig } from "../src";
+import { loadConfig, createDefineConfig } from "../src/index.ts";
 
 interface MyConfig {
   foo: string;

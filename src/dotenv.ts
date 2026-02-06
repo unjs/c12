@@ -1,6 +1,6 @@
-import { promises as fsp, statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
+import * as nodeUtil from "node:util";
 import { resolve } from "pathe";
-import * as dotenv from "dotenv";
 
 export interface DotenvOptions {
   /**
@@ -96,7 +96,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
     if (!statSync(dotenvFile, { throwIfNoEntry: false })?.isFile()) {
       continue;
     }
-    const parsed = dotenv.parse(await fsp.readFile(dotenvFile, "utf8"));
+    const parsed = await readEnvFile(dotenvFile);
     for (const key in parsed) {
       if (key in environment && !dotenvVars.has(key)) {
         continue; // Do not override existing env variables
@@ -134,6 +134,27 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   return environment;
 }
 
+// --- readEnvFile ---
+
+type ParseEnvFn = (src: string) => Record<string, string>;
+
+let _parseEnv = nodeUtil.parseEnv as ParseEnvFn | undefined;
+
+async function readEnvFile(path: string): Promise<Record<string, string>> {
+  const src = readFileSync(path, "utf8");
+  if (!_parseEnv) {
+    try {
+      const dotenv = await import("dotenv");
+      _parseEnv = (src: string) => dotenv.parse(src) as Record<string, string>;
+    } catch {
+      throw new Error(
+        "Failed to parse .env file: `node:util.parseEnv` is not available and `dotenv` package is not installed. Please upgrade your runtime or install `dotenv` as a dependency.",
+      );
+    }
+  }
+  return _parseEnv(src);
+}
+
 // Based on https://github.com/motdotla/dotenv-expand
 function interpolate(
   target: Record<string, any>,
@@ -154,7 +175,7 @@ function interpolate(
       // eslint-disable-next-line unicorn/no-array-reduce
       matches.reduce((newValue, match) => {
         const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
-        const prefix = parts[1];
+        const prefix = parts[1]!;
 
         let value, replacePart: string;
 
@@ -162,7 +183,7 @@ function interpolate(
           replacePart = parts[0] || "";
           value = replacePart.replace(String.raw`\$`, "$");
         } else {
-          const key = parts[2];
+          const key = parts[2]!;
           replacePart = (parts[0] || "").slice(prefix.length);
 
           // Avoid recursion
@@ -181,9 +202,7 @@ function interpolate(
           value = interpolate(value, [...parents, key]);
         }
 
-        return value === undefined
-          ? newValue
-          : newValue.replace(replacePart, value);
+        return value === undefined ? newValue : newValue.replace(replacePart, value);
       }, value),
     );
   }

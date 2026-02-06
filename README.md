@@ -12,7 +12,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## ✅ Features
 
-- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with [unjs/jiti](https://jiti.unjs.io)
+- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
@@ -163,13 +163,35 @@ Specify override configuration. It has the **highest** priority and is applied *
 
 Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
 
-### `jiti`
+### `import`
 
-Custom [unjs/jiti](https://github.com/unjs/jiti) instance used to import configuration files.
+Custom import function used to load configuration files. By default, c12 uses native `import()` with [unjs/jiti](https://github.com/unjs/jiti) as fallback.
 
-### `jitiOptions`
+**Example:** Using a custom [jiti](https://github.com/unjs/jiti) instance with options:
 
-Custom [unjs/jiti](https://github.com/unjs/jiti) options to import configuration files.
+```js
+import { createJiti } from "jiti";
+
+const jiti = createJiti(import.meta.url, {
+  /* jiti options */
+});
+
+const { config } = await loadConfig({
+  import: (id) => jiti.import(id),
+});
+```
+
+### `resolveModule`
+
+Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`.
+
+**Example:** Using a named export:
+
+```js
+const { config } = await loadConfig({
+  resolveModule: (mod) => mod.myConfig,
+});
+```
 
 ### `giget`
 
@@ -295,6 +317,14 @@ Layers:
 
 ## Extending config layer from remote sources
 
+> [!NOTE]
+> Extending from remote sources requires the [`giget`](https://giget.unjs.io) peer dependency to be installed.
+>
+> ```sh
+> # ✨ Auto-detect
+> npx nypm install giget
+> ```
+
 You can also extend configuration from remote sources such as npm or github.
 
 In the repo, there should be a `config.ts` (or `config.{name}.ts`) file to be considered as a valid config layer.
@@ -363,6 +393,14 @@ export default {
 ## Watching configuration
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
+
+> [!NOTE]
+> Watching requires the [`chokidar`](https://github.com/paulmillr/chokidar) peer dependency to be installed.
+>
+> ```sh
+> # ✨ Auto-detect
+> npx nypm install chokidar
+> ```
 
 ### Lifecycle hooks
 
