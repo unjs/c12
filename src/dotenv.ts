@@ -114,19 +114,18 @@ let _parseEnv = nodeUtil.parseEnv as ParseEnvFn | undefined;
 
 async function readEnvFile(path: string): Promise<Record<string, string>> {
   const src = readFileSync(path, "utf8");
-  if (_parseEnv) {
-    return _parseEnv(src);
+  if (!_parseEnv) {
+    try {
+      // @ts-expect-error dotenv is an optional peer dependency
+      const dotenv = await import("dotenv");
+      _parseEnv = (src: string) => dotenv.parse(src) as Record<string, string>;
+    } catch {
+      throw new Error(
+        "Failed to parse .env file: `node:util.parseEnv` is not available and `dotenv` package is not installed. Please upgrade your runtime or install `dotenv` as a dependency.",
+      );
+    }
   }
-  try {
-    // @ts-expect-error dotenv is an optional peer dependency
-    const dotenv = await import("dotenv");
-    _parseEnv = (src: string) => dotenv.parse(src) as Record<string, string>;
-    return _parseEnv(src);
-  } catch {
-    throw new Error(
-      "Failed to parse .env file: `node:util.parseEnv` is not available and `dotenv` package is not installed. Please upgrade your runtime or install `dotenv` as a dependency.",
-    );
-  }
+  return _parseEnv(src);
 }
 
 // Based on https://github.com/motdotla/dotenv-expand
