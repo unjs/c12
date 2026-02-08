@@ -32,8 +32,8 @@
     "rc9": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.2.1",
-    "@typescript/native-preview": "^7.0.0-dev.20260206.1",
+    "@types/node": "^25.2.2",
+    "@typescript/native-preview": "^7.0.0-dev.20260207.1",
     "@vitest/coverage-v8": "^4.0.18",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
@@ -76,5 +76,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.28.2"
+  "packageManager": "pnpm@10.29.1"
 }
