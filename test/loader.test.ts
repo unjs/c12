@@ -1,8 +1,13 @@
 import { fileURLToPath } from "node:url";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
-import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
-import { loadConfig } from "../src/index.ts";
+import type {
+  ConfigLayer,
+  ConfigLayerMeta,
+  ConfigProvider,
+  UserInputConfig,
+} from "../src/index.ts";
+import { getDefaultProviders, loadConfig } from "../src/index.ts";
 
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
@@ -347,7 +352,7 @@ describe("loader", () => {
         configFile: "CUSTOM",
         configFileRequired: true,
       }),
-    ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
+    ).rejects.toThrowError(/Required config \(.*CUSTOM\) cannot be resolved\./);
   });
 
   it("loads arrays exported from config without merging", async () => {
@@ -375,6 +380,124 @@ describe("loader", () => {
     await loadConfig({
       name: "test",
       cwd: r("./fixture/jsx"),
+    });
+  });
+
+  describe("providers", () => {
+    it("uses default providers when none specified", async () => {
+      const { config, layers } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        overrides: { fromOverrides: true },
+      });
+      expect(config.fromOverrides).toBe(true);
+      expect(layers!.length).toBeGreaterThan(0);
+    });
+
+    it("allows custom providers to inject config", async () => {
+      const customProvider: ConfigProvider = {
+        name: "custom",
+        priority: 150, // Between overrides (100) and main (200)
+        async load() {
+          return {
+            config: { customValue: "injected", overridden: false },
+            layer: { config: { customValue: "injected" }, configFile: "custom-provider" },
+          };
+        },
+      };
+
+      const { config, layers } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        providers: [...getDefaultProviders(), customProvider],
+        overrides: { overridden: true },
+      });
+
+      // Custom value should be present
+      expect(config.customValue).toBe("injected");
+      // Overrides should still win (priority 100 < 150)
+      expect(config.overridden).toBe(true);
+      // Custom layer should be in layers
+      const customLayer = layers!.find((l) => l.configFile === "custom-provider");
+      expect(customLayer).toBeDefined();
+    });
+
+    it("respects provider priority order", async () => {
+      const lowPriorityProvider: ConfigProvider = {
+        name: "low-priority",
+        priority: 1000, // Very low priority
+        async load() {
+          return { config: { testKey: "from-low" } };
+        },
+      };
+
+      const highPriorityProvider: ConfigProvider = {
+        name: "high-priority",
+        priority: 50, // Very high priority
+        async load() {
+          return { config: { testKey: "from-high" } };
+        },
+      };
+
+      const { config } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        providers: [lowPriorityProvider, highPriorityProvider],
+      });
+
+      // High priority should win
+      expect(config.testKey).toBe("from-high");
+    });
+
+    it("allows removing default providers", async () => {
+      // Only use a single static provider
+      const onlyProvider: ConfigProvider = {
+        name: "only",
+        priority: 100,
+        async load() {
+          return { config: { onlyThis: true } };
+        },
+      };
+
+      const { config, layers } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        providers: [onlyProvider],
+      });
+
+      expect(config.onlyThis).toBe(true);
+      // Should only have the one layer (no main, rc, packageJson)
+      expect(layers!.length).toBe(0); // No layer metadata provided
+    });
+
+    it("provider can access previously loaded configs", async () => {
+      const firstProvider: ConfigProvider = {
+        name: "first",
+        priority: 100,
+        async load() {
+          return { config: { firstValue: 42 } };
+        },
+      };
+
+      const secondProvider: ConfigProvider = {
+        name: "second",
+        priority: 200,
+        async load(ctx) {
+          const firstConfig = ctx.loadedConfigs.get("first");
+          return {
+            config: { sawFirst: firstConfig?.firstValue === 42 },
+          };
+        },
+      };
+
+      const { config } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        providers: [firstProvider, secondProvider],
+      });
+
+      expect(config.firstValue).toBe(42);
+      expect(config.sawFirst).toBe(true);
     });
   });
 });
