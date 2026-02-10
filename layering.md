@@ -435,3 +435,395 @@ const { config, provenance } = await loadConfig({
 4. **Async providers**: How to handle slow providers (Vault, remote config) gracefully?
 
 5. **Caching**: Should registry cache loaded configs for repeated `.load()` calls?
+
+---
+
+## Implemented: ConfigProvider System
+
+Phase 2 of the roadmap has been implemented. The c12-layer fork now includes a fully functional pluggable provider system that allows users to customize the configuration loading pipeline while maintaining complete backward compatibility.
+
+### Architecture Overview
+
+The provider system introduces a `ConfigProvider` interface that abstracts each configuration source. Instead of hardcoded loading logic, `loadConfig()` now iterates through an ordered list of providers, each responsible for loading one source of configuration.
+
+```mermaid
+flowchart LR
+    subgraph providers["Provider Pipeline"]
+        direction TB
+        p1[overrides<br/>priority: 100]
+        p2[main<br/>priority: 200]
+        p3[rc<br/>priority: 300]
+        p4[packageJson<br/>priority: 400]
+        p5[defaultConfig<br/>priority: 500]
+    end
+    
+    loadConfig --> sort[Sort by priority]
+    sort --> providers
+    providers --> merge[defu merge all configs]
+    merge --> extends[Process extends]
+    extends --> result[ResolvedConfig]
+```
+
+### Core Types
+
+The implementation adds these types in [`src/providers.ts`](src/providers.ts):
+
+```typescript
+/**
+ * Context passed to config providers during loading
+ */
+interface ProviderContext<T, MT> {
+  /** Normalized load options */
+  options: LoadConfigOptions<T, MT>;
+  /** Merger function (defu or custom) */
+  merger: (...sources: Array<T | null | undefined>) => T;
+  /** Resolve a config file (used by main provider) */
+  resolveConfig: (source: string, options: LoadConfigOptions<T, MT>) => Promise<ResolvedConfig<T, MT>>;
+  /** Results from previously loaded providers (by name) */
+  loadedConfigs: Map<string, T | null | undefined>;
+}
+
+/**
+ * Result returned by a config provider
+ */
+interface ProviderResult<T, MT> {
+  /** The loaded configuration (or null/undefined if not found) */
+  config: T | null | undefined;
+  /** Layer metadata for introspection */
+  layer?: Partial<ConfigLayer<T, MT>>;
+  /** Additional metadata to merge into ResolvedConfig */
+  meta?: MT;
+  /** Resolved config file path (for main provider) */
+  configFile?: string;
+  /** Internal config file path */
+  _configFile?: string;
+}
+
+/**
+ * A pluggable configuration source provider
+ */
+interface ConfigProvider<T, MT> {
+  /** Unique name for this provider */
+  name: string;
+  /**
+   * Priority determines merge order.
+   * Lower numbers = higher priority (merged first, so they "win").
+   */
+  priority: number;
+  /**
+   * Load configuration from this provider.
+   * Return null/undefined if this provider has no config to contribute.
+   */
+  load(ctx: ProviderContext<T, MT>): Promise<ProviderResult<T, MT> | null | undefined>;
+}
+```
+
+### Built-in Providers
+
+Five built-in providers replicate the original c12 behavior:
+
+| Provider | Priority | Factory Function | Description |
+|----------|----------|------------------|-------------|
+| overrides | 100 | `createOverridesProvider()` | Returns `options.overrides` |
+| main | 200 | `createMainProvider()` | Loads `<name>.config.ts` via `resolveConfig()` |
+| rc | 300 | `createRcProvider()` | Loads `.namerc` files (cwd, workspace, home) |
+| packageJson | 400 | `createPackageJsonProvider()` | Loads from `package.json[name]` |
+| defaultConfig | 500 | `createDefaultConfigProvider()` | Returns `options.defaultConfig` |
+
+Each provider is a standalone factory function that can be individually imported and customized.
+
+### Exports
+
+The following are exported from the main `c12` module:
+
+```typescript
+// Types
+export type { ConfigProvider, ProviderContext, ProviderResult } from "./providers.ts";
+
+// Factory functions for built-in providers
+export {
+  getDefaultProviders,      // Returns all 5 built-in providers
+  sortProviders,            // Sort providers by priority
+  createOverridesProvider,
+  createMainProvider,
+  createRcProvider,
+  createPackageJsonProvider,
+  createDefaultConfigProvider,
+} from "./providers.ts";
+```
+
+### Usage Examples
+
+#### Basic: No Changes Required
+
+Existing code works without modification:
+
+```typescript
+import { loadConfig } from 'c12';
+
+// Works exactly as before
+const { config } = await loadConfig({ name: 'myapp' });
+```
+
+#### Adding a Custom Provider
+
+Inject a custom source between existing ones:
+
+```typescript
+import { loadConfig, getDefaultProviders, ConfigProvider } from 'c12';
+
+// Create a provider that loads from environment variables
+const envProvider: ConfigProvider = {
+  name: 'env',
+  priority: 150, // Between overrides (100) and main (200)
+  async load(ctx) {
+    const config: Record<string, any> = {};
+    const prefix = `${ctx.options.name?.toUpperCase()}_`;
+    
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith(prefix)) {
+        const configKey = key.slice(prefix.length).toLowerCase();
+        config[configKey] = value;
+      }
+    }
+    
+    if (Object.keys(config).length === 0) return null;
+    
+    return {
+      config,
+      layer: {
+        config,
+        configFile: 'environment',
+      },
+    };
+  },
+};
+
+const { config, layers } = await loadConfig({
+  name: 'myapp',
+  providers: [...getDefaultProviders(), envProvider],
+});
+
+// layers will include { configFile: 'environment', config: {...} }
+```
+
+#### Replacing Default Providers
+
+Use only specific sources:
+
+```typescript
+import { loadConfig, createMainProvider, createOverridesProvider } from 'c12';
+
+// Only load from overrides and main config file (no RC, no package.json)
+const { config } = await loadConfig({
+  name: 'myapp',
+  providers: [
+    createOverridesProvider(),
+    createMainProvider(),
+  ],
+  overrides: { debug: true },
+});
+```
+
+#### Reordering Providers
+
+Change the default priority order:
+
+```typescript
+import { loadConfig, getDefaultProviders } from 'c12';
+
+// Make package.json take precedence over RC files
+const providers = getDefaultProviders().map(p => {
+  if (p.name === 'packageJson') return { ...p, priority: 250 };
+  if (p.name === 'rc') return { ...p, priority: 350 };
+  return p;
+});
+
+const { config } = await loadConfig({
+  name: 'myapp',
+  providers,
+});
+```
+
+#### Provider Dependencies
+
+Access previously loaded configs in your provider:
+
+```typescript
+const conditionalProvider: ConfigProvider = {
+  name: 'conditional',
+  priority: 250,
+  async load(ctx) {
+    // Check what the main config loaded
+    const mainConfig = ctx.loadedConfigs.get('main');
+    
+    if (mainConfig?.featureFlags?.enableAdvanced) {
+      return {
+        config: { advancedSetting: 'enabled' },
+      };
+    }
+    
+    return null; // Don't contribute if feature not enabled
+  },
+};
+```
+
+#### Remote Configuration Provider
+
+Load config from a remote source:
+
+```typescript
+const remoteProvider: ConfigProvider = {
+  name: 'remote',
+  priority: 175, // After env, before main
+  async load(ctx) {
+    const endpoint = process.env.CONFIG_ENDPOINT;
+    if (!endpoint) return null;
+    
+    try {
+      const response = await fetch(`${endpoint}/${ctx.options.name}`);
+      if (!response.ok) return null;
+      
+      const config = await response.json();
+      return {
+        config,
+        layer: {
+          config,
+          configFile: endpoint,
+        },
+      };
+    } catch {
+      // Network error - silently skip
+      return null;
+    }
+  },
+};
+```
+
+### How the Provider System Works
+
+1. **Initialization**: `loadConfig()` normalizes options and sets up dotenv (unchanged)
+
+2. **Provider Selection**: 
+   - If `options.providers` is specified, use those providers
+   - Otherwise, call `getDefaultProviders()` to get the built-in set
+
+3. **Sorting**: Providers are sorted by `priority` (ascending). Lower priority numbers are processed first and "win" in the merge.
+
+4. **Sequential Loading**: Each provider's `load()` method is called in order. The `ProviderContext` includes:
+   - The normalized `options`
+   - The `merger` function (defu or custom)
+   - A `resolveConfig` helper for loading files
+   - A `loadedConfigs` map with results from previous providers
+
+5. **Result Collection**: Non-null results are collected. Each result includes:
+   - `config`: The configuration object
+   - `layer`: Optional metadata for the `layers` array
+   - `configFile`, `_configFile`, `meta`: For the main provider
+
+6. **Merging**: All collected configs are merged using the merger function, in priority order
+
+7. **Extends Processing**: The `extends` mechanism works as before, after the main merge
+
+8. **Layer Preservation**: Provider results with `layer` data are added to `ResolvedConfig.layers`
+
+### Impact on Existing c12 Users
+
+#### Zero Breaking Changes
+
+The provider system is **fully backward compatible**. Existing code continues to work without any modifications:
+
+```typescript
+// This code works identically before and after the change
+const { config } = await loadConfig({
+  name: 'myapp',
+  overrides: { debug: true },
+  rcFile: '.myapprc',
+  packageJson: true,
+  defaults: { port: 3000 },
+});
+```
+
+#### Behavioral Equivalence
+
+When `options.providers` is not specified, the system behaves identically to the original c12:
+
+1. Same source loading order (overrides → main → rc → packageJson → defaultConfig)
+2. Same merge semantics (defu, or custom merger)
+3. Same `extends` processing
+4. Same `layers` array structure
+5. Same handling of `$development`, `$production`, etc.
+
+#### Minor Differences
+
+There is one minor difference in error messages:
+
+| Scenario | Original | With Providers |
+|----------|----------|----------------|
+| `configFileRequired: true` with missing file | `Required config (CUSTOM) cannot be resolved.` | `Required config (/full/path/CUSTOM) cannot be resolved.` |
+
+The new message includes the full resolved path, which is more helpful for debugging.
+
+#### New Option
+
+One new option is added to `LoadConfigOptions`:
+
+```typescript
+interface LoadConfigOptions<T, MT> {
+  // ... existing options ...
+  
+  /**
+   * Custom configuration providers.
+   * When specified, replaces the built-in source loading.
+   * Use getDefaultProviders() to include defaults.
+   */
+  providers?: ConfigProvider<T, MT>[];
+}
+```
+
+### Testing the Provider System
+
+The implementation includes comprehensive tests in [`test/loader.test.ts`](test/loader.test.ts):
+
+```typescript
+describe("providers", () => {
+  it("uses default providers when none specified");
+  it("allows custom providers to inject config");
+  it("respects provider priority order");
+  it("allows removing default providers");
+  it("provider can access previously loaded configs");
+});
+```
+
+Run tests with:
+```bash
+pnpm test
+```
+
+### Future Enhancements
+
+The provider system creates a foundation for additional features:
+
+1. **Drop-in Directory Provider**: A `createConfigDirProvider()` that scans `*.config.d/` directories
+
+2. **Provenance Tracking**: Providers already return layer metadata; a tracking merger could record which provider contributed each key
+
+3. **Validation Phase**: A `validateProviders()` function that checks all sources exist before loading
+
+4. **Parallel Loading**: Independent providers could load concurrently for better performance
+
+5. **Provider Plugins**: A registry of community providers (Vault, AWS SSM, Consul, etc.)
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| [`src/providers.ts`](src/providers.ts) | New file: Provider types and built-in implementations |
+| [`src/types.ts`](src/types.ts) | Added `providers` option to `LoadConfigOptions` |
+| [`src/loader.ts`](src/loader.ts) | Refactored to use provider pipeline |
+| [`src/index.ts`](src/index.ts) | Export provider types and functions |
+| [`test/loader.test.ts`](test/loader.test.ts) | Added provider system tests |
+
+### Summary
+
+The ConfigProvider system transforms c12 from a fixed-pipeline loader into an extensible, customizable configuration platform while maintaining complete backward compatibility. Users who don't need customization see no changes; power users gain full control over the loading pipeline.
