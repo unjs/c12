@@ -1,5 +1,6 @@
 import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv.ts";
+import type { ConfigProvider } from "./providers.ts";
 
 export interface ConfigLayerMeta {
   name?: string;
@@ -146,6 +147,29 @@ export interface LoadConfigOptions<
       };
 
   configFileRequired?: boolean;
+
+  /**
+   * Custom configuration providers.
+   *
+   * When specified, these providers are used instead of the built-in sources.
+   * Use `getDefaultProviders()` and modify the array to customize while
+   * keeping default behavior.
+   *
+   * Providers are sorted by priority (lower = higher precedence) before loading.
+   *
+   * @example
+   * ```ts
+   * import { getDefaultProviders } from 'c12';
+   *
+   * loadConfig({
+   *   providers: [
+   *     ...getDefaultProviders(),
+   *     { name: 'env', priority: 150, load: myEnvProvider }
+   *   ]
+   * })
+   * ```
+   */
+  providers?: ConfigProvider<T, MT>[];
 }
 
 export type DefineConfig<

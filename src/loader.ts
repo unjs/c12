@@ -4,21 +4,24 @@ import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
-import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv.ts";
+import {
+  getDefaultProviders,
+  sortProviders,
+  type ConfigProvider,
+  type ProviderContext,
+  type ProviderResult,
+} from "./providers.ts";
 
 import type {
   UserInputConfig,
   ConfigLayerMeta,
   LoadConfigOptions,
   ResolvedConfig,
-  ResolvableConfig,
   ConfigLayer,
   SourceOptions,
   InputConfig,
-  ConfigSource,
   ConfigFunctionContext,
 } from "./types.ts";
 
@@ -70,25 +73,13 @@ export async function loadConfig<
   // Custom merger
   const _merger = options.merger || defu;
 
-  // Create context
+  // Create result context
   const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
     configFile: resolve(options.cwd, options.configFile),
     layers: [],
     _configFile: undefined,
-  };
-
-  // prettier-ignore
-  const rawConfigs: Record<
-    ConfigSource,
-    ResolvableConfig<T> | null | undefined
-  > = {
-    overrides: options.overrides,
-    main: undefined,
-    rc: undefined,
-    packageJson: undefined,
-    defaultConfig: options.defaultConfig,
   };
 
   // Load dotenv
@@ -99,69 +90,49 @@ export async function loadConfig<
     });
   }
 
-  // Load main config file
-  const _mainConfig = await resolveConfig(".", options);
-  if (_mainConfig.configFile) {
-    rawConfigs.main = _mainConfig.config;
-    r.configFile = _mainConfig.configFile;
-    r._configFile = _mainConfig._configFile;
-  }
+  // Get providers (custom or default)
+  const providers = sortProviders(options.providers ?? getDefaultProviders<T, MT>());
 
-  if (_mainConfig.meta) {
-    r.meta = _mainConfig.meta;
-  }
+  // Create provider context
+  const loadedConfigs = new Map<string, T | null | undefined>();
+  const providerCtx: ProviderContext<T, MT> = {
+    options,
+    merger: _merger,
+    resolveConfig: (source, opts) => resolveConfig(source, opts),
+    loadedConfigs,
+  };
 
-  // Load rc files
-  if (options.rcFile) {
-    const rcSources: T[] = [];
-    // 1. cwd
-    rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
-    if (options.globalRc) {
-      // 2. workspace
-      const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
-      if (workspaceDir) {
-        rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
+  // Load all providers and collect results
+  const providerResults: Array<{
+    provider: ConfigProvider<T, MT>;
+    result: ProviderResult<T, MT>;
+  }> = [];
+
+  for (const provider of providers) {
+    const result = await provider.load(providerCtx);
+    if (result?.config !== undefined && result?.config !== null) {
+      loadedConfigs.set(provider.name, result.config);
+      providerResults.push({ provider, result });
+
+      // Capture main config metadata
+      if (provider.name === "main") {
+        if (result.configFile) r.configFile = result.configFile;
+        if (result._configFile) r._configFile = result._configFile;
+        if (result.meta) r.meta = result.meta;
       }
-      // 3. user home
-      rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
     }
-    rawConfigs.rc = _merger({} as T, ...rcSources);
   }
 
-  // Load config from package.json
-  if (options.packageJson) {
-    const keys = (
-      Array.isArray(options.packageJson)
-        ? options.packageJson
-        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
-    ).filter((t) => t && typeof t === "string");
-    const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
-    const values = keys.map((key) => pkgJsonFile?.[key]);
-    rawConfigs.packageJson = _merger({} as T, ...values);
-  }
+  // Extract configs in priority order for merging
+  const configs = providerResults.map((pr) => pr.result.config) as Array<T | null | undefined>;
 
-  // Resolve config sources
-  const configs = {} as Record<ConfigSource, T | null | undefined>;
-  // TODO: #253 change order from defaults to overrides in next major version
-  for (const key in rawConfigs) {
-    const value = rawConfigs[key as ConfigSource];
-    configs[key as ConfigSource] = await (typeof value === "function"
-      ? value({ configs, rawConfigs })
-      : value);
-  }
-
-  if (Array.isArray(configs.main)) {
-    // If the main config exports an array, use it directly without merging or extending
-    r.config = configs.main;
+  // Check if main config is an array (special case: use directly without merging)
+  const mainResult = providerResults.find((pr) => pr.provider.name === "main");
+  if (Array.isArray(mainResult?.result.config)) {
+    r.config = mainResult.result.config as T;
   } else {
-    // Combine sources
-    r.config = _merger(
-      configs.overrides,
-      configs.main,
-      configs.rc,
-      configs.packageJson,
-      configs.defaultConfig,
-    ) as T;
+    // Merge all provider configs in priority order
+    r.config = _merger(...(configs as [T, ...Array<T | null | undefined>])) as T;
 
     // Allow extending
     if (options.extend) {
@@ -173,19 +144,13 @@ export async function loadConfig<
   }
 
   // Preserve unmerged sources as layers
-  const baseLayers: ConfigLayer<T, MT>[] = [
-    configs.overrides && {
-      config: configs.overrides,
-      configFile: undefined,
-      cwd: undefined,
-    },
-    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
-    configs.rc && { config: configs.rc, configFile: options.rcFile },
-    configs.packageJson && {
-      config: configs.packageJson,
-      configFile: "package.json",
-    },
-  ].filter((l) => l && l.config) as ConfigLayer<T, MT>[];
+  const baseLayers: ConfigLayer<T, MT>[] = providerResults
+    .filter((pr) => pr.result.layer)
+    .map((pr) => ({
+      ...pr.result.layer,
+      config: pr.result.config,
+    }))
+    .filter((l) => l.config) as ConfigLayer<T, MT>[];
 
   r.layers = [...baseLayers, ...r.layers!];
 
