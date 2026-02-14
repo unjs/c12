@@ -16,7 +16,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
-- `.env` support with variable interpolation and `_FILE` references resolution
+- `.env` support with variable interpolation and optional `_FILE` references resolution
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
@@ -141,7 +141,7 @@ console.log(config.config.databaseURL); // "<...localhost...>"
 
 #### `expandFileReferences`
 
-Enabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `false` to disable.
+Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable.
 
 ```ini
 # .env
@@ -152,7 +152,9 @@ DATABASE_PASSWORD_FILE="/run/secrets/db_password"
 import { loadConfig } from "c12";
 
 const config = await loadConfig({
-  dotenv: true,
+  dotenv: {
+    expandFileReferences: true,
+  },
 });
 
 // DATABASE_PASSWORD is now set to the contents of /run/secrets/db_password
