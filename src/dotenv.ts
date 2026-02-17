@@ -41,7 +41,7 @@ export interface DotenvOptions {
    * This is useful for container secrets (e.g. Docker, Kubernetes) where
    * sensitive values are mounted as files.
    *
-   * @default true
+   * @default false
    *
    * @example
    * ```env
@@ -68,7 +68,7 @@ export async function setupDotenv(options: DotenvOptions): Promise<Env> {
     fileName: options.fileName ?? ".env",
     env: targetEnvironment,
     interpolate: options.interpolate ?? true,
-    expandFileReferences: options.expandFileReferences ?? true,
+    expandFileReferences: options.expandFileReferences ?? false,
   });
 
   const dotenvVars = getDotEnvVars(targetEnvironment);
@@ -117,7 +117,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Support _FILE environment variables
-  if (options.expandFileReferences !== false) {
+  if (options.expandFileReferences) {
     for (const key in environment) {
       if (key.endsWith("_FILE")) {
         const targetKey = key.slice(0, -5);
