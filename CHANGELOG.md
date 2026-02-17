@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-beta.3
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.2...v4.0.0-beta.3)
+
+### 🩹 Fixes
+
+- Disable `expandFileReferences` by default ([#303](https://github.com/unjs/c12/pull/303))
+
+### 📖 Documentation
+
+- Add migration section ([85ba131](https://github.com/unjs/c12/commit/85ba131))
+
+### 🏡 Chore
+
+- Update deps ([51e3b71](https://github.com/unjs/c12/commit/51e3b71))
+- Ignore .tmp for oxfmt ([01d8fb2](https://github.com/unjs/c12/commit/01d8fb2))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Mila ([@locksten](https://github.com/locksten))
+
 ## v4.0.0-beta.2
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.1...v4.0.0-beta.2)
