@@ -10,6 +10,9 @@
 
 c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
+> [!NOTE]
+> See the [Migration section](#migration) for upgrading from v3 to v4.
+
 ## ✅ Features
 
 - `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
@@ -514,6 +517,19 @@ const config = await loadConfig({
   context: { dev: true },
 });
 ```
+
+## Migration
+
+### v3 to v4
+
+c12 install size is now down to [380kB](https://packagephobia.com/result?p=c12@4.0.0-beta.2) from [3.44MB](https://packagephobia.com/result?p=c12@3.3.3) ([20 deps](https://npmgraph.js.org/?q=c12@3) to [7 deps](https://npmgraph.js.org/?q=c12#select=c12%404.0.0-beta.2)).
+
+Loading TypeScript files is significantly faster (on cold cache) — simple TS config loads ~2.5x faster ([bench](https://github.com/unjs/c12/tree/main/test/bench)).
+
+- If you need extends feature with remote/git source, install giget as a peer dependency (docs)
+- If you are using watchConfig, install chokidar as a peer dependency (docs).
+- If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a custom import config (docs).
+- Dotenv parsing now uses native runtime features (see #296). You might need to add dotenv as a peer dependency only for legacy/Deno support.
 
 ## Contribution
 
