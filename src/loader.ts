@@ -228,9 +228,7 @@ export async function loadConfig<
     if (result instanceof Promise) result = await result;
     if (result.issues) {
       const messages = result.issues.map((issue) => {
-        const path = issue.path
-          ?.map((p) => (typeof p === "object" ? p.key : p))
-          .join(".");
+        const path = issue.path?.map((p) => (typeof p === "object" ? p.key : p)).join(".");
         return path ? `  - ${path}: ${issue.message}` : `  - ${issue.message}`;
       });
       throw new Error(`Config validation failed:\n${messages.join("\n")}`);
