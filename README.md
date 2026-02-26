@@ -10,13 +10,16 @@
 
 c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
+> [!NOTE]
+> See the [Migration section](#migration) for upgrading from v3 to v4.
+
 ## ✅ Features
 
 - `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
-- `.env` support with variable interpolation and `_FILE` references resolution
+- `.env` support with variable interpolation and optional `_FILE` references resolution
 - Multiple sources merged with [unjs/defu](https://github.com/unjs/defu)
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
@@ -141,7 +144,7 @@ console.log(config.config.databaseURL); // "<...localhost...>"
 
 #### `expandFileReferences`
 
-Enabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `false` to disable.
+Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable.
 
 ```ini
 # .env
@@ -152,7 +155,9 @@ DATABASE_PASSWORD_FILE="/run/secrets/db_password"
 import { loadConfig } from "c12";
 
 const config = await loadConfig({
-  dotenv: true,
+  dotenv: {
+    expandFileReferences: true,
+  },
 });
 
 // DATABASE_PASSWORD is now set to the contents of /run/secrets/db_password
@@ -512,6 +517,19 @@ const config = await loadConfig({
   context: { dev: true },
 });
 ```
+
+## Migration
+
+### v3 to v4
+
+c12 install size is now down to [380kB](https://packagephobia.com/result?p=c12@4.0.0-beta.2) from [3.44MB](https://packagephobia.com/result?p=c12@3.3.3) ([20 deps](https://npmgraph.js.org/?q=c12@3) to [7 deps](https://npmgraph.js.org/?q=c12#select=c12%404.0.0-beta.2)).
+
+Loading TypeScript files is significantly faster (on cold cache) — simple TS config loads ~2.5x faster ([bench](https://github.com/unjs/c12/tree/main/test/bench)).
+
+- If you need extends feature with remote/git source, install giget as a peer dependency (docs)
+- If you are using watchConfig, install chokidar as a peer dependency (docs).
+- If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a custom import config (docs).
+- Dotenv parsing now uses native runtime features (see #296). You might need to add dotenv as a peer dependency only for legacy/Deno support.
 
 ## Contribution
 
