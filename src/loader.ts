@@ -51,6 +51,18 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
 ]) as unknown as string[];
 
 export async function loadConfig<
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+  S extends StandardSchemaV1 = StandardSchemaV1,
+>(
+  options: LoadConfigOptions<UserInputConfig, MT, S> & { schema: S },
+): Promise<ResolvedConfig<StandardSchemaV1.InferConfigOutput<S> & UserInputConfig, MT>>;
+
+export async function loadConfig<
+  T extends UserInputConfig = UserInputConfig,
+  MT extends ConfigLayerMeta = ConfigLayerMeta,
+>(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>>;
+
+export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
   S extends StandardSchemaV1 = StandardSchemaV1,
@@ -215,7 +227,13 @@ export async function loadConfig<
     let result = options.schema["~standard"].validate(r);
     if (result instanceof Promise) result = await result;
     if (result.issues) {
-      throw new Error(JSON.stringify(result.issues, undefined, 2));
+      const messages = result.issues.map((issue) => {
+        const path = issue.path
+          ?.map((p) => (typeof p === "object" ? p.key : p))
+          .join(".");
+        return path ? `  - ${path}: ${issue.message}` : `  - ${issue.message}`;
+      });
+      throw new Error(`Config validation failed:\n${messages.join("\n")}`);
     }
   }
 

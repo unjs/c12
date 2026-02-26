@@ -235,5 +235,9 @@ export declare namespace StandardSchemaV1 {
     Schema["~standard"]["types"]
   >["output"];
 
+  /** Extracts the `config` property type from a schema's output type. */
+  export type InferConfigOutput<Schema extends StandardSchemaV1> =
+    InferOutput<Schema> extends { config: infer C } ? C : never;
+
   // biome-ignore lint/complexity/noUselessEmptyExport: needed for granular visibility control of TS namespace
 }

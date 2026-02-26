@@ -39,7 +39,7 @@ describe("loader", () => {
       defaultConfig: boolean;
       extends: string[];
     }>;
-    const { config, layers } = await loadConfig<UserConfig>({
+    const { config, layers } = await loadConfig({
       schema: z.object({
         config: ConfigSchema,
       }),
@@ -394,6 +394,36 @@ describe("loader", () => {
       },
       configFile: ".testrc",
     });
+  });
+
+  it("schema validation formats errors", async () => {
+    await expect(
+      loadConfig({
+        schema: z.object({
+          config: z.object({
+            requiredField: z.string(),
+          }),
+        }),
+        cwd: r("./fixture"),
+        name: "test",
+      }),
+    ).rejects.toThrowError("Config validation failed:");
+  });
+
+  it("schema infers config type", async () => {
+    const { config } = await loadConfig({
+      schema: z.object({
+        config: z.object({
+          configFile: z.union([z.string(), z.boolean()]).optional(),
+        }),
+      }),
+      cwd: r("./fixture"),
+      name: "test",
+    });
+
+    // Type check: config.configFile should be typed as string | boolean | undefined
+    const _configFile: string | boolean | undefined = config.configFile;
+    expect(_configFile).toBeDefined();
   });
 
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
