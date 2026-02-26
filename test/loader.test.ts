@@ -4,9 +4,31 @@ import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
+import { z } from "zod";
+
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
+
+const ConfigSchema = z.object({
+  defaultConfig: z.boolean().optional(),
+  virtual: z.boolean().optional(),
+  githubLayer: z.boolean().optional(),
+  npmConfig: z.boolean().optional(),
+  devConfig: z.boolean().optional(),
+  baseConfig: z.boolean().optional(),
+  array: z.array(z.string()).optional(),
+  baseEnvConfig: z.boolean().optional(),
+  packageJSON2: z.boolean().optional(),
+  packageJSON: z.boolean().optional(),
+  testConfig: z.boolean().optional(),
+  rcFile: z.boolean().optional(),
+  configFile: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
+  overridden: z.boolean().optional(),
+  enableDefault: z.boolean().optional(),
+  envConfig: z.boolean().optional(),
+  theme: z.string().optional(),
+});
 
 describe("loader", () => {
   it("load fixture config", async () => {
@@ -17,7 +39,10 @@ describe("loader", () => {
       defaultConfig: boolean;
       extends: string[];
     }>;
-    const { config, layers } = await loadConfig<UserConfig>({
+    const { config, layers } = await loadConfig({
+      schema: z.object({
+        config: ConfigSchema,
+      }),
       cwd: r("./fixture"),
       name: "test",
       dotenv: {
@@ -369,6 +394,36 @@ describe("loader", () => {
       },
       configFile: ".testrc",
     });
+  });
+
+  it("schema validation formats errors", async () => {
+    await expect(
+      loadConfig({
+        schema: z.object({
+          config: z.object({
+            requiredField: z.string(),
+          }),
+        }),
+        cwd: r("./fixture"),
+        name: "test",
+      }),
+    ).rejects.toThrowError("Config validation failed:");
+  });
+
+  it("schema infers config type", async () => {
+    const { config } = await loadConfig({
+      schema: z.object({
+        config: z.object({
+          configFile: z.union([z.string(), z.boolean()]).optional(),
+        }),
+      }),
+      cwd: r("./fixture"),
+      name: "test",
+    });
+
+    // Type check: config.configFile should be typed as string | boolean | undefined
+    const _configFile: string | boolean | undefined = config.configFile;
+    expect(_configFile).toBeDefined();
   });
 
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
