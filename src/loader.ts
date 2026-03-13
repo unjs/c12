@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
@@ -350,7 +350,10 @@ async function resolveConfig<
 
   // Import from local fs
   const ext = extname(source);
-  const isDir = !ext || ext === basename(source); /* #71 */
+  const resolvedPath = resolve(options.cwd!, source);
+  const isDir = existsSync(resolvedPath)
+    ? statSync(resolvedPath).isDirectory()
+    : !ext || ext === basename(source); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
     source = options.configFile!;
