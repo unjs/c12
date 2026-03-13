@@ -390,7 +390,7 @@ describe("loader", () => {
     const multiDotLayer = layers?.find((l) => l.cwd && l.cwd.includes("my.dotted.layer"));
     expect(multiDotLayer).toBeDefined();
     expect(multiDotLayer?.config).toMatchObject({ multiDotLayer: true });
-    // Base config key should still be present (merged)
-    expect(config).toMatchObject({ baseKey: true });
+    // Base config key and extended layer key should both be present (merged)
+    expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
   });
 });
