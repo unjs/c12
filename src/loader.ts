@@ -387,24 +387,23 @@ async function resolveConfig<
     if (options.import) {
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
-      res.config = (await import(res.configFile! + "?t=" + _importCounter++).then(
-        _resolveModule,
-        async (error) => {
-          const { createJiti } = await import("jiti").catch(() => {
-            throw new Error(
-              `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
-              { cause: error },
-            );
-          });
-          const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
-            interopDefault: true,
-            moduleCache: false,
-            extensions: [...SUPPORTED_EXTENSIONS],
-          });
-          options.import = (id: string) => jiti.import(id);
-          return _resolveModule(await options.import(res.configFile!));
-        },
-      )) as T;
+      const _configURL = pathToFileURL(res.configFile!);
+      _configURL.search = "?t=" + _importCounter++;
+      res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
+        const { createJiti } = await import("jiti").catch(() => {
+          throw new Error(
+            `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
+            { cause: error },
+          );
+        });
+        const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
+          interopDefault: true,
+          moduleCache: false,
+          extensions: [...SUPPORTED_EXTENSIONS],
+        });
+        options.import = (id: string) => jiti.import(id);
+        return _resolveModule(await options.import(res.configFile!));
+      })) as T;
     }
   }
   if (typeof res.config === "function") {
