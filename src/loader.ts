@@ -353,9 +353,8 @@ async function resolveConfig<
   // Import from local fs
   const ext = extname(source);
   const resolvedPath = resolve(options.cwd!, source);
-  const isDir = existsSync(resolvedPath)
-    ? statSync(resolvedPath).isDirectory()
-    : !ext || ext === basename(source); /* #71 */
+  const isDir = _isDirectory(resolvedPath)
+    ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
     source = options.configFile!;
@@ -453,4 +452,13 @@ function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
     cache: false,
   });
   return res ? normalize(res) : undefined;
+}
+
+/** Returns `true`/`false` if the path exists, `null` if it doesn't. */
+function _isDirectory(path: string): boolean | null {
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return null;
+  }
 }
