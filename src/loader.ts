@@ -24,7 +24,7 @@ import type {
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
-let _importCounter = 0;
+let importCounter = 0;
 
 const ASYNC_LOADERS = {
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
@@ -388,7 +388,7 @@ async function resolveConfig<
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
       const _configURL = pathToFileURL(res.configFile!);
-      _configURL.search = "?t=" + _importCounter++;
+      _configURL.search = `_${++importCounter}`;
       res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
         const { createJiti } = await import("jiti").catch(() => {
           throw new Error(
