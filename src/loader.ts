@@ -353,8 +353,7 @@ async function resolveConfig<
   // Import from local fs
   const ext = extname(source);
   const resolvedPath = resolve(options.cwd!, source);
-  const isDir = _isDirectory(resolvedPath)
-    ?? (!ext || ext === basename(source)); /* #71 */
+  const isDir = _isDirectory(resolvedPath) ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
     source = options.configFile!;
