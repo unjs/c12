@@ -1,8 +1,12 @@
+import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
+
+const execFileAsync = promisify(execFile);
 
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
@@ -378,19 +382,32 @@ describe("loader", () => {
     });
   });
 
-  it.fails("returns fresh config objects on repeated loads for .mjs files", async () => {
-    const cwd = r("./fixture/esm-cache");
+  it("returns fresh config objects on repeated loads for .mjs files", async () => {
+    // vitest/vite strips query params from dynamic import(), so the ?t= cache
+    // buster has no effect inside the test runner. We shell out to a real
+    // Node.js process to test actual c12 behaviour.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(r("../src/index.ts"))};`,
+          `const cwd = ${JSON.stringify(r("./fixture/esm-cache"))};`,
+          `const first = await loadConfig({ name: "test", cwd });`,
+          `first.config.nested.key = "modified";`,
+          `const second = await loadConfig({ name: "test", cwd });`,
+          `console.log(JSON.stringify({`,
+          `  sameRef: second.config.nested === first.config.nested,`,
+          `  key: second.config.nested.key,`,
+          `}));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
 
-    const first = await loadConfig({ name: "test", cwd });
-    expect(first.config).toEqual({ name: "from-esm", nested: { key: "original" } });
-
-    // mutate
-    first.config.nested.key = "modified";
-
-    const second = await loadConfig({ name: "test", cwd });
-    const secondNested = second.config!.nested as Record<string, unknown>;
-
-    expect.soft(second.config!.nested).not.toBe(first.config.nested);
-    expect.soft(secondNested.key).not.toBe("modified");
+    const result = JSON.parse(stdout.trim());
+    expect(result.sameRef).toBe(false);
+    expect(result.key).toBe("original");
   });
 });
