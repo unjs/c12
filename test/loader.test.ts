@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
@@ -392,7 +392,7 @@ describe("loader", () => {
         "--input-type=module",
         "-e",
         [
-          `import { loadConfig } from ${JSON.stringify(r("../src/index.ts"))};`,
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
           `const cwd = ${JSON.stringify(r("./fixture/esm-cache"))};`,
           `const first = await loadConfig({ name: "test", cwd });`,
           `first.config.nested.key = "modified";`,
