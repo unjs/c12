@@ -1,0 +1,4 @@
+{
+  extends: ["../my.dotted.layer"],
+  baseKey: true,
+}

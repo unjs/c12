@@ -382,6 +382,22 @@ describe("loader", () => {
     });
   });
 
+  it("extends from a directory whose name contains multiple dots (#278)", async () => {
+    const { config, layers } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/multi-dot-extends"),
+      extend: {
+        extendKey: "extends",
+      },
+    });
+    // The multi-dot dir should be resolved as a directory, not a file
+    const multiDotLayer = layers?.find((l) => l.cwd && l.cwd.includes("my.dotted.layer"));
+    expect(multiDotLayer).toBeDefined();
+    expect(multiDotLayer?.config).toMatchObject({ multiDotLayer: true });
+    // Base config key and extended layer key should both be present (merged)
+    expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
+  });
+
   it("returns fresh config objects on repeated loads for .mjs files", async () => {
     // vitest/vite strips query params from dynamic import(), so the ?t= cache
     // buster has no effect inside the test runner. We shell out to a real
