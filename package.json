@@ -32,9 +32,9 @@
     "rc9": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.4.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260310.1",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@types/node": "^25.5.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260314.1",
+    "@vitest/coverage-v8": "^4.1.0",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
     "chokidar": "^5.0.0",
@@ -46,11 +46,11 @@
     "magicast": "^0.5.2",
     "obuild": "^0.4.32",
     "ohash": "^2.0.11",
-    "oxfmt": "^0.37.0",
-    "oxlint": "^1.52.0",
+    "oxfmt": "^0.40.0",
+    "oxlint": "^1.55.0",
     "perfect-debounce": "^2.1.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "peerDependencies": {
     "chokidar": "^5",
@@ -76,5 +76,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.32.0"
+  "packageManager": "pnpm@10.32.1"
 }
