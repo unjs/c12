@@ -24,6 +24,8 @@ import type {
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
+let importCounter = 0;
+
 const ASYNC_LOADERS = {
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
@@ -388,7 +390,9 @@ async function resolveConfig<
     if (options.import) {
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
-      res.config = (await import(res.configFile!).then(_resolveModule, async (error) => {
+      const _configURL = pathToFileURL(res.configFile!);
+      _configURL.search = `_${++importCounter}`;
+      res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
         const { createJiti } = await import("jiti").catch(() => {
           throw new Error(
             `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
