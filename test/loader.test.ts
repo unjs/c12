@@ -377,4 +377,20 @@ describe("loader", () => {
       cwd: r("./fixture/jsx"),
     });
   });
+
+  it.fails("returns fresh config objects on repeated loads for .mjs files", async () => {
+    const cwd = r("./fixture/esm-cache");
+
+    const first = await loadConfig({ name: "test", cwd });
+    expect(first.config).toEqual({ name: "from-esm", nested: { key: "original" } });
+
+    // mutate
+    first.config.nested.key = "modified";
+
+    const second = await loadConfig({ name: "test", cwd });
+    const secondNested = second.config!.nested as Record<string, unknown>;
+
+    expect.soft(second.config!.nested).not.toBe(first.config.nested);
+    expect.soft(secondNested.key).not.toBe("modified");
+  });
 });
