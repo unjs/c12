@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-beta.4
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.3...v4.0.0-beta.4)
+
+### 🩹 Fixes
+
+- Bust esm module cache for native js config imports ([#306](https://github.com/unjs/c12/pull/306))
+- **loader:** Use statSync to detect directories with dots in name ([#305](https://github.com/unjs/c12/pull/305))
+
+### 🏡 Chore
+
+- Update deps ([5eb0366](https://github.com/unjs/c12/commit/5eb0366))
+- Init agents.md ([be767fa](https://github.com/unjs/c12/commit/be767fa))
+- Fix ref in claude.md ([f65b96f](https://github.com/unjs/c12/commit/f65b96f))
+
+### ❤️ Contributors
+
+- Terminalchai <terminalchai@gmail.com>
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+
 ## v4.0.0-beta.3
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.2...v4.0.0-beta.3)
