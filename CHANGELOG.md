@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v3.3.4
+
+[compare changes](https://github.com/unjs/c12/compare/v3.3.3...v3.3.4)
+
+### 📦 Build
+
+- Simplify exports field ([99cb66f](https://github.com/unjs/c12/commit/99cb66f))
+
+### 🏡 Chore
+
+- Update deps ([fe676ce](https://github.com/unjs/c12/commit/fe676ce))
+- Bump giget to v3 ([3cecdd3](https://github.com/unjs/c12/commit/3cecdd3))
+- Update release script ([cb349f9](https://github.com/unjs/c12/commit/cb349f9))
+- Update prepack script ([cd6c5fd](https://github.com/unjs/c12/commit/cd6c5fd))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v3.3.3
 
 [compare changes](https://github.com/unjs/c12/compare/v3.3.2...v3.3.3)
