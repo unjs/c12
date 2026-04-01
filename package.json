@@ -25,7 +25,7 @@
     "dev": "vitest dev",
     "lint": "eslint . && prettier -c src test",
     "lint:fix": "automd && eslint . --fix && prettier -w src test",
-    "prepack": "unbuild",
+    "prepack": "obuild",
     "release": "pnpm build && pnpm test && changelogen --release --push --publish --publishTag 3x",
     "test": "pnpm lint && vitest run --coverage && pnpm test:types",
     "test:types": "tsc --noEmit"
