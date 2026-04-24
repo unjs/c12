@@ -30,6 +30,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 ## 🦴 Used by
 
 - [Hey API](https://github.com/hey-api/openapi-ts)
+- [Gen API](https://github.com/hairyf/genapi)
 - [Kysely](https://github.com/kysely-org/kysely-ctl)
 - [Nitro](https://nitro.build/)
 - [Nuxt](https://nuxt.com/)
