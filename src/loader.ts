@@ -401,6 +401,7 @@ async function resolveConfig<
           interopDefault: true,
           moduleCache: false,
           extensions: [...SUPPORTED_EXTENSIONS],
+          ...options.jitiOptions,
         });
         options.import = (id: string) => jiti.import(id);
         return _resolveModule(await options.import(res.configFile!));

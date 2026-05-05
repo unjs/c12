@@ -1,6 +1,8 @@
 import type { DownloadTemplateOptions } from "giget";
 import type { DotenvOptions } from "./dotenv.ts";
 
+type JitiOptions = NonNullable<Parameters<typeof import("jiti").createJiti>[1]>;
+
 export interface ConfigLayerMeta {
   name?: string;
   [key: string]: any;
@@ -134,6 +136,9 @@ export interface LoadConfigOptions<
 
   /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
   resolveModule?: (mod: any) => any;
+
+  /** Options to override defaults when c12 falls back to [jiti](https://github.com/unjs/jiti) for loading config files. */
+  jitiOptions?: JitiOptions;
 
   giget?: false | DownloadTemplateOptions;
 

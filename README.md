@@ -206,6 +206,21 @@ const { config } = await loadConfig({
 });
 ```
 
+### `jitiOptions`
+
+Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back to it for loading config files. Has no effect if a custom `import` is provided.
+
+**Example:**
+
+```js
+const { config } = await loadConfig({
+  jitiOptions: {
+    fsCache: false,
+    transformOptions: { /* ... */ },
+  },
+});
+```
+
 ### `resolveModule`
 
 Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`.
