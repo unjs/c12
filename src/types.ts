@@ -135,6 +135,20 @@ export interface LoadConfigOptions<
   /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
   resolveModule?: (mod: any) => any;
 
+  /**
+   * Named export(s) to use as the config root, in priority order.
+   *
+   * If set, the loader tries these named exports first and falls back to `mod.default || mod`.
+   * Ignored when a custom `resolveModule` is provided.
+   *
+   * @example
+   * ```ts
+   * // Loads `mod.config` if defined, else falls back to default export
+   * loadConfig({ configExport: "config" })
+   * ```
+   */
+  configExport?: string | string[];
+
   giget?: false | DownloadTemplateOptions;
 
   merger?: (...sources: Array<T | null | undefined>) => T;

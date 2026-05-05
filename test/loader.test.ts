@@ -375,6 +375,30 @@ describe("loader", () => {
     });
   });
 
+  it("loads named export when configExport is set", async () => {
+    const loaded = await loadConfig({
+      cwd: r("./fixture/named-export"),
+      configExport: "config",
+    });
+    expect(loaded.config).toEqual({ fromNamedExport: true });
+  });
+
+  it("falls back to default export when configExport name is missing", async () => {
+    const loaded = await loadConfig({
+      cwd: r("./fixture/named-export"),
+      configExport: "missing",
+    });
+    expect(loaded.config).toEqual({ fromDefaultExport: true });
+  });
+
+  it("tries multiple configExport names in priority order", async () => {
+    const loaded = await loadConfig({
+      cwd: r("./fixture/named-export"),
+      configExport: ["missing", "config"],
+    });
+    expect(loaded.config).toEqual({ fromNamedExport: true });
+  });
+
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
     await loadConfig({
       name: "test",

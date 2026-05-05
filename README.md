@@ -218,6 +218,27 @@ const { config } = await loadConfig({
 });
 ```
 
+### `configExport`
+
+Named export(s) to use as the config root, in priority order. Tries each name first and falls back to `mod.default || mod`.
+
+Ignored when a custom [`resolveModule`](#resolvemodule) is provided.
+
+**Example:** Prefer a `config` named export, fall back to default:
+
+```ts
+// my.config.ts
+export const config = { foo: true };
+export default { foo: false };
+```
+
+```js
+const { config } = await loadConfig({
+  configExport: "config", // or ["config", "myConfig"]
+});
+// → { foo: true }
+```
+
 ### `giget`
 
 Options passed to [unjs/giget](https://github.com/unjs/giget) when extending layer from git source.
