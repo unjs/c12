@@ -384,14 +384,16 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
+    const exportNames = options.configExport
+      ? Array.isArray(options.configExport)
+        ? options.configExport
+        : [options.configExport]
+      : undefined;
     const _resolveModule =
       options.resolveModule ||
       ((mod: any) => {
-        if (options.configExport) {
-          const names = Array.isArray(options.configExport)
-            ? options.configExport
-            : [options.configExport];
-          for (const name of names) {
+        if (exportNames) {
+          for (const name of exportNames) {
             if (mod[name] !== undefined) return mod[name];
           }
         }
