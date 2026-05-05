@@ -136,18 +136,25 @@ export interface LoadConfigOptions<
   resolveModule?: (mod: any) => any;
 
   /**
-   * Named export(s) to use as the config root, in priority order.
+   * Named export(s) to use as the config root, in priority order, or a callback
+   * that picks an export from the loaded module.
    *
-   * If set, the loader tries these named exports first and falls back to `mod.default || mod`.
+   * - `string` / `string[]`: tries each name on the module and returns the first defined one.
+   * - `(mod) => any`: full control — return the chosen value, or `undefined` to fall through.
+   *
+   * In all forms, falls back to `mod.default || mod` if nothing is picked.
    * Ignored when a custom `resolveModule` is provided.
    *
    * @example
    * ```ts
    * // Loads `mod.config` if defined, else falls back to default export
    * loadConfig({ configExport: "config" })
+   *
+   * // Pick dynamically based on env
+   * loadConfig({ configExport: (mod) => mod[process.env.MODE!] })
    * ```
    */
-  configExport?: string | string[];
+  configExport?: string | string[] | ((mod: any) => any);
 
   giget?: false | DownloadTemplateOptions;
 

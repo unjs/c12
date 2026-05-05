@@ -220,7 +220,7 @@ const { config } = await loadConfig({
 
 ### `configExport`
 
-Named export(s) to use as the config root, in priority order. Tries each name first and falls back to `mod.default || mod`.
+Named export(s) to use as the config root, in priority order, or a callback for full control. In all forms, falls back to `mod.default || mod` if nothing is picked.
 
 Ignored when a custom [`resolveModule`](#resolvemodule) is provided.
 
@@ -237,6 +237,14 @@ const { config } = await loadConfig({
   configExport: "config", // or ["config", "myConfig"]
 });
 // → { foo: true }
+```
+
+**Callback form:** Pick the export dynamically. Return `undefined` to fall through to `mod.default || mod`.
+
+```js
+const { config } = await loadConfig({
+  configExport: (mod) => mod[process.env.MODE],
+});
 ```
 
 ### `giget`

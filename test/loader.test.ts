@@ -399,6 +399,22 @@ describe("loader", () => {
     expect(loaded.config).toEqual({ fromNamedExport: true });
   });
 
+  it("supports configExport as a callback for full control", async () => {
+    const loaded = await loadConfig({
+      cwd: r("./fixture/named-export"),
+      configExport: (mod) => mod.config,
+    });
+    expect(loaded.config).toEqual({ fromNamedExport: true });
+  });
+
+  it("falls back to default export when configExport callback returns undefined", async () => {
+    const loaded = await loadConfig({
+      cwd: r("./fixture/named-export"),
+      configExport: () => undefined,
+    });
+    expect(loaded.config).toEqual({ fromDefaultExport: true });
+  });
+
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
     await loadConfig({
       name: "test",
