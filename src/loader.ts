@@ -384,19 +384,13 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    const _pickExport = options.pickExport;
     const exportNames =
-      typeof _pickExport === "string"
-        ? [_pickExport]
-        : Array.isArray(_pickExport)
-          ? _pickExport
-          : undefined;
+      typeof options.pickExport === "string"
+        ? [options.pickExport]
+        : options.pickExport;
     const _resolveModule =
       options.resolveModule ||
       ((mod: any) => {
-        if (typeof _pickExport === "function") {
-          return _pickExport(mod);
-        }
         if (exportNames) {
           for (const name of exportNames) {
             if (name in mod) return mod[name];

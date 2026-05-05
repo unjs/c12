@@ -134,32 +134,34 @@ export interface LoadConfigOptions<
 
   /**
    * Custom resolver for picking which export to use from the loaded module.
-   * Overrides `pickExport` when set.
+   * Overrides `pickExport` when set. Use this for full programmatic control.
    *
    * Default: a resolver honoring `pickExport` (if any), else `mod.default || mod`.
+   *
+   * @example
+   * ```ts
+   * loadConfig({ resolveModule: (mod) => mod[process.env.MODE!] ?? mod.default })
+   * ```
    */
   resolveModule?: (mod: any) => any;
 
   /**
-   * Named export(s) to use as the config root, or a callback that picks one.
-   *
-   * - `string` / `string[]`: tries each name on the module in order and returns
-   *   the first one that is exported. Falls back to `mod.default || mod` if none match.
-   * - `(mod) => any`: full control — the returned value is used as-is, with no fallback.
+   * Named export(s) to use as the config root. Tries each name in order and returns
+   * the first one that is exported. Falls back to `mod.default || mod` if none match.
    *
    * Ignored when a custom `resolveModule` is provided. Only applies to JS/TS module
    * loading; non-module formats (YAML, TOML, JSON5, JSONC) are unaffected.
+   *
+   * For dynamic picking, use `resolveModule` instead.
    *
    * @example
    * ```ts
    * // Loads `mod.config` if exported, else falls back to default export
    * loadConfig({ pickExport: "config" })
-   *
-   * // Pick dynamically based on env (return is final)
-   * loadConfig({ pickExport: (mod) => mod[process.env.MODE!] ?? mod.default })
+   * loadConfig({ pickExport: ["config", "myConfig"] })
    * ```
    */
-  pickExport?: string | string[] | ((mod: any) => any);
+  pickExport?: string | string[];
 
   giget?: false | DownloadTemplateOptions;
 

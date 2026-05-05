@@ -399,14 +399,6 @@ describe("loader", () => {
     expect(loaded.config).toEqual({ fromNamedExport: true });
   });
 
-  it("uses pickExport callback return as-is", async () => {
-    const loaded = await loadConfig({
-      cwd: r("./fixture/named-export"),
-      pickExport: (mod) => mod.config,
-    });
-    expect(loaded.config).toEqual({ fromNamedExport: true });
-  });
-
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
     await loadConfig({
       name: "test",
