@@ -384,15 +384,11 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    const exportNames =
-      typeof options.pickExport === "string"
-        ? [options.pickExport]
-        : options.pickExport;
     const _resolveModule =
       options.resolveModule ||
       ((mod: any) => {
-        if (exportNames) {
-          for (const name of exportNames) {
+        if (options.pickExport) {
+          for (const name of options.pickExport) {
             if (name in mod) return mod[name];
           }
         }

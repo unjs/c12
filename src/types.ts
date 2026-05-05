@@ -146,7 +146,7 @@ export interface LoadConfigOptions<
   resolveModule?: (mod: any) => any;
 
   /**
-   * Named export(s) to use as the config root. Tries each name in order and returns
+   * Named exports to use as the config root. Tries each name in order and returns
    * the first one that is exported. Falls back to `mod.default || mod` if none match.
    *
    * Ignored when a custom `resolveModule` is provided. Only applies to JS/TS module
@@ -157,11 +157,11 @@ export interface LoadConfigOptions<
    * @example
    * ```ts
    * // Loads `mod.config` if exported, else falls back to default export
-   * loadConfig({ pickExport: "config" })
+   * loadConfig({ pickExport: ["config"] })
    * loadConfig({ pickExport: ["config", "myConfig"] })
    * ```
    */
-  pickExport?: string | string[];
+  pickExport?: string[];
 
   giget?: false | DownloadTemplateOptions;
 

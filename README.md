@@ -220,7 +220,7 @@ const { config } = await loadConfig({
 
 ### `pickExport`
 
-Named export(s) to use as the config root. Tries each name in order and returns the first one that is exported. Falls back to `mod.default || mod` if none match.
+Named exports to use as the config root. Tries each name in order and returns the first one that is exported. Falls back to `mod.default || mod` if none match.
 
 Ignored when a custom [`resolveModule`](#resolvemodule) is provided. Only applies to JS/TS module loading; non-module formats (YAML, TOML, JSON5, JSONC) are unaffected.
 
@@ -236,7 +236,7 @@ export default { foo: false };
 
 ```js
 const { config } = await loadConfig({
-  pickExport: "config", // or ["config", "myConfig"]
+  pickExport: ["config", "myConfig"],
 });
 // → { foo: true }
 ```

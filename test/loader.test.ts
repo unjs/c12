@@ -378,15 +378,15 @@ describe("loader", () => {
   it("loads named export when pickExport is set", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      pickExport: "config",
+      pickExport: ["config"],
     });
     expect(loaded.config).toEqual({ fromNamedExport: true });
   });
 
-  it("falls back to default export when pickExport name is missing", async () => {
+  it("falls back to default export when pickExport names are missing", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      pickExport: "missing",
+      pickExport: ["missing"],
     });
     expect(loaded.config).toEqual({ fromDefaultExport: true });
   });
