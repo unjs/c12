@@ -384,22 +384,22 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    const _configExport = options.configExport;
+    const _pickExport = options.pickExport;
     const exportNames =
-      typeof _configExport === "string"
-        ? [_configExport]
-        : Array.isArray(_configExport)
-          ? _configExport
+      typeof _pickExport === "string"
+        ? [_pickExport]
+        : Array.isArray(_pickExport)
+          ? _pickExport
           : undefined;
     const _resolveModule =
       options.resolveModule ||
       ((mod: any) => {
-        if (typeof _configExport === "function") {
-          const picked = _configExport(mod);
-          if (picked !== undefined) return picked;
-        } else if (exportNames) {
+        if (typeof _pickExport === "function") {
+          return _pickExport(mod);
+        }
+        if (exportNames) {
           for (const name of exportNames) {
-            if (mod[name] !== undefined) return mod[name];
+            if (name in mod) return mod[name];
           }
         }
         return mod.default || mod;

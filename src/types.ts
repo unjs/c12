@@ -132,29 +132,34 @@ export interface LoadConfigOptions<
   /** Custom import function used to load configuration files */
   import?: (id: string) => Promise<unknown>;
 
-  /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
+  /**
+   * Custom resolver for picking which export to use from the loaded module.
+   * Overrides `pickExport` when set.
+   *
+   * Default: a resolver honoring `pickExport` (if any), else `mod.default || mod`.
+   */
   resolveModule?: (mod: any) => any;
 
   /**
-   * Named export(s) to use as the config root, in priority order, or a callback
-   * that picks an export from the loaded module.
+   * Named export(s) to use as the config root, or a callback that picks one.
    *
-   * - `string` / `string[]`: tries each name on the module and returns the first defined one.
-   * - `(mod) => any`: full control — return the chosen value, or `undefined` to fall through.
+   * - `string` / `string[]`: tries each name on the module in order and returns
+   *   the first one that is exported. Falls back to `mod.default || mod` if none match.
+   * - `(mod) => any`: full control — the returned value is used as-is, with no fallback.
    *
-   * In all forms, falls back to `mod.default || mod` if nothing is picked.
-   * Ignored when a custom `resolveModule` is provided.
+   * Ignored when a custom `resolveModule` is provided. Only applies to JS/TS module
+   * loading; non-module formats (YAML, TOML, JSON5, JSONC) are unaffected.
    *
    * @example
    * ```ts
-   * // Loads `mod.config` if defined, else falls back to default export
-   * loadConfig({ configExport: "config" })
+   * // Loads `mod.config` if exported, else falls back to default export
+   * loadConfig({ pickExport: "config" })
    *
-   * // Pick dynamically based on env
-   * loadConfig({ configExport: (mod) => mod[process.env.MODE!] })
+   * // Pick dynamically based on env (return is final)
+   * loadConfig({ pickExport: (mod) => mod[process.env.MODE!] ?? mod.default })
    * ```
    */
-  configExport?: string | string[] | ((mod: any) => any);
+  pickExport?: string | string[] | ((mod: any) => any);
 
   giget?: false | DownloadTemplateOptions;
 

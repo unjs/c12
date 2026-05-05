@@ -218,11 +218,14 @@ const { config } = await loadConfig({
 });
 ```
 
-### `configExport`
+### `pickExport`
 
-Named export(s) to use as the config root, in priority order, or a callback for full control. In all forms, falls back to `mod.default || mod` if nothing is picked.
+Named export(s) to use as the config root, or a callback that picks one.
 
-Ignored when a custom [`resolveModule`](#resolvemodule) is provided.
+- `string` / `string[]`: tries each name in order and returns the first one that is exported. Falls back to `mod.default || mod` if none match.
+- `(mod) => any`: full control — the returned value is used as-is, with no fallback.
+
+Ignored when a custom [`resolveModule`](#resolvemodule) is provided. Only applies to JS/TS module loading; non-module formats (YAML, TOML, JSON5, JSONC) are unaffected.
 
 **Example:** Prefer a `config` named export, fall back to default:
 
@@ -234,16 +237,16 @@ export default { foo: false };
 
 ```js
 const { config } = await loadConfig({
-  configExport: "config", // or ["config", "myConfig"]
+  pickExport: "config", // or ["config", "myConfig"]
 });
 // → { foo: true }
 ```
 
-**Callback form:** Pick the export dynamically. Return `undefined` to fall through to `mod.default || mod`.
+**Callback form:** Pick the export dynamically. The returned value is final.
 
 ```js
 const { config } = await loadConfig({
-  configExport: (mod) => mod[process.env.MODE],
+  pickExport: (mod) => mod[process.env.MODE] ?? mod.default,
 });
 ```
 

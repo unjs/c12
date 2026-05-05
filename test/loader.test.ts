@@ -375,44 +375,36 @@ describe("loader", () => {
     });
   });
 
-  it("loads named export when configExport is set", async () => {
+  it("loads named export when pickExport is set", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      configExport: "config",
+      pickExport: "config",
     });
     expect(loaded.config).toEqual({ fromNamedExport: true });
   });
 
-  it("falls back to default export when configExport name is missing", async () => {
+  it("falls back to default export when pickExport name is missing", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      configExport: "missing",
+      pickExport: "missing",
     });
     expect(loaded.config).toEqual({ fromDefaultExport: true });
   });
 
-  it("tries multiple configExport names in priority order", async () => {
+  it("tries multiple pickExport names in priority order", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      configExport: ["missing", "config"],
+      pickExport: ["missing", "config"],
     });
     expect(loaded.config).toEqual({ fromNamedExport: true });
   });
 
-  it("supports configExport as a callback for full control", async () => {
+  it("uses pickExport callback return as-is", async () => {
     const loaded = await loadConfig({
       cwd: r("./fixture/named-export"),
-      configExport: (mod) => mod.config,
+      pickExport: (mod) => mod.config,
     });
     expect(loaded.config).toEqual({ fromNamedExport: true });
-  });
-
-  it("falls back to default export when configExport callback returns undefined", async () => {
-    const loaded = await loadConfig({
-      cwd: r("./fixture/named-export"),
-      configExport: () => undefined,
-    });
-    expect(loaded.config).toEqual({ fromDefaultExport: true });
   });
 
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
