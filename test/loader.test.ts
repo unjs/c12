@@ -398,6 +398,54 @@ describe("loader", () => {
     expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
   });
 
+  it("falls back to jiti when native import fails", async () => {
+    // Fixture uses a TS enum, which Node's strip-only mode rejects, so the
+    // native dynamic import() throws and c12 must fall back to jiti.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const { config } = await loadConfig({ name: "test", cwd: ${JSON.stringify(r("./fixture/jiti"))} });`,
+          `console.log(JSON.stringify(config));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    expect(JSON.parse(stdout.trim())).toMatchObject({
+      loadedViaJiti: true,
+      mode: "development",
+    });
+  });
+
+  it("forwards jitiOptions to the jiti fallback", async () => {
+    // The fixture imports `virtual:jiti-options`, which only resolves when
+    // jitiOptions.virtualModules is forwarded to jiti — so a successful
+    // load proves the option flowed through.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const { config } = await loadConfig({`,
+          `  name: "test",`,
+          `  cwd: ${JSON.stringify(r("./fixture/jiti-options"))},`,
+          `  jitiOptions: { virtualModules: { "virtual:jiti-options": { value: "from-virtual" } } },`,
+          `});`,
+          `console.log(JSON.stringify(config));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    expect(JSON.parse(stdout.trim())).toMatchObject({ value: "from-virtual" });
+  });
+
   it("returns fresh config objects on repeated loads for .mjs files", async () => {
     // vitest/vite strips query params from dynamic import(), so the ?t= cache
     // buster has no effect inside the test runner. We shell out to a real
