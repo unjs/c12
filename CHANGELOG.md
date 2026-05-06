@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-beta.5
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.4...v4.0.0-beta.5)
+
+### 🚀 Enhancements
+
+- Support `jitiOptions` ([e968ad7](https://github.com/unjs/c12/commit/e968ad7))
+
+### 📖 Documentation
+
+- Add genapi to the 'Used Projects' list ([#312](https://github.com/unjs/c12/pull/312))
+
+### 🏡 Chore
+
+- Update deps ([2e2d54a](https://github.com/unjs/c12/commit/2e2d54a))
+- Update release script ([f5a03a3](https://github.com/unjs/c12/commit/f5a03a3))
+
+### ✅ Tests
+
+- Add tests for `jitiOptions` ([c918506](https://github.com/unjs/c12/commit/c918506))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Mao Mr ([@hairyf](https://github.com/hairyf))
+
 ## v4.0.0-beta.4
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.3...v4.0.0-beta.4)
