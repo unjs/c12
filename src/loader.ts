@@ -336,8 +336,15 @@ async function resolveConfig<
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
-      install: sourceOptions.install,
-      force: sourceOptions.install,
+      // install the cloned layer in isolation as it lives in `.c12/<name>` and
+      // is not a workspace member (unjs/c12#128)
+      install:
+        typeof sourceOptions.install === "object"
+          ? { ignoreWorkspace: true, ...sourceOptions.install }
+          : sourceOptions.install
+            ? { ignoreWorkspace: true }
+            : false,
+      force: Boolean(sourceOptions.install),
       auth: sourceOptions.auth,
       ...options.giget,
       ...sourceOptions.giget,

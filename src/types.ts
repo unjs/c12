@@ -48,9 +48,12 @@ export interface SourceOptions<
   /**
    * Install dependencies after cloning
    *
+   * Pass `true` to install with c12's defaults (`ignoreWorkspace: true`), or pass an object
+   * to forward arbitrary nypm install options.
+   *
    * @see https://nypm.unjs.io
    */
-  install?: boolean;
+  install?: NonNullable<DownloadTemplateOptions["install"]>;
 
   /**
    * Token for cloning private sources
