@@ -414,6 +414,14 @@ async function resolveConfig<
     );
   }
 
+  // The loaded config can be a non-extensible object, e.g. a native module
+  // namespace (`[Module: null prototype] {}`) or a frozen default export.
+  // c12 mutates the config later on (adds `_layers`, strips `$meta` and
+  // extend keys), so ensure we own a mutable copy.
+  if (res.config && typeof res.config === "object" && !Object.isExtensible(res.config)) {
+    res.config = { ...res.config };
+  }
+
   // Extend env specific config
   if (options.envName) {
     const envConfig = {
