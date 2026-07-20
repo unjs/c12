@@ -58,10 +58,13 @@ export async function loadConfig<
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
+  // Allow overriding the config name via a `<NAME>_APPNAME` env variable (similar to Neovim's `NVIM_APPNAME`)
+  const configName =
+    process.env[`${options.name.toUpperCase().replace(/\W/g, "_")}_APPNAME`] || options.name;
   options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
-  options.rcFile = options.rcFile ?? `.${options.name}rc`;
+    options.configFile ?? (configName === "config" ? "config" : `${configName}.config`);
+  options.rcFile = options.rcFile ?? `.${configName}rc`;
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
@@ -135,7 +138,7 @@ export async function loadConfig<
     const keys = (
       Array.isArray(options.packageJson)
         ? options.packageJson
-        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
+        : [typeof options.packageJson === "string" ? options.packageJson : configName]
     ).filter((t) => t && typeof t === "string");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
