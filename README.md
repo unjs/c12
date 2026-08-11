@@ -77,7 +77,7 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 3. RC file in CWD
 4. RC file in the workspace directory
 5. RC file in the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`)
-6. RC file in the user's home directory
+6. Legacy RC file in the user's home directory, when `$XDG_CONFIG_HOME` is not set
 7. Config from `package.json`
 8. Default config passed by options
 9. Extended config layers
@@ -104,7 +104,7 @@ Set to `false` to disable loading RC config.
 
 ### `globalRc`
 
-Load RC config from the workspace directory, the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`) and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory, the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`) and, when `$XDG_CONFIG_HOME` is not set, the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
 
 When the same key is set in more than one of these, the workspace wins over the user config directory, which wins over the home directory.
 
