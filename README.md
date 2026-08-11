@@ -102,7 +102,9 @@ Set to `false` to disable loading RC config.
 
 ### `globalRc`
 
-Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory, the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`) and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+
+When the same key is set in more than one of these, the workspace wins over the user config directory, which wins over the home directory.
 
 ### `dotenv`
 
