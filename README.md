@@ -75,10 +75,12 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 1. Config overrides passed by options
 2. Config file in CWD
 3. RC file in CWD
-4. Global RC file in the user's home directory
-5. Config from `package.json`
-6. Default config passed by options
-7. Extended config layers
+4. RC file in the workspace directory
+5. RC file in the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`)
+6. RC file in the user's home directory
+7. Config from `package.json`
+8. Default config passed by options
+9. Extended config layers
 
 ## Options
 
