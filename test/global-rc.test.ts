@@ -76,14 +76,13 @@ describe("global rc", () => {
     expect(config).toMatchObject({ shared: "project" });
   });
 
-  it("reads a single location when XDG_CONFIG_HOME is set", async () => {
+  it("still reads the legacy home rc file when XDG_CONFIG_HOME is set", async () => {
     const xdg = resolve(dir, "xdg");
     await mkdir(xdg, { recursive: true });
     process.env.XDG_CONFIG_HOME = xdg;
-    await writeFile(resolve(xdg, ".testrc"), "xdg=true\nlist[]=a\n");
-    await writeFile(resolve(home, ".testrc"), "legacy=true\n");
+    await writeFile(resolve(xdg, ".testrc"), "xdg=true\nshared=config\n");
+    await writeFile(resolve(home, ".testrc"), "legacy=true\nshared=home\n");
     const { config } = await load();
-    expect(config).toMatchObject({ xdg: true, list: ["a"] });
-    expect(config).not.toHaveProperty("legacy");
+    expect(config).toMatchObject({ xdg: true, legacy: true, shared: "config" });
   });
 });
