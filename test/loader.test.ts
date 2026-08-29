@@ -354,6 +354,23 @@ describe("loader", () => {
     ).rejects.toThrowError("Required config (CUSTOM) cannot be resolved.");
   });
 
+  it("support configFile: false to skip loading config file", async () => {
+    const { config, configFile } = await loadConfig({
+      cwd: r("./fixture"),
+      configFile: false,
+      rcFile: false,
+      dotenv: false,
+      packageJson: false,
+      defaults: {
+        defaultKey: "defaultVal",
+      },
+    });
+    expect(configFile).toBeUndefined();
+    expect(config).toEqual({
+      defaultKey: "defaultVal",
+    });
+  });
+
   it("loads arrays exported from config without merging", async () => {
     const loaded = await loadConfig({
       name: "test",

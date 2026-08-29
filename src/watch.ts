@@ -59,17 +59,25 @@ export async function watchConfig<
 
   const configName = options.name || "config";
   const configFileName =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
+    typeof options.configFile === "string"
+      ? options.configFile
+      : options.configFile === false
+        ? ""
+        : options.name === "config"
+          ? "config"
+          : `${options.name}.config`;
   const watchingFiles = [
     ...new Set(
       (config.layers || [])
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
-            resolve(l.cwd!, configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
-          ]),
+          ...(configFileName
+            ? SUPPORTED_EXTENSIONS.flatMap((ext) => [
+                resolve(l.cwd!, configFileName + ext),
+                resolve(l.cwd!, ".config", configFileName + ext),
+                resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
+              ])
+            : []),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
           options.rcFile &&

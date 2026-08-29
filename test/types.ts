@@ -29,4 +29,8 @@ async function main() {
   const config = await loadConfig<MyConfig, MyMeta>({});
   expectTypeOf(config.config!.foo).toEqualTypeOf<string>();
   expectTypeOf(config.meta!.metaFoo).toEqualTypeOf<string>();
+
+  await loadConfig<MyConfig, MyMeta>({
+    configFile: false,
+  });
 }

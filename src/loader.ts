@@ -76,7 +76,7 @@ export async function loadConfig<
   const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
-    configFile: resolve(options.cwd, options.configFile),
+    configFile: options.configFile ? resolve(options.cwd, options.configFile) : undefined,
     layers: [],
     _configFile: undefined,
   };
@@ -102,15 +102,17 @@ export async function loadConfig<
   }
 
   // Load main config file
-  const _mainConfig = await resolveConfig(".", options);
-  if (_mainConfig.configFile) {
-    rawConfigs.main = _mainConfig.config;
-    r.configFile = _mainConfig.configFile;
-    r._configFile = _mainConfig._configFile;
-  }
+  if (options.configFile !== false) {
+    const _mainConfig = await resolveConfig(".", options);
+    if (_mainConfig.configFile) {
+      rawConfigs.main = _mainConfig.config;
+      r.configFile = _mainConfig.configFile;
+      r._configFile = _mainConfig._configFile;
+    }
 
-  if (_mainConfig.meta) {
-    r.meta = _mainConfig.meta;
+    if (_mainConfig.meta) {
+      r.meta = _mainConfig.meta;
+    }
   }
 
   // Load rc files
@@ -356,7 +358,7 @@ async function resolveConfig<
   const isDir = _isDirectory(resolvedPath) ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
-    source = options.configFile!;
+    source = (options.configFile || options.name || "config") as string;
   }
   const res: ResolvedConfig<T, MT> = {
     config: undefined as unknown as T,
