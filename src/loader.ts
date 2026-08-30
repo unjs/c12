@@ -27,6 +27,7 @@ const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 let importCounter = 0;
 
 const ASYNC_LOADERS = {
+  ".json": () => Promise.resolve(JSON.parse),
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".jsonc": () => import("confbox/jsonc").then((r) => r.parseJSONC),
