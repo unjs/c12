@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, vi } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
@@ -480,7 +480,6 @@ describe("loader", () => {
   it("loads JSON configs without the optional jiti peer", async () => {
     const tempDir = await mkdtemp(join(tmpdir(), "c12-json-config-"));
     try {
-      await writeFile(join(tempDir, "test.config.json"), '{"jsonConfig":true}\n');
       const loaderFile = join(tempDir, "block-jiti-loader.mjs");
       await writeFile(
         loaderFile,
@@ -501,7 +500,7 @@ describe("loader", () => {
           "-e",
           [
             `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
-            `const { config } = await loadConfig({ cwd: ${JSON.stringify(tempDir)}, name: "test" });`,
+            `const { config } = await loadConfig({ cwd: ${JSON.stringify(r("./fixture/json"))}, name: "test" });`,
             "console.log(JSON.stringify(config));",
           ].join("\n"),
         ],
@@ -512,5 +511,20 @@ describe("loader", () => {
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
+  });
+  it("uses custom module hooks for JSON configs", async () => {
+    const importConfig = vi.fn(async () => ({ wrapped: { fromHook: true } }));
+    const resolveModule = vi.fn((module: { wrapped: unknown }) => module.wrapped);
+
+    const { config } = await loadConfig({
+      cwd: r("./fixture/json"),
+      name: "test",
+      import: importConfig,
+      resolveModule,
+    });
+
+    expect(config).toEqual({ fromHook: true });
+    expect(importConfig).toHaveBeenCalledWith(r("./fixture/json/test.config.json"));
+    expect(resolveModule).toHaveBeenCalledWith({ wrapped: { fromHook: true } });
   });
 });

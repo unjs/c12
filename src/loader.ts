@@ -380,7 +380,9 @@ async function resolveConfig<
   res._configFile = res.configFile;
 
   const configFileExt = extname(res.configFile!) || "";
-  if (configFileExt in ASYNC_LOADERS) {
+  const hasCustomJsonLoader =
+    configFileExt === ".json" && (options.import || options.resolveModule);
+  if (configFileExt in ASYNC_LOADERS && !hasCustomJsonLoader) {
     const asyncLoader = await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
