@@ -1,2 +1,7 @@
 packages:
   - test/bench
+allowBuilds:
+  '@parcel/watcher': false
+minimumReleaseAgeExclude:
+  - obuild@0.4.39
+  - rc9@3.1.0
