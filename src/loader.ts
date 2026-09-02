@@ -124,8 +124,10 @@ export async function loadConfig<
       if (workspaceDir) {
         rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
       }
-      // 3. user home
-      rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
+      // 3. user config dir ($XDG_CONFIG_HOME or ~/.config)
+      rcSources.push(rc9.readUserConfig({ name: options.rcFile }));
+      // 4. user home (legacy)
+      rcSources.push(rc9.read({ name: options.rcFile, dir: homedir() }));
     }
     rawConfigs.rc = _merger({} as T, ...rcSources);
   }
