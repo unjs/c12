@@ -49,7 +49,8 @@
     "oxlint": "^1.81.0",
     "perfect-debounce": "^2.1.0",
     "typescript": "^7",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
     "chokidar": "^5",
