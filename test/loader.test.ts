@@ -478,6 +478,9 @@ describe("loader", () => {
     expect(result.key).toBe("original");
   });
   it("loads JSON configs without the optional jiti peer", async () => {
+    const { config } = await loadConfig({ cwd: r("./fixture/json"), name: "test" });
+    expect(config).toEqual({ jsonConfig: true });
+
     const tempDir = await mkdtemp(join(tmpdir(), "c12-json-config-"));
     try {
       const loaderFile = join(tempDir, "block-jiti-loader.mjs");
