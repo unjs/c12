@@ -54,7 +54,7 @@
   "peerDependencies": {
     "chokidar": "^5",
     "dotenv": "*",
-    "giget": "*",
+    "giget": ">=3.1.0",
     "jiti": "*",
     "magicast": "*"
   },

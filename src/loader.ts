@@ -334,20 +334,25 @@ async function resolveConfig<
         : resolve(homedir(), ".cache/c12", cloneName);
     }
 
-    if (existsSync(cloneDir) && !sourceOptions.install) {
+    // Install the cloned layer in isolation as it lives in `.c12/<name>` and is
+    // not a workspace member (unjs/c12#128). `defu` is used over a spread so an
+    // explicit `undefined` does not clobber the default, and the normalized
+    // value is shared with the cleanup guard and `force` below so all three
+    // stay in agreement (`null` is falsy here, unlike `typeof x === "object"`).
+    // Note: nypm only honors `ignoreWorkspace` for pnpm.
+    const install = sourceOptions.install
+      ? defu(sourceOptions.install === true ? {} : sourceOptions.install, {
+          ignoreWorkspace: true,
+        })
+      : false;
+
+    if (existsSync(cloneDir) && !install) {
       await rm(cloneDir, { recursive: true });
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
-      // install the cloned layer in isolation as it lives in `.c12/<name>` and
-      // is not a workspace member (unjs/c12#128)
-      install:
-        typeof sourceOptions.install === "object"
-          ? { ignoreWorkspace: true, ...sourceOptions.install }
-          : sourceOptions.install
-            ? { ignoreWorkspace: true }
-            : false,
-      force: Boolean(sourceOptions.install),
+      install,
+      force: Boolean(install),
       auth: sourceOptions.auth,
       ...options.giget,
       ...sourceOptions.giget,
