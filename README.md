@@ -261,6 +261,32 @@ Context object passed to dynamic config functions.
 
 You can define a custom function that resolves the config.
 
+### `onResolved`
+
+Runs after all config sources and layers are merged, with the same `{ config, layers, ... }` object returned by `loadConfig`.
+
+Merging can retain nested references between `config` and `layers`. For a single load, clone `config` after loading:
+
+```js
+import { klona } from "klona";
+
+const loaded = await loadConfig({});
+const config = klona(loaded.config);
+```
+
+`klona` is only an example. It does not handle circular references, and stateful class instances may need a custom clone.
+
+With `watchConfig`, use the hook to clone after every reload:
+
+```js
+const watcher = await watchConfig({
+  onResolved: (resolved) => ({
+    ...resolved,
+    config: klona(resolved.config),
+  }),
+});
+```
+
 ### `configFileRequired`
 
 If this option is set to `true`, loader fails if the main config file does not exists.

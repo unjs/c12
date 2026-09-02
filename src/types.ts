@@ -126,6 +126,9 @@ export interface LoadConfigOptions<
   /** Context passed to config functions */
   context?: ConfigFunctionContext;
 
+  /** Runs after all config sources and layers are merged. */
+  onResolved?: (resolved: ResolvedConfig<T, MT>) => MaybePromise<ResolvedConfig<T, MT> | void>;
+
   resolve?: (
     id: string,
     options: LoadConfigOptions<T, MT>,
