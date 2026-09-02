@@ -30,6 +30,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 ## 🦴 Used by
 
 - [Hey API](https://github.com/hey-api/openapi-ts)
+- [Gen API](https://github.com/hairyf/genapi)
 - [Kysely](https://github.com/kysely-org/kysely-ctl)
 - [Nitro](https://nitro.build/)
 - [Nuxt](https://nuxt.com/)
@@ -74,10 +75,12 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 1. Config overrides passed by options
 2. Config file in CWD
 3. RC file in CWD
-4. Global RC file in the user's home directory
-5. Config from `package.json`
-6. Default config passed by options
-7. Extended config layers
+4. RC file in the workspace directory
+5. RC file in the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`)
+6. Legacy RC file in the user's home directory
+7. Config from `package.json`
+8. Default config passed by options
+9. Extended config layers
 
 ## Options
 
@@ -101,7 +104,9 @@ Set to `false` to disable loading RC config.
 
 ### `globalRc`
 
-Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory, the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`) and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+
+When the same key is set in more than one of these, the workspace wins over the user config directory, which wins over the home directory.
 
 ### `dotenv`
 
@@ -202,6 +207,21 @@ const jiti = createJiti(import.meta.url, {
 
 const { config } = await loadConfig({
   import: (id) => jiti.import(id),
+});
+```
+
+### `jitiOptions`
+
+Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back to it for loading config files. Has no effect if a custom `import` is provided.
+
+**Example:**
+
+```js
+const { config } = await loadConfig({
+  jitiOptions: {
+    fsCache: false,
+    transformOptions: { /* ... */ },
+  },
 });
 ```
 

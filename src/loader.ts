@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
@@ -6,7 +6,6 @@ import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv.ts";
 
 import type {
@@ -24,6 +23,8 @@ import type {
 } from "./types.ts";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
+
+let importCounter = 0;
 
 const ASYNC_LOADERS = {
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
@@ -132,12 +133,15 @@ export async function loadConfig<
     rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
     if (options.globalRc) {
       // 2. workspace
+      const { findWorkspaceDir } = await import("pkg-types");
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
         rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
       }
-      // 3. user home
-      rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
+      // 3. user config dir ($XDG_CONFIG_HOME or ~/.config)
+      rcSources.push(rc9.readUserConfig({ name: options.rcFile }));
+      // 4. user home (legacy)
+      rcSources.push(rc9.read({ name: options.rcFile, dir: homedir() }));
     }
     rawConfigs.rc = _merger({} as T, ...rcSources);
   }
@@ -149,6 +153,7 @@ export async function loadConfig<
         ? options.packageJson
         : [typeof options.packageJson === "string" ? options.packageJson : options.name]
     ).filter((t) => t && typeof t === "string");
+    const { readPackageJSON } = await import("pkg-types");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
     rawConfigs.packageJson = _merger({} as T, ...values);
@@ -363,8 +368,15 @@ async function resolveConfig<
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
-      install: sourceOptions.install,
-      force: sourceOptions.install,
+      // install the cloned layer in isolation as it lives in `.c12/<name>` and
+      // is not a workspace member (unjs/c12#128)
+      install:
+        typeof sourceOptions.install === "object"
+          ? { ignoreWorkspace: true, ...sourceOptions.install }
+          : sourceOptions.install
+            ? { ignoreWorkspace: true }
+            : false,
+      force: Boolean(sourceOptions.install),
       auth: sourceOptions.auth,
       ...options.giget,
       ...sourceOptions.giget,
@@ -379,7 +391,8 @@ async function resolveConfig<
 
   // Import from local fs
   const ext = extname(source);
-  const isDir = !ext || ext === basename(source); /* #71 */
+  const resolvedPath = resolve(options.cwd!, source);
+  const isDir = _isDirectory(resolvedPath) ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
     source = options.configFile!;
@@ -414,7 +427,9 @@ async function resolveConfig<
     if (options.import) {
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
-      res.config = (await import(res.configFile!).then(_resolveModule, async (error) => {
+      const _configURL = pathToFileURL(res.configFile!);
+      _configURL.search = `_${++importCounter}`;
+      res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
         const { createJiti } = await import("jiti").catch(() => {
           throw new Error(
             `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
@@ -425,6 +440,7 @@ async function resolveConfig<
           interopDefault: true,
           moduleCache: false,
           extensions: [...SUPPORTED_EXTENSIONS],
+          ...options.jitiOptions,
         });
         options.import = (id: string) => jiti.import(id);
         return _resolveModule(await options.import(res.configFile!));
@@ -475,4 +491,13 @@ function tryResolve(id: string, options: LoadConfigOptions<any, any, any>) {
     cache: false,
   });
   return res ? normalize(res) : undefined;
+}
+
+/** Returns `true`/`false` if the path exists, `null` if it doesn't. */
+function _isDirectory(path: string): boolean | null {
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return null;
+  }
 }

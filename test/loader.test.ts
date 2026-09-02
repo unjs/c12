@@ -1,10 +1,14 @@
-import { fileURLToPath } from "node:url";
+import { execFile } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
 import { z } from "zod";
+
+const execFileAsync = promisify(execFile);
 
 const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.url)));
 const transformPaths = (object: object) =>
@@ -431,5 +435,98 @@ describe("loader", () => {
       name: "test",
       cwd: r("./fixture/jsx"),
     });
+  });
+
+  it("extends from a directory whose name contains multiple dots (#278)", async () => {
+    const { config, layers } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/multi-dot-extends"),
+      extend: {
+        extendKey: "extends",
+      },
+    });
+    // The multi-dot dir should be resolved as a directory, not a file
+    const multiDotLayer = layers?.find((l) => l.cwd && l.cwd.includes("my.dotted.layer"));
+    expect(multiDotLayer).toBeDefined();
+    expect(multiDotLayer?.config).toMatchObject({ multiDotLayer: true });
+    // Base config key and extended layer key should both be present (merged)
+    expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
+  });
+
+  it("falls back to jiti when native import fails", async () => {
+    // Fixture uses a TS enum, which Node's strip-only mode rejects, so the
+    // native dynamic import() throws and c12 must fall back to jiti.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const { config } = await loadConfig({ name: "test", cwd: ${JSON.stringify(r("./fixture/jiti"))} });`,
+          `console.log(JSON.stringify(config));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    expect(JSON.parse(stdout.trim())).toMatchObject({
+      loadedViaJiti: true,
+      mode: "development",
+    });
+  });
+
+  it("forwards jitiOptions to the jiti fallback", async () => {
+    // The fixture imports `virtual:jiti-options`, which only resolves when
+    // jitiOptions.virtualModules is forwarded to jiti — so a successful
+    // load proves the option flowed through.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const { config } = await loadConfig({`,
+          `  name: "test",`,
+          `  cwd: ${JSON.stringify(r("./fixture/jiti-options"))},`,
+          `  jitiOptions: { virtualModules: { "virtual:jiti-options": { value: "from-virtual" } } },`,
+          `});`,
+          `console.log(JSON.stringify(config));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    expect(JSON.parse(stdout.trim())).toMatchObject({ value: "from-virtual" });
+  });
+
+  it("returns fresh config objects on repeated loads for .mjs files", async () => {
+    // vitest/vite strips query params from dynamic import(), so the ?t= cache
+    // buster has no effect inside the test runner. We shell out to a real
+    // Node.js process to test actual c12 behaviour.
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const cwd = ${JSON.stringify(r("./fixture/esm-cache"))};`,
+          `const first = await loadConfig({ name: "test", cwd });`,
+          `first.config.nested.key = "modified";`,
+          `const second = await loadConfig({ name: "test", cwd });`,
+          `console.log(JSON.stringify({`,
+          `  sameRef: second.config.nested === first.config.nested,`,
+          `  key: second.config.nested.key,`,
+          `}));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    const result = JSON.parse(stdout.trim());
+    expect(result.sameRef).toBe(false);
+    expect(result.key).toBe("original");
   });
 });
