@@ -6,7 +6,6 @@ import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv.ts";
 
 import type {
@@ -120,6 +119,7 @@ export async function loadConfig<
     rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
     if (options.globalRc) {
       // 2. workspace
+      const { findWorkspaceDir } = await import("pkg-types");
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
         rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
@@ -139,6 +139,7 @@ export async function loadConfig<
         ? options.packageJson
         : [typeof options.packageJson === "string" ? options.packageJson : options.name]
     ).filter((t) => t && typeof t === "string");
+    const { readPackageJSON } = await import("pkg-types");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
     rawConfigs.packageJson = _merger({} as T, ...values);
