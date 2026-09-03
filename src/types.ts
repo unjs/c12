@@ -131,13 +131,18 @@ export interface LoadConfigOptions<
     options: LoadConfigOptions<T, MT>,
   ) => null | undefined | ResolvedConfig<T, MT> | Promise<ResolvedConfig<T, MT> | undefined | null>;
 
-  /** Custom import function used to load configuration files */
+  /** Custom import function used to load configuration files (also used for `.json`, which is otherwise parsed with `JSON.parse`) */
   import?: (id: string) => Promise<unknown>;
 
-  /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
+  /**
+   * Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`
+   *
+   * Only applies to config files loaded via `import`. Directly parsed formats
+   * (`.json`, `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml`) are used as-is.
+   */
   resolveModule?: (mod: any) => any;
 
-  /** Options to override defaults when c12 falls back to [jiti](https://github.com/unjs/jiti) for loading config files. */
+  /** Options to override defaults when c12 falls back to [jiti](https://github.com/unjs/jiti) for loading config files. Has no effect for `.json` config files, which are parsed with `JSON.parse`. */
   jitiOptions?: JitiOptions;
 
   giget?: false | DownloadTemplateOptions;

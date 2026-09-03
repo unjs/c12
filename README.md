@@ -15,7 +15,8 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## ✅ Features
 
-- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
+- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
+- `.json` config loader with `JSON.parse` (no [unjs/jiti](https://jiti.unjs.io) needed, unless a custom `import` is provided).
 - `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
@@ -208,7 +209,7 @@ const { config } = await loadConfig({
 
 ### `jitiOptions`
 
-Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back to it for loading config files. Has no effect if a custom `import` is provided.
+Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back to it for loading config files. Has no effect if a custom `import` is provided, nor for `.json` config files (parsed with `JSON.parse`).
 
 **Example:**
 
@@ -224,6 +225,8 @@ const { config } = await loadConfig({
 ### `resolveModule`
 
 Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`.
+
+Only applies to config files loaded via `import` (`.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts`, and `.json` when a custom `import` is provided). Formats that are parsed directly (`.json`, `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml`) are used as-is.
 
 **Example:** Using a named export:
 

@@ -26,8 +26,11 @@ const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 
 let importCounter = 0;
 
+/** Memoized jiti importers, keyed by the caller's options object. */
+const _jitiImporters = new WeakMap<object, (id: string) => Promise<any>>();
+
 const ASYNC_LOADERS = {
-  ".json": () => Promise.resolve(JSON.parse),
+  ".json": () => JSON.parse,
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".jsonc": () => import("confbox/jsonc").then((r) => r.parseJSONC),
@@ -43,6 +46,8 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
   ".cjs",
   ".mts",
   ".cts",
+  // with JSON.parse (or import, if a custom `import` hook is set)
+  // NOTE: order is significant (used for resolution priority), keep `.json` here.
   ".json",
   // with confbox
   ".jsonc",
@@ -380,12 +385,12 @@ async function resolveConfig<
   res._configFile = res.configFile;
 
   const configFileExt = extname(res.configFile!) || "";
-  const hasCustomJsonLoader =
-    configFileExt === ".json" && (options.import || options.resolveModule);
-  if (configFileExt in ASYNC_LOADERS && !hasCustomJsonLoader) {
+  // `.json` is parsed directly unless the user provided a custom `import` hook to load it with.
+  const useCustomImport = configFileExt === ".json" && options.import;
+  if (configFileExt in ASYNC_LOADERS && !useCustomImport) {
     const asyncLoader = await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
     const contents = await readFile(res.configFile!, "utf8");
-    res.config = asyncLoader(contents);
+    res.config = _parseConfig(asyncLoader, contents, res.configFile!);
   } else {
     const _resolveModule = options.resolveModule || ((mod: any) => mod.default || mod);
     if (options.import) {
@@ -394,20 +399,25 @@ async function resolveConfig<
       const _configURL = pathToFileURL(res.configFile!);
       _configURL.search = `_${++importCounter}`;
       res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
-        const { createJiti } = await import("jiti").catch(() => {
-          throw new Error(
-            `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
-            { cause: error },
-          );
-        });
-        const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
-          interopDefault: true,
-          moduleCache: false,
-          extensions: [...SUPPORTED_EXTENSIONS],
-          ...options.jitiOptions,
-        });
-        options.import = (id: string) => jiti.import(id);
-        return _resolveModule(await options.import(res.configFile!));
+        // Memoized privately (never on `options`, which is caller-owned and inspected above)
+        let _jitiImport = _jitiImporters.get(options);
+        if (!_jitiImport) {
+          const { createJiti } = await import("jiti").catch(() => {
+            throw new Error(
+              `Failed to load config file \`${res.configFile}\`: ${error?.message}.  Hint install \`jiti\` for compatibility.`,
+              { cause: error },
+            );
+          });
+          const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
+            interopDefault: true,
+            moduleCache: false,
+            extensions: [...SUPPORTED_EXTENSIONS],
+            ...options.jitiOptions,
+          });
+          _jitiImport = (id: string) => jiti.import(id);
+          _jitiImporters.set(options, _jitiImport);
+        }
+        return _resolveModule(await _jitiImport(res.configFile!));
       })) as T;
     }
   }
@@ -464,4 +474,27 @@ function _isDirectory(path: string): boolean | null {
   } catch {
     return null;
   }
+}
+
+/** Parse a config file's contents, adding the file path to any parse error. */
+function _parseConfig(parse: (source: string) => any, contents: string, configFile: string) {
+  let parsed: any;
+  try {
+    // Strip UTF-8 BOM, which `JSON.parse` (and some confbox parsers) reject
+    parsed = parse(contents.replace(/^\uFEFF/, ""));
+  } catch (error: any) {
+    throw new Error(`Failed to load config file \`${configFile}\`: ${error?.message}`, {
+      cause: error,
+    });
+  }
+  // An empty (or explicitly null) config file is an empty config
+  if (parsed === null || parsed === undefined) {
+    return {};
+  }
+  if (typeof parsed !== "object") {
+    throw new Error(
+      `Failed to load config file \`${configFile}\`: expected an object, received ${typeof parsed}.`,
+    );
+  }
+  return parsed;
 }
