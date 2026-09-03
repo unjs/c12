@@ -1,0 +1,4 @@
+{
+  "marker": "after",
+  "default": { "nested": true }
+}

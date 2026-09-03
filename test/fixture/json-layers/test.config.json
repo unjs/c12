@@ -1,0 +1,3 @@
+{
+  "extends": ["./before.json", "../jiti/test.config", "./after.json"]
+}

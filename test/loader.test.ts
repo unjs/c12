@@ -1,9 +1,6 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { expect, it, describe, vi } from "vitest";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
@@ -477,44 +474,95 @@ describe("loader", () => {
     expect(result.sameRef).toBe(false);
     expect(result.key).toBe("original");
   });
-  it("loads JSON configs without the optional jiti peer", async () => {
+  // NOTE: this only smoke-tests the result. It is NOT a guard for the jiti-free path:
+  // vitest transforms `.json` into an ES module, so it passes even without the fix.
+  // The subprocess test below is the real regression guard.
+  it("loads JSON configs", async () => {
     const { config } = await loadConfig({ cwd: r("./fixture/json"), name: "test" });
     expect(config).toEqual({ jsonConfig: true });
-
-    const tempDir = await mkdtemp(join(tmpdir(), "c12-json-config-"));
-    try {
-      const loaderFile = join(tempDir, "block-jiti-loader.mjs");
-      await writeFile(
-        loaderFile,
-        [
-          "export async function resolve(specifier, context, nextResolve) {",
-          '  if (specifier === "jiti") throw new Error("jiti unavailable");',
-          "  return nextResolve(specifier, context);",
-          "}",
-        ].join("\n"),
-      );
-
-      const { stdout } = await execFileAsync(
-        process.execPath,
-        [
-          "--experimental-loader",
-          pathToFileURL(loaderFile).href,
-          "--input-type=module",
-          "-e",
-          [
-            `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
-            `const { config } = await loadConfig({ cwd: ${JSON.stringify(r("./fixture/json"))}, name: "test" });`,
-            "console.log(JSON.stringify(config));",
-          ].join("\n"),
-        ],
-        { env: { ...process.env, NODE_OPTIONS: "" } },
-      );
-
-      expect(JSON.parse(stdout.trim())).toEqual({ jsonConfig: true });
-    } finally {
-      await rm(tempDir, { recursive: true, force: true });
-    }
   });
+
+  it("loads JSON configs with a UTF-8 BOM", async () => {
+    const { config } = await loadConfig({ cwd: r("./fixture/json-bom"), name: "test" });
+    expect(config).toEqual({ bomKey: true });
+  });
+
+  it("reports the config file path for invalid JSON", async () => {
+    await expect(loadConfig({ cwd: r("./fixture/json-broken"), name: "test" })).rejects.toThrow(
+      /json-broken[/\\]test\.config\.json/,
+    );
+  });
+
+  it("loads JSON configs without the optional jiti peer", async () => {
+    // Block `jiti` resolution in a child process so the fallback cannot kick in
+    const blockJiti = `data:text/javascript,${encodeURIComponent(
+      [
+        "export async function resolve(specifier, context, nextResolve) {",
+        '  if (specifier === "jiti") throw new Error("jiti unavailable");',
+        "  return nextResolve(specifier, context);",
+        "}",
+      ].join("\n"),
+    )}`;
+    const registerBlockJiti = `data:text/javascript,${encodeURIComponent(
+      `import { register } from "node:module";\nregister(${JSON.stringify(blockJiti)});`,
+    )}`;
+
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--import",
+        registerBlockJiti,
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const cwd = ${JSON.stringify(r("./fixture/json"))};`,
+          `const plain = await loadConfig({ cwd, name: "test" });`,
+          // `resolveModule` is post-processing only and must not re-arm the import path
+          `const withResolveModule = await loadConfig({ cwd, name: "test", resolveModule: (mod) => mod });`,
+          `console.log(JSON.stringify({ plain: plain.config, withResolveModule: withResolveModule.config }));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    expect(JSON.parse(stdout.trim())).toEqual({
+      plain: { jsonConfig: true },
+      withResolveModule: { jsonConfig: true },
+    });
+  });
+
+  it("parses JSON layers consistently around a jiti fallback layer", async () => {
+    // Runs in a child process so the `.ts` layer really goes through jiti
+    // (vitest would otherwise transform it and never reach the fallback).
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        [
+          `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+          `const options = { cwd: ${JSON.stringify(r("./fixture/json-layers"))}, name: "test" };`,
+          `const { layers } = await loadConfig(options);`,
+          `const pick = (name) => layers.find((l) => l.configFile?.endsWith(name))?.config;`,
+          `console.log(JSON.stringify({`,
+          `  before: pick("before.json"),`,
+          `  after: pick("after.json"),`,
+          `  optionsMutated: "import" in options,`,
+          `}));`,
+        ].join("\n"),
+      ],
+      { env: { ...process.env, NODE_OPTIONS: "" } },
+    );
+
+    const result = JSON.parse(stdout.trim());
+    // Byte-identical layers must parse identically regardless of position
+    expect(result.before).toEqual({ marker: "before", default: { nested: true } });
+    expect(result.after).toEqual({ marker: "after", default: { nested: true } });
+    // The jiti importer must never be written back onto the caller's options
+    expect(result.optionsMutated).toBe(false);
+  });
+
   it("uses custom module hooks for JSON configs", async () => {
     const importConfig = vi.fn(async () => ({ wrapped: { fromHook: true } }));
     const resolveModule = vi.fn((module: { wrapped: unknown }) => module.wrapped);

@@ -1,0 +1,4 @@
+{
+  "marker": "before",
+  "default": { "nested": true }
+}
