@@ -32,7 +32,7 @@
     "rc9": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "^26",
+    "@types/node": "^26.4.0",
     "@vitest/coverage-v8": "^4.1.11",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
@@ -54,7 +54,7 @@
   "peerDependencies": {
     "chokidar": "^5",
     "dotenv": "*",
-    "giget": ">=3.1.0",
+    "giget": ">=3.3.1",
     "jiti": "*",
     "magicast": "*"
   },
@@ -75,5 +75,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@11.25.0"
 }

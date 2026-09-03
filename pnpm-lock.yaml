@@ -28,7 +28,7 @@ importers:
         version: 3.1.0
     devDependencies:
       '@types/node':
-        specifier: ^26
+        specifier: ^26.4.0
         version: 26.4.1
       '@vitest/coverage-v8':
         specifier: ^4.1.11
