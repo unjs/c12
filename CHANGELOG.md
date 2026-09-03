@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-rc.1
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.5...v4.0.0-rc.1)
+
+### 🚀 Enhancements
+
+- Read global rc from xdg config dir ([#328](https://github.com/unjs/c12/pull/328))
+
+### 🔥 Performance
+
+- Load `pkg-types` only when it is needed ([#330](https://github.com/unjs/c12/pull/330))
+
+### 🩹 Fixes
+
+- Install layer deps with `--ignore-workspace` ([#318](https://github.com/unjs/c12/pull/318))
+- Normalize layer `install` option ([72709ac](https://github.com/unjs/c12/commit/72709ac))
+- Parse `.json` configs with `JSON.parse` ([6a4dfc6](https://github.com/unjs/c12/commit/6a4dfc6))
+- Allow trailing commas in `.jsonc` configs ([ef6eb78](https://github.com/unjs/c12/commit/ef6eb78))
+
+### 📖 Documentation
+
+- Document createDefineConfig and $meta ([#327](https://github.com/unjs/c12/pull/327))
+
+### 🏡 Chore
+
+- Update release script ([435d33d](https://github.com/unjs/c12/commit/435d33d))
+- Update deps ([4886c34](https://github.com/unjs/c12/commit/4886c34))
+- Update tsconfig ([c882c22](https://github.com/unjs/c12/commit/c882c22))
+- Update deps ([af745db](https://github.com/unjs/c12/commit/af745db))
+- Update confbox ([fdb1760](https://github.com/unjs/c12/commit/fdb1760))
+- Update lockfile ([ba7551c](https://github.com/unjs/c12/commit/ba7551c))
+- Prepare for rc ([81f7cce](https://github.com/unjs/c12/commit/81f7cce))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Vittorio Esposito <esposito.vittorio@rocketmail.com>
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Lubos ([@mrlubos](https://github.com/mrlubos))
+
 ## v4.0.0-beta.5
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.4...v4.0.0-beta.5)
