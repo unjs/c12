@@ -434,6 +434,68 @@ export default {
 };
 ```
 
+## Typed `defineConfig` helpers
+
+Libraries that expose a typed config file can use [`createDefineConfig`](https://github.com/unjs/c12/blob/main/src/types.ts) to ship a `defineConfig`-style helper for `.ts` configs.
+
+```ts
+import { createDefineConfig, loadConfig } from "c12";
+
+interface MyConfig {
+  apiUrl: string;
+  logLevel?: "info" | "debug" | "error";
+}
+
+interface MyMeta {
+  name?: string;
+  author?: string;
+}
+
+export const defineMyConfig = createDefineConfig<MyConfig, MyMeta>();
+
+// my.config.ts
+export default defineMyConfig({
+  apiUrl: "https://api.example.com",
+  logLevel: "info",
+  $meta: {
+    name: "my-app",
+    author: "acme",
+  },
+  $development: {
+    logLevel: "debug",
+  },
+});
+```
+
+`createDefineConfig` is an identity function at runtime. Its value is TypeScript inference: the returned helper accepts your config keys plus c12 reserved keys (`$meta`, `$development`, `$production`, `$test`, `$env`).
+
+Pass the same generics to `loadConfig` so resolved `config` and `meta` stay typed:
+
+```ts
+const { config, meta } = await loadConfig<MyConfig, MyMeta>({
+  name: "my",
+});
+
+config.apiUrl; // string
+meta?.author; // string | undefined
+```
+
+### `$meta`
+
+`$meta` is a reserved namespace for **layer metadata**, not user-facing options. Use it for values such as layer name, author, repository, or credentials that describe the config layer itself.
+
+c12 reads `$meta` (merged with `sourceOptions.meta` when extending) into the resolved layer's `meta` field and **removes** it from `config`, so it does not mix with regular options.
+
+```ts
+const { config, meta, layers } = await loadConfig<MyConfig, MyMeta>({});
+
+// Regular options live on `config`
+console.log(config.apiUrl);
+
+// Layer metadata lives on `meta` / `layers[].meta`
+console.log(meta?.name);
+```
+
 ## Watching configuration
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
