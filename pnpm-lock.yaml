@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       confbox:
-        specifier: ^0.2.4
-        version: 0.2.4
+        specifier: ^0.3.0
+        version: 0.3.0
       defu:
         specifier: ^6.1.7
         version: 6.1.7
@@ -21,14 +21,14 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       pkg-types:
-        specifier: ^2.3.1
-        version: 2.3.1
+        specifier: ^2.3.2
+        version: 2.3.2
       rc9:
         specifier: ^3.1.0
         version: 3.1.0
     devDependencies:
       '@types/node':
-        specifier: ^26
+        specifier: ^26.4.1
         version: 26.4.1
       '@vitest/coverage-v8':
         specifier: ^4.1.11
@@ -67,7 +67,7 @@ importers:
         specifier: ^2.0.12
         version: 2.0.12
       oxfmt:
-        specifier: '>=0.65.0'
+        specifier: ^0.66.0
         version: 0.66.0
       oxlint:
         specifier: ^1.81.0
@@ -76,7 +76,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
       typescript:
-        specifier: ^7
+        specifier: ^7.0.2
         version: 7.0.2
       vitest:
         specifier: ^4.1.11
@@ -1143,6 +1143,9 @@ packages:
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
 
+  confbox@0.3.0:
+    resolution: {integrity: sha512-kwgXY5w5EWPZLpFhvQBPzkujFZtSgq5PtUCoQwfjqkvu5Qgr0w8ctK5zTHOrGLdxTf/5YJf5D5XBnc2UfTAHVw==}
+
   consola@3.4.2:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
     engines: {node: ^14.18.0 || >=16.10.0}
@@ -1822,6 +1825,9 @@ packages:
 
   pkg-types@2.3.1:
     resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
+
+  pkg-types@2.3.2:
+    resolution: {integrity: sha512-v0sVXzj7oPGysr543YYZLYbcJNJsKikSsp/fFzoxQ12ewY3ZZr7oCPC8y7OlmxfYB3QPvriXmuPD8KZggE1vqg==}
 
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
@@ -2851,7 +2857,7 @@ snapshots:
       exsolve: 1.1.1
       pathe: 2.0.3
       pkg-types: 2.3.1
-      rc9: 3.0.1
+      rc9: 3.1.0
     optionalDependencies:
       chokidar: 5.0.0
       dotenv: 17.4.2
@@ -2906,6 +2912,8 @@ snapshots:
   confbox@0.1.8: {}
 
   confbox@0.2.4: {}
+
+  confbox@0.3.0: {}
 
   consola@3.4.2: {}
 
@@ -3754,6 +3762,12 @@ snapshots:
   pkg-types@2.3.1:
     dependencies:
       confbox: 0.2.4
+      exsolve: 1.1.1
+      pathe: 2.0.3
+
+  pkg-types@2.3.2:
+    dependencies:
+      confbox: 0.3.0
       exsolve: 1.1.1
       pathe: 2.0.3
 

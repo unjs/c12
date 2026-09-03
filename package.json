@@ -24,15 +24,15 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
-    "confbox": "^0.2.4",
+    "confbox": "^0.3.0",
     "defu": "^6.1.7",
     "exsolve": "^1.1.1",
     "pathe": "^2.0.3",
-    "pkg-types": "^2.3.1",
+    "pkg-types": "^2.3.2",
     "rc9": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "^26",
+    "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
@@ -45,10 +45,10 @@
     "magicast": "^0.5.4",
     "obuild": "^0.4.39",
     "ohash": "^2.0.12",
-    "oxfmt": ">=0.65.0",
+    "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",
     "perfect-debounce": "^2.1.0",
-    "typescript": "^7",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
   "peerDependencies": {
