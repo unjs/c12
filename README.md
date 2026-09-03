@@ -15,8 +15,8 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## ✅ Features
 
-- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
-- `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
+- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
+- `.json` config loader with `JSON.parse` and `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with variable interpolation and optional `_FILE` references resolution

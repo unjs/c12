@@ -375,6 +375,15 @@ describe("loader", () => {
     });
   });
 
+  it("loads .json configs without jiti", async () => {
+    const { config, configFile } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/json"),
+    });
+    expect(configFile).toBe(r("./fixture/json/test.config.json"));
+    expect(config).toMatchObject({ loadedFromJSON: true, baseKey: true });
+  });
+
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
     await loadConfig({
       name: "test",
