@@ -24,6 +24,7 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 - Reads config from the nearest `package.json` file
 - [Extends configurations](https://github.com/unjs/c12#extending-configuration) from multiple local or git sources
 - Overwrite with [environment-specific configuration](#environment-specific-configuration)
+- Validate the resolved config with any [Standard Schema](https://standardschema.dev) library (zod, valibot, arktype, ...)
 - Config watcher with auto-reload and HMR support
 - Create or update configuration files with [magicast](https://github.com/unjs/magicast)
 
@@ -264,6 +265,46 @@ You can define a custom function that resolves the config.
 ### `configFileRequired`
 
 If this option is set to `true`, loader fails if the main config file does not exists.
+
+### `schema`
+
+A [Standard Schema](https://standardschema.dev) (zod, valibot, arktype, ...) used to validate the resolved config.
+
+Validation runs **once on the final config**, after all layers, `extends`, environment-specific keys and `defaults`/`overrides` are merged. Individual layers are not validated on their own.
+
+```js
+import { z } from "zod";
+import { loadConfig } from "c12";
+
+const { config } = await loadConfig({
+  name: "app",
+  schema: z.object({
+    port: z.coerce.number().default(3000),
+    host: z.string().default("localhost"),
+  }),
+});
+
+// `config` is typed as `{ port: number; host: string }`
+```
+
+The validated output replaces `config`, so schema defaults, transforms and coercions are applied. This also means unknown keys are handled by **your schema**: most libraries strip them by default. To validate only a part of the config and keep the rest untouched, use a loose object:
+
+```js
+schema: z.looseObject({
+  port: z.coerce.number().default(3000),
+});
+```
+
+If validation fails, `loadConfig` throws an `Error` listing every issue, with the raw issues available on `error.cause`:
+
+```
+Config validation failed (zod):
+  - port: Invalid input: expected number, received string
+```
+
+Async schemas are supported. When used with [`watchConfig`](#watching-configuration), a validation error on reload is logged as a warning and the previously loaded config is kept.
+
+**Note:** When explicit generics are passed (`loadConfig<MyConfig>({ schema })`), the explicit type wins and the schema output is not inferred.
 
 ## Extending configuration
 

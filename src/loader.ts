@@ -20,6 +20,7 @@ import type {
   ConfigSource,
   ConfigFunctionContext,
   StandardSchemaV1,
+  InferSchemaConfig,
 } from "./types.ts";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -52,22 +53,10 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
 ]) as unknown as string[];
 
 export async function loadConfig<
-  MT extends ConfigLayerMeta = ConfigLayerMeta,
-  S extends StandardSchemaV1 = StandardSchemaV1,
->(
-  options: LoadConfigOptions<UserInputConfig, MT, S> & { schema: S },
-): Promise<ResolvedConfig<StandardSchemaV1.InferConfigOutput<S> & UserInputConfig, MT>>;
-
-export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>>;
-
-export async function loadConfig<
-  T extends UserInputConfig = UserInputConfig,
-  MT extends ConfigLayerMeta = ConfigLayerMeta,
-  S extends StandardSchemaV1 = StandardSchemaV1,
->(options: LoadConfigOptions<T, MT, S>): Promise<ResolvedConfig<T, MT>> {
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
+>(options: LoadConfigOptions<T, MT, S>): Promise<ResolvedConfig<InferSchemaConfig<T, S>, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
   options.name = options.name || "config";
@@ -227,27 +216,34 @@ export async function loadConfig<
     throw new Error(`Required config (${r.configFile}) cannot be resolved.`);
   }
 
-  // Validate config
-  if (options.schema) {
-    let result = options.schema["~standard"].validate(r);
-    if (result instanceof Promise) result = await result;
+  // Validate merged config with the (optional) standard schema
+  const schema = options.schema as StandardSchemaV1 | undefined;
+  if (schema) {
+    let result = schema["~standard"].validate(r.config);
+    if (result instanceof Promise) {
+      result = await result;
+    }
     if (result.issues) {
       const messages = result.issues.map((issue) => {
-        const path = issue.path?.map((p) => (typeof p === "object" ? p.key : p)).join(".");
+        const path = issue.path?.map((p) => String(typeof p === "object" ? p.key : p)).join(".");
         return path ? `  - ${path}: ${issue.message}` : `  - ${issue.message}`;
       });
-      throw new Error(`Config validation failed:\n${messages.join("\n")}`);
+      throw new Error(
+        `Config validation failed (${schema["~standard"].vendor}):\n${messages.join("\n")}`,
+        { cause: result.issues },
+      );
     }
+    r.config = result.value as T;
   }
 
   // Return resolved config
-  return r;
+  return r as ResolvedConfig<InferSchemaConfig<T, S>, MT>;
 }
 
 async function extendConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
-  S extends StandardSchemaV1 = StandardSchemaV1,
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
 >(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT, S>) {
   (config as any)._layers = config._layers || [];
   if (!options.extend) {
@@ -308,7 +304,7 @@ const NPM_PACKAGE_RE = /^(@[\da-z~-][\d._a-z~-]*\/)?[\da-z~-][\d._a-z~-]*($|\/.*
 async function resolveConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
-  S extends StandardSchemaV1 = StandardSchemaV1,
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
 >(
   source: string,
   options: LoadConfigOptions<T, MT, S>,

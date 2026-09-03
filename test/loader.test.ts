@@ -1,9 +1,14 @@
 import { execFile } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, expectTypeOf } from "vitest";
 import { normalize } from "pathe";
-import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
+import type {
+  ConfigLayer,
+  ConfigLayerMeta,
+  StandardSchemaV1,
+  UserInputConfig,
+} from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
 import { z } from "zod";
@@ -14,26 +19,6 @@ const r = (path: string) => normalize(fileURLToPath(new URL(path, import.meta.ur
 const transformPaths = (object: object) =>
   JSON.parse(JSON.stringify(object).replaceAll(r("."), "<path>/"));
 
-const ConfigSchema = z.object({
-  defaultConfig: z.boolean().optional(),
-  virtual: z.boolean().optional(),
-  githubLayer: z.boolean().optional(),
-  npmConfig: z.boolean().optional(),
-  devConfig: z.boolean().optional(),
-  baseConfig: z.boolean().optional(),
-  array: z.array(z.string()).optional(),
-  baseEnvConfig: z.boolean().optional(),
-  packageJSON2: z.boolean().optional(),
-  packageJSON: z.boolean().optional(),
-  testConfig: z.boolean().optional(),
-  rcFile: z.boolean().optional(),
-  configFile: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
-  overridden: z.boolean().optional(),
-  enableDefault: z.boolean().optional(),
-  envConfig: z.boolean().optional(),
-  theme: z.string().optional(),
-});
-
 describe("loader", () => {
   it("load fixture config", async () => {
     type UserConfig = Partial<{
@@ -43,10 +28,7 @@ describe("loader", () => {
       defaultConfig: boolean;
       extends: string[];
     }>;
-    const { config, layers } = await loadConfig({
-      schema: z.object({
-        config: ConfigSchema,
-      }),
+    const { config, layers } = await loadConfig<UserConfig>({
       cwd: r("./fixture"),
       name: "test",
       dotenv: {
@@ -400,34 +382,86 @@ describe("loader", () => {
     });
   });
 
-  it("schema validation formats errors", async () => {
-    await expect(
-      loadConfig({
-        schema: z.object({
-          config: z.object({
-            requiredField: z.string(),
-          }),
-        }),
+  describe("schema validation", () => {
+    it("validates the merged config and applies schema output", async () => {
+      const { config } = await loadConfig({
         cwd: r("./fixture"),
         name: "test",
-      }),
-    ).rejects.toThrowError("Config validation failed:");
-  });
-
-  it("schema infers config type", async () => {
-    const { config } = await loadConfig({
-      schema: z.object({
-        config: z.object({
-          configFile: z.union([z.string(), z.boolean()]).optional(),
+        defaults: { port: "3000" },
+        schema: z.looseObject({
+          theme: z.string().transform((value) => value.toUpperCase()),
+          injected: z.string().default("from-schema"),
+          port: z.coerce.number(),
         }),
-      }),
-      cwd: r("./fixture"),
-      name: "test",
+      });
+
+      // Schema defaults, transforms and coercions are applied
+      expect(config.injected).toBe("from-schema");
+      expect(config.theme).toBe("./THEME");
+      expect(config.port).toBe(3000);
+      // Loose schemas keep keys they do not describe
+      expect(config.rcFile).toBe(true);
+      expectTypeOf(config.theme).toEqualTypeOf<string>();
     });
 
-    // Type check: config.configFile should be typed as string | boolean | undefined
-    const _configFile: string | boolean | undefined = config.configFile;
-    expect(_configFile).toBeDefined();
+    it("strips unknown keys with a strict schema", async () => {
+      const { config } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        schema: z.object({ theme: z.string() }),
+      });
+
+      expect(Object.keys(config)).toEqual(["theme"]);
+    });
+
+    it("formats errors and exposes issues as cause", async () => {
+      const promise = loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        schema: z.looseObject({
+          requiredField: z.string(),
+          theme: z.object({ nested: z.number() }),
+        }),
+      });
+
+      await expect(promise).rejects.toThrowError(
+        `Config validation failed (zod):
+  - requiredField: Invalid input: expected string, received undefined
+  - theme: Invalid input: expected object, received string`,
+      );
+      await expect(promise).rejects.toSatisfy(
+        (error: Error) => Array.isArray(error.cause) && error.cause.length === 2,
+      );
+    });
+
+    it("supports async schemas and non-string issue paths", async () => {
+      const asyncSchema = {
+        "~standard": {
+          version: 1,
+          vendor: "custom",
+          validate: async () => ({
+            issues: [{ message: "nope", path: [Symbol("sym"), { key: 0 }] }],
+          }),
+        },
+      } satisfies StandardSchemaV1;
+
+      await expect(
+        loadConfig({ cwd: r("./fixture"), name: "test", schema: asyncSchema }),
+      ).rejects.toThrowError("Config validation failed (custom):\n  - Symbol(sym).0: nope");
+    });
+
+    it("infers config type from the schema", async () => {
+      const { config } = await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        schema: z.looseObject({
+          configFile: z.union([z.string(), z.boolean()]).optional(),
+        }),
+      });
+
+      expectTypeOf(config.configFile).toEqualTypeOf<string | boolean | undefined>();
+      expect(config.configFile).toBeDefined();
+    });
   });
 
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {

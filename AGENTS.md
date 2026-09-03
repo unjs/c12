@@ -40,6 +40,7 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 - **Environment overrides** — `$test`, `$development`, `$production` keys auto-applied based on env
 - **Remote extends** — Config can extend from GitHub/GitLab/npm via `giget`
 - **Dynamic config** — Supports `export default (ctx) => ({ ... })` functions
+- **Standard Schema validation** — Optional `schema` option validates the merged config once (post-merge) and replaces it with the validated output
 - **ESM cache busting** — Native `import()` with incrementing query string `_${++counter}`
 
 ### Core Dependencies

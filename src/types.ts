@@ -104,7 +104,7 @@ export type ResolvableConfig<T extends UserInputConfig = UserInputConfig> =
 export interface LoadConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
-  S extends StandardSchemaV1 = StandardSchemaV1,
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
 > {
   name?: string;
   cwd?: string;
@@ -156,6 +156,16 @@ export interface LoadConfigOptions<
 
   configFileRequired?: boolean;
 
+  /**
+   * [Standard Schema](https://standardschema.dev) used to validate the merged config.
+   *
+   * Validation runs once on the final config, after all layers are merged, and the validated
+   * output replaces `config` so that schema defaults and transforms are applied.
+   *
+   * Keys the schema does not describe are handled by the schema itself. Most libraries strip
+   * them, so use a loose object (`z.looseObject()`, `v.looseObject()`, ...) to validate only
+   * a part of the config and keep the rest as-is.
+   */
   schema?: S;
 }
 
@@ -180,7 +190,6 @@ export interface StandardSchemaV1<Input = unknown, Output = Input> {
   readonly "~standard": StandardSchemaV1.Props<Input, Output>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace StandardSchemaV1 {
   /** The Standard Schema properties interface. */
   export interface Props<Input = unknown, Output = Input> {
@@ -242,10 +251,14 @@ export declare namespace StandardSchemaV1 {
   export type InferOutput<Schema extends StandardSchemaV1> = NonNullable<
     Schema["~standard"]["types"]
   >["output"];
-
-  /** Extracts the `config` property type from a schema's output type. */
-  export type InferConfigOutput<Schema extends StandardSchemaV1> =
-    InferOutput<Schema> extends { config: infer C } ? C : never;
-
-  // biome-ignore lint/complexity/noUselessEmptyExport: needed for granular visibility control of TS namespace
 }
+
+/**
+ * Config type resolved from `schema`, falling back to `T` when no schema is inferred.
+ *
+ * The check is intentionally non-distributive so that explicit generics
+ * (`loadConfig<MyConfig>({ schema })`) keep `T` instead of resolving to the schema output.
+ */
+export type InferSchemaConfig<T extends UserInputConfig, S> = [S] extends [StandardSchemaV1]
+  ? StandardSchemaV1.InferOutput<S> & UserInputConfig
+  : T;

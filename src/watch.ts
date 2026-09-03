@@ -7,6 +7,8 @@ import type {
   ConfigLayerMeta,
   ResolvedConfig,
   LoadConfigOptions,
+  StandardSchemaV1,
+  InferSchemaConfig,
 } from "./types.ts";
 import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader.ts";
 
@@ -23,7 +25,8 @@ export type ConfigWatcher<
 export interface WatchConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
-> extends LoadConfigOptions<T, MT> {
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
+> extends LoadConfigOptions<T, MT, S> {
   chokidarOptions?: ChokidarOptions;
   debounce?: false | number;
 
@@ -34,14 +37,14 @@ export interface WatchConfigOptions<
 
   acceptHMR?: (context: {
     getDiff: () => DiffEntries;
-    newConfig: ResolvedConfig<T, MT>;
-    oldConfig: ResolvedConfig<T, MT>;
+    newConfig: ResolvedConfig<InferSchemaConfig<T, S>, MT>;
+    oldConfig: ResolvedConfig<InferSchemaConfig<T, S>, MT>;
   }) => void | boolean | Promise<void | boolean>;
 
   onUpdate?: (context: {
     getDiff: () => ReturnType<typeof diff>;
-    newConfig: ResolvedConfig<T, MT>;
-    oldConfig: ResolvedConfig<T, MT>;
+    newConfig: ResolvedConfig<InferSchemaConfig<T, S>, MT>;
+    oldConfig: ResolvedConfig<InferSchemaConfig<T, S>, MT>;
   }) => void | Promise<void>;
 }
 
@@ -54,8 +57,11 @@ const eventMap = {
 export async function watchConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(options: WatchConfigOptions<T, MT>): Promise<ConfigWatcher<T, MT>> {
-  let config = await loadConfig<T, MT>(options);
+  S extends StandardSchemaV1 | undefined = StandardSchemaV1 | undefined,
+>(options: WatchConfigOptions<T, MT, S>): Promise<ConfigWatcher<InferSchemaConfig<T, S>, MT>> {
+  type C = InferSchemaConfig<T, S>;
+
+  let config = await loadConfig<T, MT, S>(options);
 
   const configName = options.name || "config";
   const configFileName =
@@ -103,8 +109,9 @@ export async function watchConfig<
     }
     const oldConfig = config;
     try {
-      config = await loadConfig(options);
+      config = await loadConfig<T, MT, S>(options);
     } catch (error) {
+      // Includes schema validation errors: previous config is kept
       console.warn(`Failed to load config ${path}\n${error}`);
       return;
     }
@@ -130,19 +137,19 @@ export async function watchConfig<
     _fswatcher.on("all", debounce(onChange, options.debounce ?? 100));
   }
 
-  const utils: Partial<ConfigWatcher<T, MT>> = {
+  const utils: Partial<ConfigWatcher<C, MT>> = {
     watchingFiles,
     unwatch: async () => {
       await _fswatcher.close();
     },
   };
 
-  return new Proxy<ConfigWatcher<T, MT>>(utils as ConfigWatcher<T, MT>, {
+  return new Proxy<ConfigWatcher<C, MT>>(utils as ConfigWatcher<C, MT>, {
     get(_, prop) {
       if (prop in utils) {
         return utils[prop as keyof typeof utils];
       }
-      return config[prop as keyof ResolvedConfig<T, MT>];
+      return config[prop as keyof ResolvedConfig<C, MT>];
     },
   });
 }
