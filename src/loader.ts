@@ -390,7 +390,7 @@ async function resolveConfig<
   if (configFileExt in ASYNC_LOADERS && !useCustomImport) {
     const asyncLoader = await ASYNC_LOADERS[configFileExt as keyof typeof ASYNC_LOADERS]();
     const contents = await readFile(res.configFile!, "utf8");
-    res.config = _parseConfig(asyncLoader, contents, res.configFile!);
+    res.config = _parseConfig({ parse: asyncLoader, contents, configFile: res.configFile! });
   } else {
     const _resolveModule = options.resolveModule || ((mod: any) => mod.default || mod);
     if (options.import) {
@@ -477,11 +477,23 @@ function _isDirectory(path: string): boolean | null {
 }
 
 /** Parse a config file's contents, adding the file path to any parse error. */
-function _parseConfig(parse: (source: string) => any, contents: string, configFile: string) {
+function _parseConfig({
+  parse,
+  contents,
+  configFile,
+}: {
+  parse: (source: string) => any;
+  contents: string;
+  configFile: string;
+}) {
+  // Strip UTF-8 BOM, which `JSON.parse` (and some confbox parsers) reject
+  const source = contents.replace(/^\uFEFF/, "");
+  if (!source.trim()) {
+    return {};
+  }
   let parsed: any;
   try {
-    // Strip UTF-8 BOM, which `JSON.parse` (and some confbox parsers) reject
-    parsed = parse(contents.replace(/^\uFEFF/, ""));
+    parsed = parse(source);
   } catch (error: any) {
     throw new Error(`Failed to load config file \`${configFile}\`: ${error?.message}`, {
       cause: error,

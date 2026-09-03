@@ -487,6 +487,11 @@ describe("loader", () => {
     expect(config).toEqual({ bomKey: true });
   });
 
+  it("loads empty JSON configs as empty objects", async () => {
+    const { config } = await loadConfig({ cwd: r("./fixture/json-empty"), name: "test" });
+    expect(config).toEqual({});
+  });
+
   it("reports the config file path for invalid JSON", async () => {
     await expect(loadConfig({ cwd: r("./fixture/json-broken"), name: "test" })).rejects.toThrow(
       /json-broken[/\\]test\.config\.json/,
