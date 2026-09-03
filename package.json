@@ -24,7 +24,7 @@
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
-    "confbox": "^0.3.0",
+    "confbox": "^0.3.1",
     "defu": "^6.1.7",
     "exsolve": "^1.1.1",
     "pathe": "^2.0.3",
