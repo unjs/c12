@@ -29,7 +29,11 @@ const ASYNC_LOADERS = {
   ".json": () => JSON.parse,
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
-  ".jsonc": () => import("confbox/jsonc").then((r) => r.parseJSONC),
+  // `allowTrailingComma` defaults to false since confbox v0.3 (jsonc-parser -> strip-json-comments)
+  ".jsonc": () =>
+    import("confbox/jsonc").then(
+      (r) => (source: string) => r.parseJSONC(source, { allowTrailingComma: true }),
+    ),
   ".json5": () => import("confbox/json5").then((r) => r.parseJSON5),
   ".toml": () => import("confbox/toml").then((r) => r.parseTOML),
 } as const;
