@@ -54,7 +54,7 @@
   "peerDependencies": {
     "chokidar": "^5",
     "dotenv": "*",
-    "giget": ">=3.1.0",
+    "giget": ">=3.3.1",
     "jiti": "*",
     "magicast": "*"
   },
@@ -75,5 +75,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@11.25.0"
 }
