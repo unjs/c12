@@ -219,7 +219,7 @@ export async function loadConfig<
   }
 
   // Return resolved config
-  return r;
+  return (await options.onResolved?.(r)) ?? r;
 }
 
 async function extendConfig<
