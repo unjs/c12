@@ -20,11 +20,24 @@ export interface DotenvOptions {
   /**
    * Whether to interpolate variables within .env.
    *
+   * Enabled by default through `loadConfig` and `setupDotenv`, but must be set explicitly
+   * when calling `loadDotenv` directly.
+   *
+   * Supported syntax is `$VAR`, `${VAR}` and `\${VAR}` (escaped, resolves to a literal `${VAR}`).
+   *
+   * Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is
+   * unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can
+   * themselves contain interpolations.
+   *
+   * A reference that cannot be resolved is kept as-is rather than replaced with an empty value.
+   *
    * @example
    * ```env
    * BASE_DIR="/test"
    * # resolves to "/test/further"
    * ANOTHER_DIR="${BASE_DIR}/further"
+   * # resolves to "/test/fallback" when UNSET_DIR is unset or empty
+   * FALLBACK_DIR="${UNSET_DIR:-${BASE_DIR}/fallback}"
    * ```
    */
   interpolate?: boolean;
@@ -177,45 +190,153 @@ function interpolate(
     if (typeof value !== "string") {
       return value;
     }
-    const matches: string[] = value.match(/(.?\${?(?:[\w:]+)?}?)/g) || [];
-    return parse(
-      // eslint-disable-next-line unicorn/no-array-reduce
-      matches.reduce((newValue, match) => {
-        const parts = /(.?)\${?([\w:]+)?}?/g.exec(match) || [];
-        const prefix = parts[1]!;
 
-        let value, replacePart: string;
+    let result = "";
+    let index = 0;
 
-        if (prefix === "\\") {
-          replacePart = parts[0] || "";
-          value = replacePart.replace(String.raw`\$`, "$");
-        } else {
-          const key = parts[2]!;
-          replacePart = (parts[0] || "").slice(prefix.length);
+    while (index < value.length) {
+      const char = value[index];
 
-          // Avoid recursion
-          if (parents.includes(key)) {
-            console.warn(
-              `Please avoid recursive environment variables ( loop: ${parents.join(
-                " > ",
-              )} > ${key} )`,
-            );
-            return "";
-          }
+      // `\$` escapes to a literal `$`
+      if (char === "\\" && value[index + 1] === "$") {
+        result += "$";
+        index += 2;
+        continue;
+      }
 
-          value = getValue(key);
+      const ref = char === "$" ? parseRef(value, index) : undefined;
+      if (!ref) {
+        result += char;
+        index++;
+        continue;
+      }
 
-          // Resolve recursive interpolations
-          value = interpolate(value, [...parents, key]);
+      // Avoid recursion
+      if (parents.includes(ref.key)) {
+        // A self reference guarded by a default (`${VAR:-default}`) is not a loop
+        if (ref.defaultValue !== undefined) {
+          result += interpolate(ref.defaultValue, parents);
+          index = ref.end;
+          continue;
         }
+        console.warn(
+          `Please avoid recursive environment variables ( loop: ${parents.join(
+            " > ",
+          )} > ${ref.key} )`,
+        );
+        return "";
+      }
 
-        return value === undefined ? newValue : newValue.replace(replacePart, value);
-      }, value),
-    );
+      // Resolve recursive interpolations
+      let resolved = interpolate(getValue(ref.key), [...parents, ref.key]);
+
+      // Fallback to the default value (`${VAR:-default}` or `${VAR-default}`)
+      if (
+        ref.defaultValue !== undefined &&
+        (resolved === undefined || (ref.operator === ":-" && resolved === ""))
+      ) {
+        resolved = interpolate(ref.defaultValue, parents);
+      }
+
+      // Unresolvable references are kept as-is
+      result += resolved === undefined ? value.slice(index, ref.end) : resolved;
+      index = ref.end;
+    }
+
+    return parse(result);
   }
 
   for (const key in target) {
     target[key] = interpolate(getValue(key));
+  }
+}
+
+interface EnvRef {
+  /** Referenced variable name. */
+  key: string;
+  /** Index right after the reference. */
+  end: number;
+  /** Default value operator (`:-` also applies to empty values). */
+  operator?: "-" | ":-";
+  /** Raw (not yet interpolated) default value. */
+  defaultValue?: string;
+}
+
+const REF_NAME_RE = /[\w:]+/y;
+
+/** Parse a `$VAR`, `${VAR}`, `${VAR:-default}` or `${VAR-default}` reference starting at `start`. */
+function parseRef(input: string, start: number): EnvRef | undefined {
+  let index = start + 1; /* skip `$` */
+  const braced = input[index] === "{";
+  if (braced) {
+    index++;
+  }
+
+  REF_NAME_RE.lastIndex = index;
+  const name = REF_NAME_RE.exec(input);
+  if (!name) {
+    return;
+  }
+  let key = name[0];
+  index = REF_NAME_RE.lastIndex;
+
+  // `$VAR` (defaults are only supported within braces)
+  if (!braced) {
+    return { key, end: index };
+  }
+
+  // `${VAR}`
+  if (input[index] === "}") {
+    return { key, end: index + 1 };
+  }
+
+  // `${VAR:-default}` and `${VAR-default}`
+  if (input[index] === "-") {
+    let operator: EnvRef["operator"] = "-";
+    if (key.endsWith(":")) {
+      key = key.slice(0, -1);
+      operator = ":-";
+    }
+    const defaultValue = key ? readDefault(input, index + 1) : undefined;
+    if (!defaultValue) {
+      return;
+    }
+    return { key, operator, defaultValue: defaultValue.value, end: defaultValue.end };
+  }
+
+  // Unterminated `${VAR`
+  return { key, end: index };
+}
+
+/** Read a default value up to the (nesting aware) closing brace. */
+function readDefault(input: string, start: number): { value: string; end: number } | undefined {
+  let value = "";
+  let depth = 1;
+  for (let index = start; index < input.length; index++) {
+    const char = input[index];
+    if (char === "\\" && index + 1 < input.length) {
+      const next = input[index + 1]!;
+      // `\{` and `\}` escape braces here, `\$` is preserved for the interpolator
+      value += next === "{" || next === "}" ? next : char + next;
+      index++;
+      continue;
+    }
+    if (char === "$" && input[index + 1] === "{") {
+      depth++;
+      value += "${";
+      index++;
+      continue;
+    }
+    if (char === "{") {
+      depth++;
+    }
+    if (char === "}") {
+      depth--;
+      if (depth === 0) {
+        return { value, end: index + 1 };
+      }
+    }
+    value += char;
   }
 }
 

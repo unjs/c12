@@ -147,6 +147,23 @@ console.log(config.config.connectionPoolMax); // "10"
 console.log(config.config.databaseURL); // "<...localhost...>"
 ```
 
+#### `interpolate`
+
+Enabled by default. Variables within `.env` files are interpolated using `$VAR` or `${VAR}` syntax (use `\${VAR}` to escape). Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can themselves contain interpolations. A reference that cannot be resolved is kept as-is rather than replaced with an empty value. Set to `false` to disable.
+
+```ini
+# .env
+BASE_DIR="/test"
+# "/test/further"
+ANOTHER_DIR="${BASE_DIR}/further"
+# "/test/fallback" when CACHE_DIR_INPUT is unset or empty
+CACHE_DIR="${CACHE_DIR_INPUT:-${BASE_DIR}/fallback}"
+# "info" when LOG_LEVEL_INPUT is unset (an empty value is kept as-is)
+LOG_LEVEL="${LOG_LEVEL_INPUT-info}"
+# kept as the literal "${UNKNOWN}" since it cannot be resolved
+UNRESOLVED="${UNKNOWN}"
+```
+
 #### `expandFileReferences`
 
 Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable.
