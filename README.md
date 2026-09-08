@@ -149,7 +149,7 @@ console.log(config.config.databaseURL); // "<...localhost...>"
 
 #### `interpolate`
 
-Enabled by default. Variables within `.env` files are interpolated using `$VAR` or `${VAR}` syntax (use `\${VAR}` to escape). Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can themselves contain interpolations. Set to `false` to disable.
+Enabled by default. Variables within `.env` files are interpolated using `$VAR` or `${VAR}` syntax (use `\${VAR}` to escape). Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can themselves contain interpolations. A reference that cannot be resolved is kept as-is rather than replaced with an empty value. Set to `false` to disable.
 
 ```ini
 # .env
@@ -160,6 +160,8 @@ ANOTHER_DIR="${BASE_DIR}/further"
 CACHE_DIR="${CACHE_DIR_INPUT:-${BASE_DIR}/fallback}"
 # "info" when LOG_LEVEL_INPUT is unset (an empty value is kept as-is)
 LOG_LEVEL="${LOG_LEVEL_INPUT-info}"
+# kept as the literal "${UNKNOWN}" since it cannot be resolved
+UNRESOLVED="${UNKNOWN}"
 ```
 
 #### `expandFileReferences`

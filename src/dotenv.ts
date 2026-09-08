@@ -20,11 +20,16 @@ export interface DotenvOptions {
   /**
    * Whether to interpolate variables within .env.
    *
+   * Enabled by default through `loadConfig` and `setupDotenv`, but must be set explicitly
+   * when calling `loadDotenv` directly.
+   *
    * Supported syntax is `$VAR`, `${VAR}` and `\${VAR}` (escaped, resolves to a literal `${VAR}`).
    *
    * Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is
    * unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can
    * themselves contain interpolations.
+   *
+   * A reference that cannot be resolved is kept as-is rather than replaced with an empty value.
    *
    * @example
    * ```env
@@ -208,6 +213,12 @@ function interpolate(
 
       // Avoid recursion
       if (parents.includes(ref.key)) {
+        // A self reference guarded by a default (`${VAR:-default}`) is not a loop
+        if (ref.defaultValue !== undefined) {
+          result += interpolate(ref.defaultValue, parents);
+          index = ref.end;
+          continue;
+        }
         console.warn(
           `Please avoid recursive environment variables ( loop: ${parents.join(
             " > ",
@@ -304,7 +315,9 @@ function readDefault(input: string, start: number): { value: string; end: number
   for (let index = start; index < input.length; index++) {
     const char = input[index];
     if (char === "\\" && index + 1 < input.length) {
-      value += char + input[index + 1];
+      const next = input[index + 1]!;
+      // `\{` and `\}` escape braces here, `\$` is preserved for the interpolator
+      value += next === "{" || next === "}" ? next : char + next;
       index++;
       continue;
     }
@@ -313,6 +326,9 @@ function readDefault(input: string, start: number): { value: string; end: number
       value += "${";
       index++;
       continue;
+    }
+    if (char === "{") {
+      depth++;
     }
     if (char === "}") {
       depth--;

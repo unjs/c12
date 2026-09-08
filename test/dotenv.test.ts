@@ -262,12 +262,110 @@ describe("dotenv interpolation", () => {
     `);
   });
 
+  it("supports `:` within variable names", async () => {
+    expect(
+      await loadEnv(
+        ["COLON=${a:b:-c}", "TRAILING_COLON=${a::-b}", "IN_DEFAULT=${UNSET:-:b}"].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "COLON": "c",
+        "IN_DEFAULT": ":b",
+        "TRAILING_COLON": "b",
+      }
+    `);
+  });
+
+  it("supports braces within default values", async () => {
+    expect(
+      await loadEnv(
+        ["BARE='${UNSET:-{a}b}'", "JSON='${UNSET:-{\"j\":1}}'", "ESCAPED='${UNSET:-a\\}b}'"].join(
+          "\n",
+        ),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "BARE": "{a}b",
+        "ESCAPED": "a}b",
+        "JSON": "{"j":1}",
+      }
+    `);
+  });
+
+  it("keeps degenerate references as-is", async () => {
+    expect(
+      await loadEnv(
+        [
+          "SET=value",
+          "UNTERMINATED=${SET:-",
+          "EMPTY_REF=${}",
+          "NO_KEY=${:-x}",
+          "LONE_DOLLAR=$",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "EMPTY_REF": "\${}",
+        "LONE_DOLLAR": "$",
+        "NO_KEY": "\${:-x}",
+        "SET": "value",
+        "UNTERMINATED": "\${SET:-",
+      }
+    `);
+  });
+
+  it("does not mangle `$` replacement patterns within values", async () => {
+    expect(await loadEnv(["AMP=$&", "REF=${AMP}", "BASE_DIR=/test", "STRAY=$BASE_DIR}"].join("\n")))
+      .toMatchInlineSnapshot(`
+      {
+        "AMP": "$&",
+        "BASE_DIR": "/test",
+        "REF": "$&",
+        "STRAY": "/test}",
+      }
+    `);
+  });
+
+  it("does not warn for self references guarded by a default", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(
+      await loadEnv(
+        [
+          "PORT=${PORT-3000}",
+          "LOG_LEVEL=${LOG_LEVEL:-info}",
+          "NESTED=${NESTED:-${NESTED:-x}}",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "LOG_LEVEL": "info",
+        "NESTED": "x",
+        "PORT": "3000",
+      }
+    `);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it("warns and resolves to an empty value for recursive variables", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     expect(await loadEnv(["A=${B}", "B=${A}"].join("\n"))).toMatchInlineSnapshot(`
       {
         "A": "",
         "B": "",
+      }
+    `);
+    expect(warn).toHaveBeenCalledWith(
+      "Please avoid recursive environment variables ( loop: B > A > B )",
+    );
+    warn.mockRestore();
+  });
+
+  it("warns for recursive variables reached through a default value", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(await loadEnv(["A=${B:-${A}}"].join("\n"))).toMatchInlineSnapshot(`
+      {
+        "A": "",
       }
     `);
     expect(warn).toHaveBeenCalled();
