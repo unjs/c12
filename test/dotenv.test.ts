@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
-import { beforeEach, expect, it, describe, afterAll } from "vitest";
+import { beforeEach, expect, it, describe, afterAll, vi } from "vitest";
 import { join, normalize } from "pathe";
 import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
-import { setupDotenv } from "../src/index.ts";
+import { loadDotenv, setupDotenv } from "../src/index.ts";
 
 const tmpDir = normalize(fileURLToPath(new URL(".tmp-dotenv", import.meta.url)));
 const r = (path: string) => join(tmpDir, path);
@@ -86,5 +86,191 @@ describe("update config file", () => {
 
     delete process.env.TEST_SECRET;
     delete process.env.TEST_SECRET_FILE;
+  });
+});
+
+const interpolateDir = normalize(
+  fileURLToPath(new URL(".tmp-dotenv-interpolate", import.meta.url)),
+);
+
+describe("dotenv interpolation", () => {
+  beforeEach(async () => {
+    await rm(interpolateDir, { recursive: true, force: true }).catch(() => {});
+    await mkdir(interpolateDir, { recursive: true });
+  });
+  afterAll(async () => {
+    await rm(interpolateDir, { recursive: true, force: true }).catch(() => {});
+  });
+
+  const loadEnv = async (contents: string) => {
+    await writeFile(join(interpolateDir, ".env"), contents);
+    const env = await loadDotenv({
+      cwd: interpolateDir,
+      env: {},
+      interpolate: true,
+    });
+    return { ...env };
+  };
+
+  it("resolves `${VAR}` and `$VAR`", async () => {
+    expect(
+      await loadEnv(
+        [
+          "BASE_DIR=/test",
+          "BRACED=${BASE_DIR}/further",
+          "PLAIN=$BASE_DIR/further",
+          "MIXED=${BASE_DIR}:$BASE_DIR",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "BASE_DIR": "/test",
+        "BRACED": "/test/further",
+        "MIXED": "/test:/test",
+        "PLAIN": "/test/further",
+      }
+    `);
+  });
+
+  it("keeps unresolvable references as-is", async () => {
+    expect(await loadEnv(["BRACED=${UNSET}", "PLAIN=$UNSET"].join("\n"))).toMatchInlineSnapshot(`
+      {
+        "BRACED": "\${UNSET}",
+        "PLAIN": "$UNSET",
+      }
+    `);
+  });
+
+  it("supports escaping with `\\$`", async () => {
+    expect(
+      await loadEnv(
+        ["BASE_DIR=/test", String.raw`BRACED=\${BASE_DIR}`, String.raw`PLAIN=\$BASE_DIR`].join(
+          "\n",
+        ),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "BASE_DIR": "/test",
+        "BRACED": "\${BASE_DIR}",
+        "PLAIN": "$BASE_DIR",
+      }
+    `);
+  });
+
+  it("supports `${VAR:-default}` (unset or empty)", async () => {
+    expect(
+      await loadEnv(
+        [
+          "SET=value",
+          "EMPTY=",
+          "FROM_SET=${SET:-fallback}",
+          "FROM_EMPTY=${EMPTY:-fallback}",
+          "FROM_UNSET=${UNSET:-fallback}",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "EMPTY": "",
+        "FROM_EMPTY": "fallback",
+        "FROM_SET": "value",
+        "FROM_UNSET": "fallback",
+        "SET": "value",
+      }
+    `);
+  });
+
+  it("supports `${VAR-default}` (unset only)", async () => {
+    expect(
+      await loadEnv(
+        [
+          "SET=value",
+          "EMPTY=",
+          "FROM_SET=${SET-fallback}",
+          "FROM_EMPTY=${EMPTY-fallback}",
+          "FROM_UNSET=${UNSET-fallback}",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "EMPTY": "",
+        "FROM_EMPTY": "",
+        "FROM_SET": "value",
+        "FROM_UNSET": "fallback",
+        "SET": "value",
+      }
+    `);
+  });
+
+  it("supports empty default values", async () => {
+    expect(await loadEnv(["EMPTY=", "A=${UNSET:-}", "B=${EMPTY:-}", "C=${UNSET-}"].join("\n")))
+      .toMatchInlineSnapshot(`
+      {
+        "A": "",
+        "B": "",
+        "C": "",
+        "EMPTY": "",
+      }
+    `);
+  });
+
+  it("supports nested default values", async () => {
+    expect(
+      await loadEnv(
+        [
+          "BASE_DIR=/test",
+          "NESTED=${UNSET:-${BASE_DIR}/nested}",
+          "NESTED_DEFAULT=${UNSET:-${ALSO_UNSET:-deep}}",
+          "NESTED_MISSING=${UNSET:-${ALSO_UNSET}}",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "BASE_DIR": "/test",
+        "NESTED": "/test/nested",
+        "NESTED_DEFAULT": "deep",
+        "NESTED_MISSING": "\${ALSO_UNSET}",
+      }
+    `);
+  });
+
+  it("supports special characters within default values", async () => {
+    expect(
+      await loadEnv(
+        [
+          "URL='${UNSET:-https://example.com/a b.c}'",
+          "PRICE='${UNSET:-$5.00}'",
+          "COLON='${UNSET:-a:b:c}'",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "COLON": "a:b:c",
+        "PRICE": "$5.00",
+        "URL": "https://example.com/a b.c",
+      }
+    `);
+  });
+
+  it("only supports default values within braces", async () => {
+    expect(await loadEnv(["NAME=c12", "SET=$NAME-suffix", "UNSET=$UNKNOWN-suffix"].join("\n")))
+      .toMatchInlineSnapshot(`
+      {
+        "NAME": "c12",
+        "SET": "c12-suffix",
+        "UNSET": "$UNKNOWN-suffix",
+      }
+    `);
+  });
+
+  it("warns and resolves to an empty value for recursive variables", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(await loadEnv(["A=${B}", "B=${A}"].join("\n"))).toMatchInlineSnapshot(`
+      {
+        "A": "",
+        "B": "",
+      }
+    `);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
