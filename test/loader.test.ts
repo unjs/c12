@@ -306,6 +306,33 @@ describe("loader", () => {
     `);
   });
 
+  it("calls onResolved with the resolved result", async () => {
+    type Config = {
+      extends?: string[];
+      nested?: { value: string; transformed?: boolean };
+    };
+    const { config, layers } = await loadConfig<Config>({
+      cwd: r("./fixture/new_dir"),
+      name: "missing",
+      rcFile: false,
+      overrides: { extends: ["virtual"] },
+      resolve: (source) =>
+        source === "virtual" ? { source, config: { nested: { value: "layer" } } } : undefined,
+      onResolved: async (resolved) => ({
+        ...resolved,
+        config: {
+          ...resolved.config,
+          nested: { ...resolved.config.nested!, transformed: true },
+        },
+      }),
+    });
+    const layer = layers!.find((layer) => layer.source === "virtual")!;
+
+    expect(config.nested).toEqual({ value: "layer", transformed: true });
+    expect(layer.config!.nested).toEqual({ value: "layer" });
+    expect(config.nested).not.toBe(layer.config!.nested);
+  });
+
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       name: "test",
