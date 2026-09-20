@@ -276,6 +276,32 @@ describe("dotenv interpolation", () => {
     `);
   });
 
+  it("stops an unbraced `$VAR` at a `:`", async () => {
+    expect(
+      await loadEnv(
+        [
+          "HOST=localhost",
+          "PORT=5432",
+          "USER=admin",
+          "PASSWORD=secret",
+          "ADDR=$HOST:$PORT",
+          "DATABASE_URL=postgres://$USER:$PASSWORD@$HOST:$PORT/app",
+          "TRAILING=$HOST:",
+        ].join("\n"),
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        "ADDR": "localhost:5432",
+        "DATABASE_URL": "postgres://admin:secret@localhost:5432/app",
+        "HOST": "localhost",
+        "PASSWORD": "secret",
+        "PORT": "5432",
+        "TRAILING": "localhost:",
+        "USER": "admin",
+      }
+    `);
+  });
+
   it("supports braces within default values", async () => {
     expect(
       await loadEnv(
