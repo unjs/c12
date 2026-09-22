@@ -25,6 +25,9 @@ export interface DotenvOptions {
    *
    * Supported syntax is `$VAR`, `${VAR}` and `\${VAR}` (escaped, resolves to a literal `${VAR}`).
    *
+   * An unbraced `$VAR` ends at the first character that is not a word character, so `$HOST:$PORT`
+   * resolves both references. Use braces (`${VAR}`) for names that contain a `:`.
+   *
    * Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is
    * unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can
    * themselves contain interpolations.
@@ -281,7 +284,10 @@ interface EnvRef {
   defaultValue?: string;
 }
 
-const REF_NAME_RE = /[\w:]+/y;
+const REF_NAME_RE = /\w+/y;
+// `:` is only part of a name within braces, where `}` still delimits the reference.
+// Outside of braces it commonly follows a reference (`$HOST:$PORT`) instead.
+const BRACED_REF_NAME_RE = /[\w:]+/y;
 
 /** Parse a `$VAR`, `${VAR}`, `${VAR:-default}` or `${VAR-default}` reference starting at `start`. */
 function parseRef(input: string, start: number): EnvRef | undefined {
@@ -291,13 +297,14 @@ function parseRef(input: string, start: number): EnvRef | undefined {
     index++;
   }
 
-  REF_NAME_RE.lastIndex = index;
-  const name = REF_NAME_RE.exec(input);
+  const nameRe = braced ? BRACED_REF_NAME_RE : REF_NAME_RE;
+  nameRe.lastIndex = index;
+  const name = nameRe.exec(input);
   if (!name) {
     return;
   }
   let key = name[0];
-  index = REF_NAME_RE.lastIndex;
+  index = nameRe.lastIndex;
 
   // `$VAR` (defaults are only supported within braces)
   if (!braced) {
