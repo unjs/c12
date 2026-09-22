@@ -28,11 +28,11 @@
     "defu": "^6.1.7",
     "exsolve": "^1.1.1",
     "pathe": "^2.0.3",
-    "pkg-types": "^2.3.2",
+    "pkg-types": "^2.3.3",
     "rc9": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.2",
     "@vitest/coverage-v8": "^4.1.11",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
@@ -42,11 +42,11 @@
     "expect-type": "^1.4.0",
     "giget": "^3.3.1",
     "jiti": "^2.7.0",
-    "magicast": "^0.5.4",
-    "obuild": "^0.4.39",
+    "magicast": "^0.5.5",
+    "obuild": "^0.4.40",
     "ohash": "^2.0.12",
-    "oxfmt": "^0.66.0",
-    "oxlint": "^1.81.0",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.83.0",
     "perfect-debounce": "^2.1.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
@@ -54,7 +54,7 @@
   "peerDependencies": {
     "chokidar": "^5",
     "dotenv": "*",
-    "giget": ">=3.1.0",
+    "giget": ">=3.3.1",
     "jiti": "*",
     "magicast": "*"
   },
@@ -75,5 +75,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@11.27.0"
 }
