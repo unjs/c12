@@ -154,6 +154,13 @@ export interface LoadConfigOptions<
 
   merger?: (...sources: Array<T | null | undefined>) => T;
 
+  /**
+   * Custom merger used to apply environment-specific overrides (`$<envName>` and `$env.<envName>`) onto the config.
+   *
+   * Defaults to `merger` (or `defu`).
+   */
+  envMerger?: (...sources: Array<T | null | undefined>) => T;
+
   extend?:
     | false
     | {

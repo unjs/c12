@@ -443,7 +443,8 @@ async function resolveConfig<
     .flatMap((envName) => [res.config!.$env?.[envName], res.config!["$" + envName]])
     .filter((c) => c && Object.keys(c).length > 0);
   if (envConfigs.length > 0) {
-    res.config = _merger({} as T, ...envConfigs, res.config) as T;
+    const _envMerger = options.envMerger || _merger;
+    res.config = _envMerger({} as T, ...envConfigs, res.config) as T;
   }
 
   // Meta
