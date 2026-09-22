@@ -43,8 +43,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
+        specifier: ^18.0.1
+        version: 18.0.1
       eslint-config-unjs:
         specifier: ^0.6.2
         version: 0.6.2(eslint@10.9.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@7.0.2)
@@ -62,7 +62,7 @@ importers:
         version: 0.5.4
       obuild:
         specifier: ^0.4.39
-        version: 0.4.39(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)(typescript@7.0.2)
+        version: 0.4.39(chokidar@5.0.0)(dotenv@18.0.1)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)(typescript@7.0.2)
       ohash:
         specifier: ^2.0.12
         version: 2.0.12
@@ -1215,6 +1215,11 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
+
+  dotenv@18.0.1:
+    resolution: {integrity: sha512-0eR4m4D/jH5eaI3evo2ZqqMii5mrTCR12v12VChdie6O1gPHs7XAjzTep0CWc1Bd+oNx3vVfbi734dK4zghigw==}
+    engines: {node: '>=12'}
+    hasBin: true
 
   dts-resolver@3.0.0:
     resolution: {integrity: sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q==}
@@ -2844,7 +2849,7 @@ snapshots:
       jiti: 2.7.0
       magicast: 0.5.4
 
-  c12@4.0.0-beta.5(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4):
+  c12@4.0.0-beta.5(chokidar@5.0.0)(dotenv@18.0.1)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4):
     dependencies:
       confbox: 0.2.4
       defu: 6.1.7
@@ -2854,7 +2859,7 @@ snapshots:
       rc9: 3.1.0
     optionalDependencies:
       chokidar: 5.0.0
-      dotenv: 17.4.2
+      dotenv: 18.0.1
       giget: 3.3.1
       jiti: 2.7.0
       magicast: 0.5.4
@@ -2965,6 +2970,8 @@ snapshots:
       lodash.deburr: 4.1.0
 
   dotenv@17.4.2: {}
+
+  dotenv@18.0.1: {}
 
   dts-resolver@3.0.0: {}
 
@@ -3634,9 +3641,9 @@ snapshots:
 
   obug@2.1.4: {}
 
-  obuild@0.4.39(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)(typescript@7.0.2):
+  obuild@0.4.39(chokidar@5.0.0)(dotenv@18.0.1)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)(typescript@7.0.2):
     dependencies:
-      c12: 4.0.0-beta.5(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)
+      c12: 4.0.0-beta.5(chokidar@5.0.0)(dotenv@18.0.1)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)
       consola: 3.4.2
       defu: 6.1.7
       exsolve: 1.1.1
