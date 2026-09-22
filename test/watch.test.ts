@@ -106,21 +106,25 @@ describe("watchConfig", () => {
     await vi.waitFor(() => expect(config.config.foo).toBe(3));
   });
 
-  it("re-watches nested directories after parent is moved away and back", async () => {
-    await mkdir(r("layer/.config"), { recursive: true });
-    await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 1 }));
-    await writeFile(r("test.config.json"), JSON.stringify({ extends: ["./layer"] }));
-    const config = await setup();
-    expect(config.config.foo).toBe(1);
+  // Windows refuses to rename a directory while a descendant has an open `fs.watch` handle (EPERM)
+  it.skipIf(process.platform === "win32")(
+    "re-watches nested directories after parent is moved away and back",
+    async () => {
+      await mkdir(r("layer/.config"), { recursive: true });
+      await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 1 }));
+      await writeFile(r("test.config.json"), JSON.stringify({ extends: ["./layer"] }));
+      const config = await setup();
+      expect(config.config.foo).toBe(1);
 
-    await rename(r("layer"), r("layer-moved"));
-    await vi.waitFor(() => expect(config.config.foo).toBeUndefined());
-    await rename(r("layer-moved"), r("layer"));
-    await vi.waitFor(() => expect(config.config.foo).toBe(1));
+      await rename(r("layer"), r("layer-moved"));
+      await vi.waitFor(() => expect(config.config.foo).toBeUndefined());
+      await rename(r("layer-moved"), r("layer"));
+      await vi.waitFor(() => expect(config.config.foo).toBe(1));
 
-    await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 2 }));
-    await vi.waitFor(() => expect(config.config.foo).toBe(2));
-  });
+      await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 2 }));
+      await vi.waitFor(() => expect(config.config.foo).toBe(2));
+    },
+  );
 
   it("re-watches cwd after it is removed and re-created", async () => {
     await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
