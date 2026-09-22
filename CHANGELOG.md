@@ -143,7 +143,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### 🔥 Performance
 
-- ⚠️  Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
+- ⚠️ Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
 
 ### 📦 Build
 
@@ -159,7 +159,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
+- ⚠️ Optional jiti loader ([#295](https://github.com/unjs/c12/pull/295))
 
 ### ❤️ Contributors
 

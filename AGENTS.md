@@ -44,35 +44,35 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 
 ### Core Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `confbox` | Parse YAML, JSONC, JSON5, TOML (lazy) |
-| `defu` | Deep merge config layers |
-| `exsolve` | Module path resolution |
-| `pathe` | Cross-platform path utilities |
-| `pkg-types` | `package.json` reading |
-| `rc9` | RC file parsing |
+| Package     | Purpose                               |
+| ----------- | ------------------------------------- |
+| `confbox`   | Parse YAML, JSONC, JSON5, TOML (lazy) |
+| `defu`      | Deep merge config layers              |
+| `exsolve`   | Module path resolution                |
+| `pathe`     | Cross-platform path utilities         |
+| `pkg-types` | `package.json` reading                |
+| `rc9`       | RC file parsing                       |
 
 ### Optional Peer Dependencies
 
-| Package | When needed |
-|---------|------------|
-| `chokidar` | `watchConfig()` |
-| `giget` | Remote git extends |
-| `jiti` | Legacy/CJS TypeScript loading |
-| `dotenv` | `.env` parsing on Node <20.6 |
+| Package    | When needed                       |
+| ---------- | --------------------------------- |
+| `chokidar` | `watchConfig()`                   |
+| `giget`    | Remote git extends                |
+| `jiti`     | Legacy/CJS TypeScript loading     |
+| `dotenv`   | `.env` parsing on Node <20.6      |
 | `magicast` | `updateConfig()` AST modification |
 
 ## Public API
 
 ```ts
-loadConfig<T>(options)      // Core: load and merge config from all sources
-watchConfig<T>(options)     // Watch config files, reload on change
-loadDotenv(options)         // Load .env files into an object
-setupDotenv(options)        // Load .env files into process.env
-updateConfig(options)       // Create or update config files (experimental)
-createDefineConfig<T>()     // Type-safe config definition helper
-SUPPORTED_EXTENSIONS        // Array of all supported file extensions
+loadConfig<T>(options); // Core: load and merge config from all sources
+watchConfig<T>(options); // Watch config files, reload on change
+loadDotenv(options); // Load .env files into an object
+setupDotenv(options); // Load .env files into process.env
+updateConfig(options); // Create or update config files (experimental)
+createDefineConfig<T>(); // Type-safe config definition helper
+SUPPORTED_EXTENSIONS; // Array of all supported file extensions
 ```
 
 ## Development
