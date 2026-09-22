@@ -9,7 +9,7 @@ src/
 ├── index.ts      # Public exports barrel
 ├── types.ts      # All TypeScript type definitions
 ├── loader.ts     # Core config loading logic (~450 LoC)
-├── watch.ts      # Native `node:fs` watcher with HMR support (~300 LoC)
+├── watch.ts      # Native `node:fs` watcher with HMR support (~400 LoC)
 ├── dotenv.ts     # .env file parsing and interpolation (~235 LoC)
 └── update.ts     # Programmatic config file creation/update (~130 LoC)
 

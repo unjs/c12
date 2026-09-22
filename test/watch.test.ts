@@ -1,7 +1,8 @@
 import { fileURLToPath } from "node:url";
+import { renameSync, rmSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { join, normalize } from "pathe";
-import { mkdir, rename, rm, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { watchConfig, type ConfigWatcher } from "../src/index.ts";
 
 const tmpDir = normalize(fileURLToPath(new URL(".tmp-watch", import.meta.url)));
@@ -87,6 +88,103 @@ describe("watchConfig", () => {
     await mkdir(r(".config"));
     await writeFile(r(".config/test.json"), JSON.stringify({ foo: "again" }));
     await vi.waitFor(() => expect(config.config.foo).toBe("again"));
+  });
+
+  it("re-watches a .config directory replaced by another one", async () => {
+    await mkdir(r(".config"));
+    await writeFile(r(".config/test.json"), JSON.stringify({ foo: 1 }));
+    const config = await setup();
+
+    await mkdir(r(".config-new"));
+    await writeFile(r(".config-new/test.json"), JSON.stringify({ foo: 2 }));
+    // Swap synchronously so no watcher event is handled in between
+    rmSync(r(".config"), { recursive: true });
+    renameSync(r(".config-new"), r(".config"));
+    await vi.waitFor(() => expect(config.config.foo).toBe(2));
+
+    await writeFile(r(".config/test.json"), JSON.stringify({ foo: 3 }));
+    await vi.waitFor(() => expect(config.config.foo).toBe(3));
+  });
+
+  it("re-watches nested directories after parent is moved away and back", async () => {
+    await mkdir(r("layer/.config"), { recursive: true });
+    await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 1 }));
+    await writeFile(r("test.config.json"), JSON.stringify({ extends: ["./layer"] }));
+    const config = await setup();
+    expect(config.config.foo).toBe(1);
+
+    await rename(r("layer"), r("layer-moved"));
+    await vi.waitFor(() => expect(config.config.foo).toBeUndefined());
+    await rename(r("layer-moved"), r("layer"));
+    await vi.waitFor(() => expect(config.config.foo).toBe(1));
+
+    await writeFile(r("layer/.config/test.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() => expect(config.config.foo).toBe(2));
+  });
+
+  it("re-watches cwd after it is removed and re-created", async () => {
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    const config = await setup();
+
+    await rm(tmpDir, { recursive: true });
+    await vi.waitFor(() =>
+      expect(events).toContainEqual({ type: "removed", path: "<tmp>/test.config.json" }),
+    );
+    await mkdir(tmpDir);
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() => expect(config.config.foo).toBe(2));
+  });
+
+  it.skipIf(process.platform === "win32")(
+    "detects changes to symlinked config target",
+    async () => {
+      await mkdir(r("shared"));
+      await writeFile(r("shared/real.json"), JSON.stringify({ foo: 1 }));
+      await symlink(r("shared/real.json"), r("test.config.json"));
+      const config = await setup();
+      expect(config.config.foo).toBe(1);
+
+      await writeFile(r("shared/real.json"), JSON.stringify({ foo: 2 }));
+      await vi.waitFor(() => expect(config.config.foo).toBe(2));
+      expect(events).toContainEqual({ type: "updated", path: "<tmp>/test.config.json" });
+    },
+  );
+
+  it("coalesces events within debounce window", async () => {
+    const config = await setup({ debounce: 200 });
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() => expect(config.config.foo).toBe(2));
+    expect(events).toEqual([{ type: "created", path: "<tmp>/test.config.json" }]);
+  });
+
+  it("does not throw unhandled errors from hooks", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    watcher = await watchConfig({
+      cwd: tmpDir,
+      name: "test",
+      debounce: 10,
+      onUpdate: () => {
+        throw new Error("hook failed");
+      },
+    });
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() =>
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("hook failed")),
+    );
+    warn.mockRestore();
+  });
+
+  it("does not call hooks after unwatch with pending events", async () => {
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    const config = await setup({ debounce: 200 });
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await config.unwatch();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(events).toEqual([]);
+    expect(config.config.foo).toBe(1);
   });
 
   it("ignores unrelated files", async () => {
