@@ -87,6 +87,21 @@ describe("update config file", () => {
     delete process.env.TEST_SECRET;
     delete process.env.TEST_SECRET_FILE;
   });
+
+  it("should support a custom `parse` function", async () => {
+    await writeFile(r(".env"), "custom: parser");
+    const parse = vi.fn((src: string) => {
+      const [key, value] = src.split(": ");
+      return { [key!]: value! };
+    });
+
+    const env = await loadDotenv({ cwd: tmpDir, parse });
+    expect(parse).toHaveBeenCalledWith("custom: parser");
+    expect(env.custom).toBe("parser");
+
+    await setupDotenv({ cwd: tmpDir, parse, env: {} });
+    expect(parse).toHaveBeenCalledTimes(2);
+  });
 });
 
 const interpolateDir = normalize(

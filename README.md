@@ -185,6 +185,19 @@ const config = await loadConfig({
 // DATABASE_PASSWORD is now set to the contents of /run/secrets/db_password
 ```
 
+#### `parse`
+
+Custom `.env` file parser with `(src: string) => Record<string, string>` signature (exported as `DotenvParseFn` type). By default, `node:util.parseEnv` is used when available, falling back to the optional `dotenv` package.
+
+```ts
+import { loadConfig } from "c12";
+import { parse } from "dotenv";
+
+const config = await loadConfig({
+  dotenv: { parse },
+});
+```
+
 ### `packageJson`
 
 Loads config from nearest `package.json` file. It is disabled by default.

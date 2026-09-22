@@ -1,4 +1,10 @@
-export { type DotenvOptions, type Env, loadDotenv, setupDotenv } from "./dotenv.ts";
+export {
+  type DotenvOptions,
+  type DotenvParseFn,
+  type Env,
+  loadDotenv,
+  setupDotenv,
+} from "./dotenv.ts";
 
 export { SUPPORTED_EXTENSIONS, loadConfig } from "./loader.ts";
 
