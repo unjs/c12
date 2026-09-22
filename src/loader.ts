@@ -6,7 +6,6 @@ import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
 import * as rc9 from "rc9";
 import { defu } from "defu";
-import { findWorkspaceDir, readPackageJSON } from "pkg-types";
 import { setupDotenv } from "./dotenv.ts";
 
 import type {
@@ -27,9 +26,14 @@ const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 let importCounter = 0;
 
 const ASYNC_LOADERS = {
+  ".json": () => JSON.parse,
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
-  ".jsonc": () => import("confbox/jsonc").then((r) => r.parseJSONC),
+  // `allowTrailingComma` defaults to false since confbox v0.3 (jsonc-parser -> strip-json-comments)
+  ".jsonc": () =>
+    import("confbox/jsonc").then(
+      (r) => (source: string) => r.parseJSONC(source, { allowTrailingComma: true }),
+    ),
   ".json5": () => import("confbox/json5").then((r) => r.parseJSON5),
   ".toml": () => import("confbox/toml").then((r) => r.parseTOML),
 } as const;
@@ -42,8 +46,8 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
   ".cjs",
   ".mts",
   ".cts",
+  // with parsers
   ".json",
-  // with confbox
   ".jsonc",
   ".json5",
   ".yaml",
@@ -120,12 +124,15 @@ export async function loadConfig<
     rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
     if (options.globalRc) {
       // 2. workspace
+      const { findWorkspaceDir } = await import("pkg-types");
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
         rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
       }
-      // 3. user home
-      rcSources.push(rc9.readUser({ name: options.rcFile, dir: options.cwd }));
+      // 3. user config dir ($XDG_CONFIG_HOME or ~/.config)
+      rcSources.push(rc9.readUserConfig({ name: options.rcFile }));
+      // 4. user home (legacy)
+      rcSources.push(rc9.read({ name: options.rcFile, dir: homedir() }));
     }
     rawConfigs.rc = _merger({} as T, ...rcSources);
   }
@@ -137,6 +144,7 @@ export async function loadConfig<
         ? options.packageJson
         : [typeof options.packageJson === "string" ? options.packageJson : options.name]
     ).filter((t) => t && typeof t === "string");
+    const { readPackageJSON } = await import("pkg-types");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
     rawConfigs.packageJson = _merger({} as T, ...values);
@@ -331,13 +339,25 @@ async function resolveConfig<
         : resolve(homedir(), ".cache/c12", cloneName);
     }
 
-    if (existsSync(cloneDir) && !sourceOptions.install) {
+    // Install the cloned layer in isolation as it lives in `.c12/<name>` and is
+    // not a workspace member (unjs/c12#128). `defu` is used over a spread so an
+    // explicit `undefined` does not clobber the default, and the normalized
+    // value is shared with the cleanup guard and `force` below so all three
+    // stay in agreement (`null` is falsy here, unlike `typeof x === "object"`).
+    // Note: nypm only honors `ignoreWorkspace` for pnpm.
+    const install = sourceOptions.install
+      ? defu(sourceOptions.install === true ? {} : sourceOptions.install, {
+          ignoreWorkspace: true,
+        })
+      : false;
+
+    if (existsSync(cloneDir) && !install) {
       await rm(cloneDir, { recursive: true });
     }
     const cloned = await downloadTemplate(source, {
       dir: cloneDir,
-      install: sourceOptions.install,
-      force: sourceOptions.install,
+      install,
+      force: Boolean(install),
       auth: sourceOptions.auth,
       ...options.giget,
       ...sourceOptions.giget,
@@ -425,14 +445,16 @@ async function resolveConfig<
   }
 
   // Extend env specific config
-  if (options.envName) {
-    const envConfig = {
-      ...res.config!["$" + options.envName],
-      ...res.config!.$env?.[options.envName],
-    };
-    if (Object.keys(envConfig).length > 0) {
-      res.config = _merger(envConfig, res.config);
-    }
+  // Later names in the list have higher priority
+  const envNames = (Array.isArray(options.envName) ? options.envName : [options.envName])
+    .filter(Boolean)
+    .reverse() as string[];
+  const envConfigs = envNames
+    .flatMap((envName) => [res.config!.$env?.[envName], res.config!["$" + envName]])
+    .filter((c) => c && Object.keys(c).length > 0);
+  if (envConfigs.length > 0) {
+    const _envMerger = options.envMerger || _merger;
+    res.config = _envMerger({} as T, ...envConfigs, res.config) as T;
   }
 
   // Meta

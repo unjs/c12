@@ -9,7 +9,7 @@ src/
 ├── index.ts      # Public exports barrel
 ├── types.ts      # All TypeScript type definitions
 ├── loader.ts     # Core config loading logic (~450 LoC)
-├── watch.ts      # File watcher with HMR support (~150 LoC)
+├── watch.ts      # Native `node:fs` watcher with HMR support (~300 LoC)
 ├── dotenv.ts     # .env file parsing and interpolation (~235 LoC)
 └── update.ts     # Programmatic config file creation/update (~130 LoC)
 
@@ -17,6 +17,7 @@ test/
 ├── loader.test.ts   # Config loader tests (fixture-based)
 ├── dotenv.test.ts   # Dotenv parsing/interpolation tests
 ├── update.test.ts   # Config update tests
+├── watch.test.ts    # watchConfig tests (temp dir)
 └── fixture/         # Real config files for testing
 ```
 
@@ -35,7 +36,7 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 
 ### Key Design Patterns
 
-- **Lazy loading** — Optional deps (`chokidar`, `giget`, `jiti`, `dotenv`, `magicast`) imported on demand
+- **Lazy loading** — Optional deps (`giget`, `jiti`, `dotenv`, `magicast`) imported on demand
 - **Deep merge** via `defu` — Layers are merged bottom-up with `defu`
 - **Environment overrides** — `$test`, `$development`, `$production` keys auto-applied based on env
 - **Remote extends** — Config can extend from GitHub/GitLab/npm via `giget`
@@ -44,35 +45,34 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 
 ### Core Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `confbox` | Parse YAML, JSONC, JSON5, TOML (lazy) |
-| `defu` | Deep merge config layers |
-| `exsolve` | Module path resolution |
-| `pathe` | Cross-platform path utilities |
-| `pkg-types` | `package.json` reading |
-| `rc9` | RC file parsing |
+| Package     | Purpose                               |
+| ----------- | ------------------------------------- |
+| `confbox`   | Parse YAML, JSONC, JSON5, TOML (lazy) |
+| `defu`      | Deep merge config layers              |
+| `exsolve`   | Module path resolution                |
+| `pathe`     | Cross-platform path utilities         |
+| `pkg-types` | `package.json` reading                |
+| `rc9`       | RC file parsing                       |
 
 ### Optional Peer Dependencies
 
-| Package | When needed |
-|---------|------------|
-| `chokidar` | `watchConfig()` |
-| `giget` | Remote git extends |
-| `jiti` | Legacy/CJS TypeScript loading |
-| `dotenv` | `.env` parsing on Node <20.6 |
+| Package    | When needed                       |
+| ---------- | --------------------------------- |
+| `giget`    | Remote git extends                |
+| `jiti`     | Legacy/CJS TypeScript loading     |
+| `dotenv`   | `.env` parsing on Node <20.6      |
 | `magicast` | `updateConfig()` AST modification |
 
 ## Public API
 
 ```ts
-loadConfig<T>(options)      // Core: load and merge config from all sources
-watchConfig<T>(options)     // Watch config files, reload on change
-loadDotenv(options)         // Load .env files into an object
-setupDotenv(options)        // Load .env files into process.env
-updateConfig(options)       // Create or update config files (experimental)
-createDefineConfig<T>()     // Type-safe config definition helper
-SUPPORTED_EXTENSIONS        // Array of all supported file extensions
+loadConfig<T>(options); // Core: load and merge config from all sources
+watchConfig<T>(options); // Watch config files, reload on change
+loadDotenv(options); // Load .env files into an object
+setupDotenv(options); // Load .env files into process.env
+updateConfig(options); // Create or update config files (experimental)
+createDefineConfig<T>(); // Type-safe config definition helper
+SUPPORTED_EXTENSIONS; // Array of all supported file extensions
 ```
 
 ## Development

@@ -15,8 +15,8 @@ c12 (pronounced as /siːtwelv/, like c-twelve) is a smart configuration loader.
 
 ## ✅ Features
 
-- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` `.json` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
-- `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` config loader with [unjs/confbox](https://confbox.unjs.io)
+- `.js`, `.ts`, `.mjs`, `.cjs`, `.mts`, `.cts` config loader with customizable import or [unjs/jiti](https://jiti.unjs.io) fallback.
+- `.json` config loader with `JSON.parse` and `.jsonc`, `.json5`, `.yaml`, `.yml`, `.toml` with [unjs/confbox](https://confbox.unjs.io)
 - `.config/` directory support ([config dir proposal](https://github.com/pi0/config-dir))
 - `.rc` config support with [unjs/rc9](https://github.com/unjs/rc9)
 - `.env` support with variable interpolation and optional `_FILE` references resolution
@@ -68,6 +68,16 @@ const { config } = await loadConfig({});
 const { config, configFile, layers } = await loadConfig({});
 ```
 
+> [!NOTE]
+> Merged `config` may share nested object references with `layers[].config`, so mutating `config` can also mutate a layer (and vice versa). If you need to mutate the result, clone it first using a deep clone strategy that fits your config (for example [`klona`](https://github.com/lukeed/klona) or `structuredClone`):
+>
+> ```js
+> import { klona } from "klona";
+>
+> const { config: _config, layers } = await loadConfig({});
+> const config = klona(_config);
+> ```
+
 ## Loading priority
 
 c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
@@ -75,10 +85,12 @@ c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by belo
 1. Config overrides passed by options
 2. Config file in CWD
 3. RC file in CWD
-4. Global RC file in the user's home directory
-5. Config from `package.json`
-6. Default config passed by options
-7. Extended config layers
+4. RC file in the workspace directory
+5. RC file in the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`)
+6. Legacy RC file in the user's home directory
+7. Config from `package.json`
+8. Default config passed by options
+9. Extended config layers
 
 ## Options
 
@@ -102,7 +114,9 @@ Set to `false` to disable loading RC config.
 
 ### `globalRc`
 
-Load RC config from the workspace directory and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+Load RC config from the workspace directory, the user's config directory (`$XDG_CONFIG_HOME` or `~/.config`) and the user's home directory. Only enabled when `rcFile` is provided. Set to `false` to disable this functionality.
+
+When the same key is set in more than one of these, the workspace wins over the user config directory, which wins over the home directory.
 
 ### `dotenv`
 
@@ -143,6 +157,23 @@ console.log(config.config.connectionPoolMax); // "10"
 console.log(config.config.databaseURL); // "<...localhost...>"
 ```
 
+#### `interpolate`
+
+Enabled by default. Variables within `.env` files are interpolated using `$VAR` or `${VAR}` syntax (use `\${VAR}` to escape). Within braces, a default value can be provided with `${VAR:-default}` (used when `VAR` is unset **or** empty) or `${VAR-default}` (used when `VAR` is unset only). Default values can themselves contain interpolations. A reference that cannot be resolved is kept as-is rather than replaced with an empty value. Set to `false` to disable.
+
+```ini
+# .env
+BASE_DIR="/test"
+# "/test/further"
+ANOTHER_DIR="${BASE_DIR}/further"
+# "/test/fallback" when CACHE_DIR_INPUT is unset or empty
+CACHE_DIR="${CACHE_DIR_INPUT:-${BASE_DIR}/fallback}"
+# "info" when LOG_LEVEL_INPUT is unset (an empty value is kept as-is)
+LOG_LEVEL="${LOG_LEVEL_INPUT-info}"
+# kept as the literal "${UNKNOWN}" since it cannot be resolved
+UNRESOLVED="${UNKNOWN}"
+```
+
 #### `expandFileReferences`
 
 Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable.
@@ -162,6 +193,19 @@ const config = await loadConfig({
 });
 
 // DATABASE_PASSWORD is now set to the contents of /run/secrets/db_password
+```
+
+#### `parse`
+
+Custom `.env` file parser with `(src: string) => Record<string, string>` signature (exported as `DotenvParseFn` type). By default, `node:util.parseEnv` is used when available, falling back to the optional `dotenv` package.
+
+```ts
+import { loadConfig } from "c12";
+import { parse } from "dotenv";
+
+const config = await loadConfig({
+  dotenv: { parse },
+});
 ```
 
 ### `packageJson`
@@ -197,9 +241,7 @@ Custom import function used to load configuration files. By default, c12 uses na
 ```js
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, {
-  /* jiti options */
-});
+const jiti = createJiti(import.meta.url, {/* jiti options */});
 
 const { config } = await loadConfig({
   import: (id) => jiti.import(id),
@@ -216,7 +258,7 @@ Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back 
 const { config } = await loadConfig({
   jitiOptions: {
     fsCache: false,
-    transformOptions: { /* ... */ },
+    transformOptions: {/* ... */},
   },
 });
 ```
@@ -243,11 +285,36 @@ Custom options merger function. Default is [defu](https://github.com/unjs/defu).
 
 **Note:** Custom merge function should deeply merge options with arguments high -> low priority.
 
+### `envMerger`
+
+Custom merger used to apply [environment specific configuration](#environment-specific-configuration) (`$<envName>` and `$env.<envName>` keys) onto the config. Defaults to [`merger`](#merger) (or [defu](https://github.com/unjs/defu)).
+
+**Note:** It only applies when merging a layer's env keys onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
+
+Useful when an environment override should replace a value instead of being merged into it. For example, to replace arrays instead of concatenating them:
+
+```js
+import { createDefu } from "defu";
+
+const replaceArrays = createDefu((obj, key, value) => {
+  if (Array.isArray(value)) {
+    obj[key] = [...value];
+    return true;
+  }
+});
+
+const { config } = await loadConfig({
+  envMerger: (...sources) => replaceArrays({}, ...sources),
+});
+```
+
 ### `envName`
 
 Environment name used for [environment specific configuration](#environment-specific-configuration).
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
+
+You can also pass an array of names (e.g. `["production", "prerender"]`) to apply several environments. Later names have higher priority.
 
 ### `context`
 
@@ -332,23 +399,17 @@ Layers:
 ```js
 [
   {
-    config: {
-      /* theme config */
-    },
+    config: {/* theme config */},
     configFile: "/path/to/theme/config.ts",
     cwd: "/path/to/theme ",
   },
   {
-    config: {
-      /* base  config */
-    },
+    config: {/* base  config */},
     configFile: "/path/to/base/config.ts",
     cwd: "/path/to/base",
   },
   {
-    config: {
-      /* dev   config */
-    },
+    config: {/* dev   config */},
     configFile: "/path/to/config.dev.ts",
     cwd: "/path/",
   },
@@ -430,17 +491,73 @@ export default {
 };
 ```
 
+## Typed `defineConfig` helpers
+
+Libraries that expose a typed config file can use [`createDefineConfig`](https://github.com/unjs/c12/blob/main/src/types.ts) to ship a `defineConfig`-style helper for `.ts` configs.
+
+```ts
+import { createDefineConfig, loadConfig } from "c12";
+
+interface MyConfig {
+  apiUrl: string;
+  logLevel?: "info" | "debug" | "error";
+}
+
+interface MyMeta {
+  name?: string;
+  author?: string;
+}
+
+export const defineMyConfig = createDefineConfig<MyConfig, MyMeta>();
+
+// my.config.ts
+export default defineMyConfig({
+  apiUrl: "https://api.example.com",
+  logLevel: "info",
+  $meta: {
+    name: "my-app",
+    author: "acme",
+  },
+  $development: {
+    logLevel: "debug",
+  },
+});
+```
+
+`createDefineConfig` is an identity function at runtime. Its value is TypeScript inference: the returned helper accepts your config keys plus c12 reserved keys (`$meta`, `$development`, `$production`, `$test`, `$env`).
+
+Pass the same generics to `loadConfig` so resolved `config` and `meta` stay typed:
+
+```ts
+const { config, meta } = await loadConfig<MyConfig, MyMeta>({
+  name: "my",
+});
+
+config.apiUrl; // string
+meta?.author; // string | undefined
+```
+
+### `$meta`
+
+`$meta` is a reserved namespace for **layer metadata**, not user-facing options. Use it for values such as layer name, author, repository, or credentials that describe the config layer itself.
+
+c12 reads `$meta` (merged with `sourceOptions.meta` when extending) into the resolved layer's `meta` field and **removes** it from `config`, so it does not mix with regular options.
+
+```ts
+const { config, meta, layers } = await loadConfig<MyConfig, MyMeta>({});
+
+// Regular options live on `config`
+console.log(config.apiUrl);
+
+// Layer metadata lives on `meta` / `layers[].meta`
+console.log(meta?.name);
+```
+
 ## Watching configuration
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
 
-> [!NOTE]
-> Watching requires the [`chokidar`](https://github.com/paulmillr/chokidar) peer dependency to be installed.
->
-> ```sh
-> # ✨ Auto-detect
-> npx nypm install chokidar
-> ```
+Watching uses native (non-recursive) [`fs.watch`](https://nodejs.org/api/fs.html#fswatchfilename-options-listener) on the directories of expected config paths, no extra dependencies are needed.
 
 ### Lifecycle hooks
 
@@ -453,7 +570,6 @@ import { watchConfig } from "c12";
 
 const config = watchConfig({
   cwd: ".",
-  // chokidarOptions: {}, // Default is { ignoreInitial: true }
   // debounce: 200 // Default is 100. You can set it to false to disable debounced watcher
   onWatch: (event) => {
     console.log("[watcher]", event.type, event.path);
@@ -543,7 +659,7 @@ c12 install size is now down to [380kB](https://packagephobia.com/result?p=c12@4
 Loading TypeScript files is significantly faster (on cold cache) — simple TS config loads ~2.5x faster ([bench](https://github.com/unjs/c12/tree/main/test/bench)).
 
 - If you need extends feature with remote/git source, install giget as a peer dependency (docs)
-- If you are using watchConfig, install chokidar as a peer dependency (docs).
+- `watchConfig` now uses native `node:fs` watching. The `chokidar` peer dependency and `chokidarOptions` option are removed (#260).
 - If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a custom import config (docs).
 - Dotenv parsing now uses native runtime features (see #296). You might need to add dotenv as a peer dependency only for legacy/Deno support.
 

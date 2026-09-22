@@ -1,0 +1,4 @@
+{
+  "loadedFromJSON": true,
+  "extends": ["./base.json"]
+}

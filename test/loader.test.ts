@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { expect, it, describe } from "vitest";
+import { createDefu } from "defu";
 import { normalize } from "pathe";
 import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
@@ -306,6 +307,44 @@ describe("loader", () => {
     `);
   });
 
+  it("supports multiple env names", async () => {
+    const load = (envName: string | string[]) =>
+      loadConfig({ name: "test", cwd: r("./fixture/env-names"), envName, omit$Keys: true }).then(
+        (r) => r.config,
+      );
+
+    expect(await load("production")).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 1,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+    expect(await load(["production", "prerender"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "silent",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+    expect(await load(["prerender", "production"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+  });
+
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       name: "test",
@@ -395,6 +434,53 @@ describe("loader", () => {
       cwd: r("./fixture/frozen-array"),
     });
     expect(config).toEqual([{ a: 1 }, { b: 2 }]);
+  });
+
+  it("loads .json configs without jiti", async () => {
+    const { config, configFile } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/json"),
+    });
+    expect(configFile).toBe(r("./fixture/json/test.config.json"));
+    expect(config).toMatchObject({ loadedFromJSON: true, baseKey: true });
+  });
+
+  it("envMerger", async () => {
+    const baseOptions = {
+      name: "test",
+      cwd: r("./fixture/env-merger"),
+      envName: "test",
+      overrides: { plugins: ["override"] },
+    };
+
+    // Default merger (defu) concatenates env override arrays
+    const { config: defaultConfig } = await loadConfig(baseOptions);
+    expect(defaultConfig.plugins).toMatchInlineSnapshot(`
+      [
+        "override",
+        "test-only",
+        "base",
+      ]
+    `);
+
+    // Custom envMerger replaces arrays for env overrides only;
+    // `overrides` are still merged with the default merger (concatenated)
+    const replaceArrays = createDefu((obj, key, value) => {
+      if (Array.isArray(value)) {
+        obj[key] = value;
+        return true;
+      }
+    });
+    const { config } = await loadConfig<{ plugins?: string[] }>({
+      ...baseOptions,
+      envMerger: (...sources) => replaceArrays({}, ...sources),
+    });
+    expect(config.plugins).toMatchInlineSnapshot(`
+      [
+        "override",
+        "test-only",
+      ]
+    `);
   });
 
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {

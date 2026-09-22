@@ -48,9 +48,12 @@ export interface SourceOptions<
   /**
    * Install dependencies after cloning
    *
+   * Pass `true` to install with c12's defaults (`ignoreWorkspace: true`), or pass an object
+   * to forward arbitrary nypm install options.
+   *
    * @see https://nypm.unjs.io
    */
-  install?: boolean;
+  install?: NonNullable<DownloadTemplateOptions["install"]>;
 
   /**
    * Token for cloning private sources
@@ -112,7 +115,14 @@ export interface LoadConfigOptions<
 
   dotenv?: boolean | DotenvOptions;
 
-  envName?: string | false;
+  /**
+   * Environment name(s) used to apply `$<envName>` and `$env.<envName>` overrides.
+   *
+   * When an array is given, later names have higher priority.
+   *
+   * Default: `process.env.NODE_ENV`
+   */
+  envName?: string | string[] | false;
 
   packageJson?: boolean | string | string[];
 
@@ -143,6 +153,15 @@ export interface LoadConfigOptions<
   giget?: false | DownloadTemplateOptions;
 
   merger?: (...sources: Array<T | null | undefined>) => T;
+
+  /**
+   * Custom merger used to apply environment-specific overrides (`$<envName>` and `$env.<envName>`) onto the config.
+   *
+   * Only applies when merging a layer's env keys onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
+   *
+   * Defaults to `merger` (or `defu`).
+   */
+  envMerger?: (...sources: Array<T | null | undefined>) => T;
 
   extend?:
     | false

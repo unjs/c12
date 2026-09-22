@@ -1,2 +1,9 @@
 packages:
   - test/bench
+allowBuilds:
+  "@parcel/watcher": false
+minimumReleaseAgeExclude:
+  - obuild@0.4.39
+  - rc9@3.1.0
+  - confbox@0.3.0 || 0.3.1
+  - pkg-types@2.3.2

@@ -9,6 +9,7 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "noUncheckedIndexedAccess": true,
