@@ -440,6 +440,16 @@ async function resolveConfig<
     );
   }
 
+  // Config may be frozen or a module namespace, but gets mutated below (#205)
+  if (
+    res.config &&
+    typeof res.config === "object" &&
+    !Array.isArray(res.config) &&
+    !Object.isExtensible(res.config)
+  ) {
+    res.config = { ...res.config };
+  }
+
   // Extend env specific config
   // Later names in the list have higher priority
   const envNames = (Array.isArray(options.envName) ? options.envName : [options.envName])

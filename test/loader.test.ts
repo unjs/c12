@@ -381,6 +381,20 @@ describe("loader", () => {
     expect(Object.keys(baseLayerConfig.config!)).toContain("$env");
   });
 
+  // https://github.com/unjs/c12/issues/205
+  it("extends a non-extensible (frozen) layer", async () => {
+    const { config } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/frozen-extends"),
+    });
+
+    expect(config).toMatchObject({
+      app: true,
+      frozenBase: true,
+      shared: "base",
+    });
+  });
+
   it("no config loaded and configFileRequired is default setting", async () => {
     await expect(
       loadConfig({
@@ -417,6 +431,14 @@ describe("loader", () => {
       },
       configFile: ".testrc",
     });
+  });
+
+  it("loads frozen arrays exported from config without merging", async () => {
+    const { config } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/frozen-array"),
+    });
+    expect(config).toEqual([{ a: 1 }, { b: 2 }]);
   });
 
   it("loads .json configs without jiti", async () => {
