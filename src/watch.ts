@@ -276,7 +276,7 @@ function watchFiles(
   function unwatchDir(dir: string) {
     watchers.get(dir)?.watcher.close();
     watchers.delete(dir);
-    for (const child of [...watchers.keys()]) {
+    for (const child of watchers.keys()) {
       if (dirname(child) === dir) {
         unwatchDir(child);
         addToSet(pendingDirs, dir, basename(child));
