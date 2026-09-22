@@ -39,9 +39,6 @@ importers:
       changelogen:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.4)
-      chokidar:
-        specifier: ^5.0.0
-        version: 5.0.0
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2

@@ -534,13 +534,7 @@ console.log(meta?.name);
 
 you can use `watchConfig` instead of `loadConfig` to load config and watch for changes, add and removals in all expected configuration paths and auto reload with new config.
 
-> [!NOTE]
-> Watching requires the [`chokidar`](https://github.com/paulmillr/chokidar) peer dependency to be installed.
->
-> ```sh
-> # ✨ Auto-detect
-> npx nypm install chokidar
-> ```
+Watching uses native (non-recursive) [`fs.watch`](https://nodejs.org/api/fs.html#fswatchfilename-options-listener) on the directories of expected config paths, no extra dependencies are needed.
 
 ### Lifecycle hooks
 
@@ -553,7 +547,6 @@ import { watchConfig } from "c12";
 
 const config = watchConfig({
   cwd: ".",
-  // chokidarOptions: {}, // Default is { ignoreInitial: true }
   // debounce: 200 // Default is 100. You can set it to false to disable debounced watcher
   onWatch: (event) => {
     console.log("[watcher]", event.type, event.path);
@@ -643,7 +636,7 @@ c12 install size is now down to [380kB](https://packagephobia.com/result?p=c12@4
 Loading TypeScript files is significantly faster (on cold cache) — simple TS config loads ~2.5x faster ([bench](https://github.com/unjs/c12/tree/main/test/bench)).
 
 - If you need extends feature with remote/git source, install giget as a peer dependency (docs)
-- If you are using watchConfig, install chokidar as a peer dependency (docs).
+- `watchConfig` now uses native `node:fs` watching. The `chokidar` peer dependency and `chokidarOptions` option are removed (#260).
 - If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a custom import config (docs).
 - Dotenv parsing now uses native runtime features (see #296). You might need to add dotenv as a peer dependency only for legacy/Deno support.
 
