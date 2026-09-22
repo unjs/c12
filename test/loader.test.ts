@@ -3,7 +3,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { expect, it, describe } from "vitest";
 import { normalize } from "pathe";
-import type { ConfigLayer, ConfigLayerMeta, UserInputConfig } from "../src/index.ts";
+import type {
+  ConfigLayer,
+  ConfigLayerMeta,
+  StandardSchemaV1,
+  UserInputConfig,
+} from "../src/index.ts";
 import { loadConfig } from "../src/index.ts";
 
 const execFileAsync = promisify(execFile);
@@ -520,5 +525,75 @@ describe("loader", () => {
     const result = JSON.parse(stdout.trim());
     expect(result.sameRef).toBe(false);
     expect(result.key).toBe("original");
+  });
+  describe("schema", () => {
+    const schema: StandardSchemaV1 = {
+      "~standard": {
+        version: 1,
+        vendor: "custom",
+        validate: async (value: any) =>
+          typeof value.theme === "string"
+            ? { value: { ...value, validated: true } }
+            : {
+                issues: [
+                  { message: "Expected string", path: [{ key: "theme" }] },
+                  { message: "Invalid" },
+                ],
+              },
+      },
+    };
+
+    it("uses validated output", async () => {
+      const { config } = await loadConfig({ cwd: r("./fixture"), name: "test", schema });
+      expect(config.validated).toBe(true);
+    });
+
+    it("throws on validation issues", async () => {
+      const promise = loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        overrides: { theme: 123 },
+        schema,
+      });
+      await expect(promise).rejects.toThrowError(
+        "Config validation failed (custom):\n  - theme: Expected string\n  - Invalid",
+      );
+      await expect(promise).rejects.toSatisfy((error: Error) => Array.isArray(error.cause));
+    });
+
+    it("supports sync validate and nested paths", async () => {
+      const promise = loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        schema: {
+          "~standard": {
+            version: 1,
+            vendor: "sync",
+            validate: () => ({ issues: [{ message: "Bad", path: ["a", 0, { key: "b" }] }] }),
+          },
+        },
+      });
+      await expect(promise).rejects.toThrowError(
+        "Config validation failed (sync):\n  - a.0.b: Bad",
+      );
+    });
+
+    it("validates after omitting $ keys", async () => {
+      let input: Record<string, unknown> | undefined;
+      await loadConfig({
+        cwd: r("./fixture"),
+        name: "test",
+        overrides: { $test: { a: 1 } },
+        omit$Keys: true,
+        schema: {
+          "~standard": {
+            version: 1,
+            vendor: "custom",
+            validate: (value: any) => ({ value: (input = value) }),
+          },
+        },
+      });
+      expect(Object.keys(input!).some((key) => key.startsWith("$"))).toBe(false);
+    });
   });
 });

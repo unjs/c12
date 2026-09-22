@@ -305,6 +305,28 @@ You can define a custom function that resolves the config.
 
 If this option is set to `true`, loader fails if the main config file does not exists.
 
+### `schema`
+
+A [Standard Schema](https://standardschema.dev) (zod, valibot, arktype, ...) used to validate the final config, after all layers are merged.
+
+```js
+import { z } from "zod";
+
+const { config } = await loadConfig({
+  name: "app",
+  schema: z.looseObject({ port: z.coerce.number().default(3000) }),
+});
+```
+
+The validated output replaces `config`, so schema defaults and transforms are applied (and unknown keys may be stripped depending on your schema). On failure, an error listing all issues is thrown (raw issues are available on `error.cause`).
+
+Notes:
+
+- The schema should output an object.
+- Environment-specific keys (`$development`, `$env`, ...) are passed to the schema unless [`omit$Keys`](#omitkeys) is enabled.
+- `layers` keep the raw (unvalidated) configs, and the validated `config` may not share references with them.
+- With `watchConfig`, a validation error on reload is logged and the previous config is kept.
+
 ## Extending configuration
 
 If resolved config contains a `extends` key, it will be used to extend the configuration.
