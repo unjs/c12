@@ -415,7 +415,12 @@ async function resolveConfig<
   }
 
   // Config may be frozen or a module namespace, but gets mutated below (#205)
-  if (res.config && typeof res.config === "object" && !Object.isExtensible(res.config)) {
+  if (
+    res.config &&
+    typeof res.config === "object" &&
+    !Array.isArray(res.config) &&
+    !Object.isExtensible(res.config)
+  ) {
     res.config = { ...res.config };
   }
 

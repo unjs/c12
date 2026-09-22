@@ -389,6 +389,14 @@ describe("loader", () => {
     });
   });
 
+  it("loads frozen arrays exported from config without merging", async () => {
+    const { config } = await loadConfig({
+      name: "test",
+      cwd: r("./fixture/frozen-array"),
+    });
+    expect(config).toEqual([{ a: 1 }, { b: 2 }]);
+  });
+
   it("try reproduce error with index.js on root importing jsx/tsx", async () => {
     await loadConfig({
       name: "test",
