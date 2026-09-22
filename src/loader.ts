@@ -19,6 +19,7 @@ import type {
   InputConfig,
   ConfigSource,
   ConfigFunctionContext,
+  StandardSchemaV1,
 } from "./types.ts";
 
 const _normalize = (p?: string) => p?.replace(/\\/g, "/");
@@ -216,6 +217,11 @@ export async function loadConfig<
   // Fail if no config loaded
   if (options.configFileRequired && !r._configFile) {
     throw new Error(`Required config (${r.configFile}) cannot be resolved.`);
+  }
+
+  // Validate final config
+  if (options.schema != null) {
+    r.config = (await validateConfig(r.config, options.schema)) as T;
   }
 
   // Return resolved config
@@ -464,6 +470,26 @@ async function resolveConfig<
 }
 
 // --- internal ---
+
+async function validateConfig(config: unknown, schema: StandardSchemaV1) {
+  if (typeof schema?.["~standard"]?.validate !== "function") {
+    throw new TypeError(
+      "Invalid `schema` option: expected a Standard Schema (https://standardschema.dev).",
+    );
+  }
+  const result = await schema["~standard"].validate(config);
+  if (result.issues) {
+    const messages = result.issues.map((issue) => {
+      const path = issue.path?.map((p) => String(typeof p === "object" ? p.key : p)).join(".");
+      return `  - ${path ? `${path}: ` : ""}${issue.message}`;
+    });
+    throw new Error(
+      `Config validation failed (${schema["~standard"].vendor}):\n${messages.join("\n")}`,
+      { cause: result.issues },
+    );
+  }
+  return result.value;
+}
 
 function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
   const res = resolveModulePath(id, {

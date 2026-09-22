@@ -41,6 +41,7 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 - **Environment overrides** — `$test`, `$development`, `$production` keys auto-applied based on env
 - **Remote extends** — Config can extend from GitHub/GitLab/npm via `giget`
 - **Dynamic config** — Supports `export default (ctx) => ({ ... })` functions
+- **Schema validation** — Optional `schema` ([Standard Schema](https://standardschema.dev)) validates the final merged config once; output replaces `config`
 - **ESM cache busting** — Native `import()` with incrementing query string `_${++counter}`
 
 ### Core Dependencies
@@ -82,7 +83,7 @@ SUPPORTED_EXTENSIONS; // Array of all supported file extensions
 - **Build**: `obuild`
 - **Test**: `vitest` (run with `pnpm vitest run <path>`)
 - **Lint**: `oxlint` + `oxfmt` (Rust-based)
-- **Types**: `tsgo --noEmit`
+- **Types**: `tsc --noEmit` (`pnpm test:types`)
 - **Package manager**: `pnpm`
 
 ### Commands
