@@ -281,6 +281,8 @@ Custom options merger function. Default is [defu](https://github.com/unjs/defu).
 
 Custom merger used to apply [environment specific configuration](#environment-specific-configuration) (`$<envName>` and `$env.<envName>` keys) onto the config. Defaults to [`merger`](#merger) (or [defu](https://github.com/unjs/defu)).
 
+**Note:** It only applies when merging a layer's env keys onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
+
 Useful when an environment override should replace a value instead of being merged into it. For example, to replace arrays instead of concatenating them:
 
 ```js
@@ -288,7 +290,7 @@ import { createDefu } from "defu";
 
 const replaceArrays = createDefu((obj, key, value) => {
   if (Array.isArray(value)) {
-    obj[key] = value;
+    obj[key] = [...value];
     return true;
   }
 });
