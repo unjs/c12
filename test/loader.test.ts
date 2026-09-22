@@ -578,6 +578,14 @@ describe("loader", () => {
       );
     });
 
+    it("throws on invalid schema option", async () => {
+      for (const schema of [true, {}, { "~standard": {} }, () => {}]) {
+        await expect(
+          loadConfig({ cwd: r("./fixture"), name: "test", schema: schema as any }),
+        ).rejects.toThrowError("Invalid `schema` option");
+      }
+    });
+
     it("validates after omitting $ keys", async () => {
       let input: Record<string, unknown> | undefined;
       await loadConfig({

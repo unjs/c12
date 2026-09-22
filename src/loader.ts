@@ -220,7 +220,7 @@ export async function loadConfig<
   }
 
   // Validate final config
-  if (options.schema) {
+  if (options.schema != null) {
     r.config = (await validateConfig(r.config, options.schema)) as T;
   }
 
@@ -471,6 +471,11 @@ async function resolveConfig<
 // --- internal ---
 
 async function validateConfig(config: unknown, schema: StandardSchemaV1) {
+  if (typeof schema?.["~standard"]?.validate !== "function") {
+    throw new TypeError(
+      "Invalid `schema` option: expected a Standard Schema (https://standardschema.dev).",
+    );
+  }
   const result = await schema["~standard"].validate(config);
   if (result.issues) {
     const messages = result.issues.map((issue) => {
