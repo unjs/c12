@@ -68,6 +68,16 @@ const { config } = await loadConfig({});
 const { config, configFile, layers } = await loadConfig({});
 ```
 
+> [!NOTE]
+> Merged `config` may share nested object references with `layers[].config`, so mutating `config` can also mutate a layer (and vice versa). If you need to mutate the result, clone it first using a deep clone strategy that fits your config (for example [`klona`](https://github.com/lukeed/klona) or `structuredClone`):
+>
+> ```js
+> import { klona } from "klona";
+>
+> const { config: _config, layers } = await loadConfig({});
+> const config = klona(_config);
+> ```
+
 ## Loading priority
 
 c12 merged config sources with [unjs/defu](https://github.com/unjs/defu) by below order:
@@ -231,9 +241,7 @@ Custom import function used to load configuration files. By default, c12 uses na
 ```js
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, {
-  /* jiti options */
-});
+const jiti = createJiti(import.meta.url, {/* jiti options */});
 
 const { config } = await loadConfig({
   import: (id) => jiti.import(id),
@@ -250,7 +258,7 @@ Options passed to [unjs/jiti](https://github.com/unjs/jiti) when c12 falls back 
 const { config } = await loadConfig({
   jitiOptions: {
     fsCache: false,
-    transformOptions: { /* ... */ },
+    transformOptions: {/* ... */},
   },
 });
 ```
@@ -368,23 +376,17 @@ Layers:
 ```js
 [
   {
-    config: {
-      /* theme config */
-    },
+    config: {/* theme config */},
     configFile: "/path/to/theme/config.ts",
     cwd: "/path/to/theme ",
   },
   {
-    config: {
-      /* base  config */
-    },
+    config: {/* base  config */},
     configFile: "/path/to/base/config.ts",
     cwd: "/path/to/base",
   },
   {
-    config: {
-      /* dev   config */
-    },
+    config: {/* dev   config */},
     configFile: "/path/to/config.dev.ts",
     cwd: "/path/",
   },
