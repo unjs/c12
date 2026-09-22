@@ -170,6 +170,13 @@ export interface LoadConfigOptions<
       };
 
   configFileRequired?: boolean;
+
+  /**
+   * [Standard Schema](https://standardschema.dev) (zod, valibot, arktype, ...) used to validate the final merged config.
+   *
+   * The validated output replaces `config` (schema defaults and transforms are applied).
+   */
+  schema?: StandardSchemaV1;
 }
 
 export type DefineConfig<
@@ -183,3 +190,25 @@ export function createDefineConfig<
 >(): DefineConfig<T, MT> {
   return (input: InputConfig<T, MT>) => input;
 }
+
+/**
+ * Minimal [Standard Schema](https://standardschema.dev) v1 interface.
+ */
+export interface StandardSchemaV1<Output = unknown> {
+  readonly "~standard": {
+    readonly version: 1;
+    readonly vendor: string;
+    readonly validate: (
+      value: unknown,
+    ) => StandardSchemaV1Result<Output> | Promise<StandardSchemaV1Result<Output>>;
+  };
+}
+
+export type StandardSchemaV1Result<Output = unknown> =
+  | { readonly value: Output; readonly issues?: undefined }
+  | {
+      readonly issues: ReadonlyArray<{
+        readonly message: string;
+        readonly path?: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }> | undefined;
+      }>;
+    };
