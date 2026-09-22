@@ -306,6 +306,44 @@ describe("loader", () => {
     `);
   });
 
+  it("supports multiple env names", async () => {
+    const load = (envName: string | string[]) =>
+      loadConfig({ name: "test", cwd: r("./fixture/env-names"), envName, omit$Keys: true }).then(
+        (r) => r.config,
+      );
+
+    expect(await load("production")).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 1,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+    expect(await load(["production", "prerender"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "silent",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+    expect(await load(["prerender", "production"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+      }
+    `);
+  });
+
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       name: "test",

@@ -435,14 +435,15 @@ async function resolveConfig<
   }
 
   // Extend env specific config
-  if (options.envName) {
-    const envConfig = {
-      ...res.config!["$" + options.envName],
-      ...res.config!.$env?.[options.envName],
-    };
-    if (Object.keys(envConfig).length > 0) {
-      res.config = _merger(envConfig, res.config);
-    }
+  // Later names in the list have higher priority
+  const envNames = (Array.isArray(options.envName) ? options.envName : [options.envName])
+    .filter(Boolean)
+    .reverse() as string[];
+  const envConfigs = envNames
+    .flatMap((envName) => [res.config!.$env?.[envName], res.config!["$" + envName]])
+    .filter((c) => c && Object.keys(c).length > 0);
+  if (envConfigs.length > 0) {
+    res.config = _merger({} as T, ...envConfigs, res.config) as T;
   }
 
   // Meta

@@ -115,7 +115,14 @@ export interface LoadConfigOptions<
 
   dotenv?: boolean | DotenvOptions;
 
-  envName?: string | false;
+  /**
+   * Environment name(s) used to apply `$<envName>` and `$env.<envName>` overrides.
+   *
+   * When an array is given, later names have higher priority.
+   *
+   * Default: `process.env.NODE_ENV`
+   */
+  envName?: string | string[] | false;
 
   packageJson?: boolean | string | string[];
 

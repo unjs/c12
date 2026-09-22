@@ -283,6 +283,8 @@ Environment name used for [environment specific configuration](#environment-spec
 
 The default is `process.env.NODE_ENV`. You can set `envName` to `false` or an empty string to disable the feature.
 
+You can also pass an array of names (e.g. `["production", "prerender"]`) to apply several environments. Later names have higher priority.
+
 ### `context`
 
 Context object passed to dynamic config functions.
