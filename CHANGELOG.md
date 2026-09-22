@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-rc.2
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-rc.1...v4.0.0-rc.2)
+
+### 🚀 Enhancements
+
+- **dotenv:** Support `${VAR:-default}` fallback syntax ([#337](https://github.com/unjs/c12/pull/337))
+- **dotenv:** Support custom `parse` option ([c299035](https://github.com/unjs/c12/commit/c299035))
+- Support multiple env names in `envName` ([7cd4a6d](https://github.com/unjs/c12/commit/7cd4a6d))
+- Add envMerger option for env-specific overrides ([#341](https://github.com/unjs/c12/pull/341))
+- ⚠️  Use native `node:fs` watcher instead of chokidar ([#342](https://github.com/unjs/c12/pull/342))
+- Support `schema` option for standard schema validation ([#343](https://github.com/unjs/c12/pull/343))
+
+### 🩹 Fixes
+
+- **dotenv:** Stop an unbraced `$VAR` reference at a `:` ([#339](https://github.com/unjs/c12/pull/339))
+- **watch:** Handle replaced dirs, symlinks, hook errors and unwatch races ([bf5c3c2](https://github.com/unjs/c12/commit/bf5c3c2))
+- Support non-extensible config objects ([#323](https://github.com/unjs/c12/pull/323))
+
+### 📖 Documentation
+
+- Note shared references between merged config and layers ([eff5fe8](https://github.com/unjs/c12/commit/eff5fe8))
+
+### 🏡 Chore
+
+- Update deps ([f6a4922](https://github.com/unjs/c12/commit/f6a4922))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Use native `node:fs` watcher instead of chokidar ([#342](https://github.com/unjs/c12/pull/342))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Naveentehrpariya ([@naveentehrpariya](https://github.com/naveentehrpariya))
+- Pi0x <x@pi0.io>
+- Mochammad Fadhlan Al-Ghiffari ([@MFA-G](https://github.com/MFA-G))
+
 ## v4.0.0-rc.1
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-beta.5...v4.0.0-rc.1)
