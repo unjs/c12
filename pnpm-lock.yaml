@@ -31,7 +31,7 @@ importers:
         specifier: ^26.6.2
         version: 26.6.2
       '@vitest/coverage-v8':
-        specifier: ^5
+        specifier: ^5.0.1
         version: 5.0.1(vitest@5.0.1)
       automd:
         specifier: ^0.4.3
@@ -40,8 +40,8 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.5)
       dotenv:
-        specifier: ^18.0.2
-        version: 18.0.2
+        specifier: ^18.0.3
+        version: 18.0.3
       eslint-config-unjs:
         specifier: ^0.6.2
         version: 0.6.2(eslint@10.11.0(jiti@2.7.0))(typescript@7.0.2)
@@ -59,7 +59,7 @@ importers:
         version: 0.5.5
       obuild:
         specifier: ^0.4.40
-        version: 0.4.40(chokidar@5.0.0)(dotenv@18.0.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)(typescript@7.0.2)
+        version: 0.4.40(chokidar@5.0.0)(dotenv@18.0.3)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)(typescript@7.0.2)
       ohash:
         specifier: ^2.0.12
         version: 2.0.12
@@ -76,7 +76,7 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^5
+        specifier: ^5.0.1
         version: 5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(vite@8.3.0(@types/node@26.6.2)(jiti@2.7.0))
 
   test/bench:
@@ -1218,8 +1218,8 @@ packages:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
-  dotenv@18.0.2:
-    resolution: {integrity: sha512-wl0U3CxC0iobaryqEKpFJxzyp4AxQFYAKj/WWszXZr87vVHLi2yJv2syax5Vxt+u02xqNgE277rsc3lOKg9sPg==}
+  dotenv@18.0.3:
+    resolution: {integrity: sha512-/8CJTyL817qPnfbQrJgOEcrU3fDrJkRIoXBE566wHuvIXKOCHUZhPqGPbCPi9SogjdGnreF0TlvnTgK6J/8zpA==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -2836,7 +2836,7 @@ snapshots:
       jiti: 2.7.0
       magicast: 0.5.5
 
-  c12@4.0.0-rc.1(chokidar@5.0.0)(dotenv@18.0.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5):
+  c12@4.0.0-rc.1(chokidar@5.0.0)(dotenv@18.0.3)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5):
     dependencies:
       confbox: 0.3.1
       defu: 6.1.7
@@ -2846,7 +2846,7 @@ snapshots:
       rc9: 3.1.0
     optionalDependencies:
       chokidar: 5.0.0
-      dotenv: 18.0.2
+      dotenv: 18.0.3
       giget: 3.3.1
       jiti: 2.7.0
       magicast: 0.5.5
@@ -2962,7 +2962,7 @@ snapshots:
 
   dotenv@17.4.2: {}
 
-  dotenv@18.0.2: {}
+  dotenv@18.0.3: {}
 
   dts-resolver@3.0.0: {}
 
@@ -3622,9 +3622,9 @@ snapshots:
 
   obug@3.0.0: {}
 
-  obuild@0.4.40(chokidar@5.0.0)(dotenv@18.0.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)(typescript@7.0.2):
+  obuild@0.4.40(chokidar@5.0.0)(dotenv@18.0.3)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)(typescript@7.0.2):
     dependencies:
-      c12: 4.0.0-rc.1(chokidar@5.0.0)(dotenv@18.0.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)
+      c12: 4.0.0-rc.1(chokidar@5.0.0)(dotenv@18.0.3)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.5)
       consola: 3.4.2
       defu: 6.1.7
       exsolve: 1.1.1
