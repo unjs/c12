@@ -1,4 +1,4 @@
-import { existsSync, statSync } from "node:fs";
+import { existsSync, realpathSync, statSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { homedir } from "node:os";
@@ -70,6 +70,7 @@ export async function loadConfig<
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
+      dedupe: true,
       ...options.extend,
     };
   }
@@ -107,7 +108,8 @@ export async function loadConfig<
   }
 
   // Load main config file
-  const _mainConfig = await resolveConfig(".", options);
+  const seen = options.extend && options.extend.dedupe ? new Set<string>() : undefined;
+  const _mainConfig = (await resolveConfig(".", options, {}, seen)) as ResolvedConfig<T, MT>;
   if (_mainConfig.configFile) {
     rawConfigs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
@@ -176,7 +178,7 @@ export async function loadConfig<
 
     // Allow extending
     if (options.extend) {
-      await extendConfig(r.config, options);
+      await extendConfig(r.config, options, seen);
       r.layers = r.config._layers;
       delete r.config._layers;
       r.config = _merger(r.config, ...r.layers!.map((e) => e.config)) as T;
@@ -231,7 +233,7 @@ export async function loadConfig<
 async function extendConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>) {
+>(config: InputConfig<T, MT>, options: LoadConfigOptions<T, MT>, seen?: Set<string>) {
   (config as any)._layers = config._layers || [];
   if (!options.extend) {
     return;
@@ -266,14 +268,17 @@ async function extendConfig<
       );
       continue;
     }
-    const _config = await resolveConfig(extendSource, options, sourceOptions);
+    const _config = await resolveConfig(extendSource, options, sourceOptions, seen);
+    if (_config === DUPLICATE) {
+      continue;
+    }
     if (!_config.config) {
       // TODO: Use error in next major versions
 
       console.warn(`Cannot extend config from \`${extendSource}\` in ${options.cwd}`);
       continue;
     }
-    await extendConfig(_config.config, { ...options, cwd: _config.cwd });
+    await extendConfig(_config.config, { ...options, cwd: _config.cwd }, seen);
     config._layers.push(_config);
     if (_config.config._layers) {
       config._layers.push(..._config.config._layers);
@@ -295,12 +300,15 @@ async function resolveConfig<
   source: string,
   options: LoadConfigOptions<T, MT>,
   sourceOptions: SourceOptions<T, MT> = {},
-): Promise<ResolvedConfig<T, MT>> {
+  seen?: Set<string>,
+): Promise<ResolvedConfig<T, MT> | typeof DUPLICATE> {
   // Custom user resolver
   if (options.resolve) {
     const res = await options.resolve(source, options);
     if (res) {
-      return res;
+      const file = res._configFile || res.configFile;
+      const configFile = file && resolve(res.cwd || options.cwd!, file);
+      return _isDuplicateLayer(seen, configFile, res.cwd) ? DUPLICATE : res;
     }
   }
 
@@ -317,6 +325,10 @@ async function resolveConfig<
       : GIGET_PREFIXES;
 
   if (options.giget !== false && gigetPrefixes.some((prefix) => source.startsWith(prefix))) {
+    if (seen?.has(`giget:${source}`)) {
+      return DUPLICATE;
+    }
+    seen?.add(`giget:${source}`);
     const { downloadTemplate } = await import("giget").catch((error) => {
       throw new Error(
         `Extending config from \`${source}\` requires \`giget\` peer dependency to be installed.\n\nInstall it with: \`npx nypm i giget\``,
@@ -400,6 +412,10 @@ async function resolveConfig<
 
   if (!existsSync(res.configFile!)) {
     return res;
+  }
+
+  if (_isDuplicateLayer(seen, res.configFile!, res.cwd)) {
+    return DUPLICATE;
   }
 
   res._configFile = res.configFile;
@@ -499,6 +515,32 @@ async function validateConfig(config: unknown, schema: StandardSchemaV1) {
     );
   }
   return result.value;
+}
+
+const DUPLICATE = Symbol("duplicate");
+
+function _layerKey(path: string): string {
+  try {
+    return _normalize(realpathSync(path))!;
+  } catch {
+    return _normalize(resolve(path))!;
+  }
+}
+
+function _isDuplicateLayer(seen: Set<string> | undefined, configFile?: string, cwd?: string) {
+  const path = configFile || cwd;
+  if (!seen || !path) {
+    return false;
+  }
+  const key = _layerKey(path);
+  if (seen.has(key)) {
+    return true;
+  }
+  seen.add(key);
+  if (configFile && cwd) {
+    seen.add(_layerKey(cwd));
+  }
+  return false;
 }
 
 function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
