@@ -2,12 +2,22 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "pathe";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../src/index.ts";
 
 type Config = { items?: string[]; extends?: unknown; _extends?: unknown };
 
 let root: string;
+
+const downloadTemplate = vi.hoisted(() =>
+  vi.fn(async (_source: string, { dir }: { dir: string }) => {
+    const { mkdir, writeFile } = await import("node:fs/promises");
+    await mkdir(dir, { recursive: true });
+    await writeFile(`${dir}/test.config.mjs`, 'export default { items: ["remote"] }');
+    return { dir };
+  }),
+);
+vi.mock("giget", () => ({ downloadTemplate }));
 
 async function layer(dir: string, name: string, extendsList: unknown[] = []) {
   await mkdir(join(root, dir), { recursive: true });
@@ -75,8 +85,8 @@ beforeAll(async () => {
   await layer("cycle/b", "b", ["../"]);
 
   await mkdir(join(root, "remote/a/node_modules"), { recursive: true });
-  await layer("remote/a", "a", ["gh:unjs/c12/test/fixture/_github#main"]);
-  await layer("remote/b", "b", ["gh:unjs/c12/test/fixture/_github#main"]);
+  await layer("remote/a", "a", ["gh:org/remote-layer"]);
+  await layer("remote/b", "b", ["gh:org/remote-layer"]);
   await layer("remote", "root", ["./a", "./b"]);
   await layer("cycle", "root", ["./a"]);
 });
@@ -113,15 +123,36 @@ describe("extends dedupe", () => {
       cwd: join(root, "diamond"),
       name: "test",
       resolve: (id) =>
-        id === "virtual" ? { config: { items: ["virtual"] }, cwd: join(root, "virtual") } : null,
-      overrides: { extends: ["virtual", "virtual"] },
+        id.startsWith("virtual")
+          ? {
+              config: { items: [id] },
+              configFile: `${id.split(":")[0]}.config.ts`,
+              cwd: join(root, "virtual"),
+            }
+          : null,
+      overrides: { extends: ["virtual", "virtual:again", "virtual2"] },
     });
-    expect(layerItems(layers)).toEqual(["root", "virtual", "a", "c", "b"]);
+    expect(layerItems(layers)).toEqual(["root", "virtual", "virtual2", "a", "c", "b"]);
+  });
+
+  it("dedupes extends of a main config returned by a custom resolver", async () => {
+    const main = {
+      config: { items: ["main"], extends: ["self"] },
+      configFile: "main.config.ts",
+      cwd: join(root, "virtual"),
+    };
+    const { layers } = await loadConfig<Config>({
+      cwd: join(root, "virtual"),
+      name: "test",
+      resolve: (id) => (id === "." || id === "self" ? structuredClone(main) : null),
+    });
+    expect(layerItems(layers)).toEqual(["main"]);
   });
 
   it("dedupes remote sources extended from different directories", async () => {
     const { layers } = await load("remote");
-    expect(layers!.filter((l) => (l.config as any)?.githubLayer)).toHaveLength(1);
+    expect(layerItems(layers)).toEqual(["root", "a", "remote", "b"]);
+    expect(downloadTemplate).toHaveBeenCalledOnce();
   });
 
   it("dedupes resolver layers without a config file by cwd", async () => {

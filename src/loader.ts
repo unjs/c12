@@ -108,7 +108,8 @@ export async function loadConfig<
   }
 
   // Load main config file
-  const _mainConfig = (await resolveConfig(".", options)) as ResolvedConfig<T, MT>;
+  const seen = options.extend && options.extend.dedupe ? new Set<string>() : undefined;
+  const _mainConfig = (await resolveConfig(".", options, {}, seen)) as ResolvedConfig<T, MT>;
   if (_mainConfig.configFile) {
     rawConfigs.main = _mainConfig.config;
     r.configFile = _mainConfig.configFile;
@@ -177,10 +178,6 @@ export async function loadConfig<
 
     // Allow extending
     if (options.extend) {
-      const seen = options.extend.dedupe ? new Set<string>() : undefined;
-      if (seen && _mainConfig._configFile) {
-        _isDuplicateLayer(seen, _mainConfig._configFile, options.cwd);
-      }
       await extendConfig(r.config, options, seen);
       r.layers = r.config._layers;
       delete r.config._layers;
@@ -310,9 +307,8 @@ async function resolveConfig<
     const res = await options.resolve(source, options);
     if (res) {
       const file = res._configFile || res.configFile;
-      return _isDuplicateLayer(seen, file && existsSync(file) ? file : undefined, res.cwd)
-        ? DUPLICATE
-        : res;
+      const configFile = file && resolve(res.cwd || options.cwd!, file);
+      return _isDuplicateLayer(seen, configFile, res.cwd) ? DUPLICATE : res;
     }
   }
 
