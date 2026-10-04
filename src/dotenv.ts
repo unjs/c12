@@ -203,9 +203,14 @@ function interpolate(
   source: Record<string, any> = {},
   parse = (v: any) => v,
 ) {
+  // Resolve references against the raw values. Reading back values that were
+  // already interpolated would expand escaped `\${VAR}` literals a second time,
+  // making the result depend on key order.
+  const raw = { ...target };
+
   function getValue(key: string) {
     // Source value 'wins' over target value
-    return source[key] === undefined ? target[key] : source[key];
+    return source[key] === undefined ? raw[key] : source[key];
   }
 
   function interpolate(value: unknown, parents: string[] = []): any {
