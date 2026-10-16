@@ -440,6 +440,9 @@ async function resolveConfig<
     );
   }
 
+  // A file containing `null` or a config function returning nothing provides no config
+  res.config ??= {} as T;
+
   // Config may be frozen or a module namespace, but gets mutated below (#205)
   if (
     res.config &&
