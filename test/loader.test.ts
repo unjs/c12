@@ -441,6 +441,22 @@ describe("loader", () => {
     expect(config).toEqual([{ a: 1 }, { b: 2 }]);
   });
 
+  it("treats a null config or a config function returning nothing as empty", async () => {
+    for (const configFile of ["null.config", "function.config"]) {
+      for (const envName of [false, "production"] as const) {
+        const { config, _configFile } = await loadConfig({
+          configFile,
+          envName,
+          rcFile: false,
+          cwd: r("./fixture/empty"),
+          defaults: { fromDefaults: true },
+        });
+        expect(_configFile).toBeDefined();
+        expect(config).toEqual({ fromDefaults: true });
+      }
+    }
+  });
+
   it("loads .json configs without jiti", async () => {
     const { config, configFile } = await loadConfig({
       name: "test",
