@@ -156,9 +156,8 @@ export async function loadConfig<
   // TODO: #253 change order from defaults to overrides in next major version
   for (const key in rawConfigs) {
     const value = rawConfigs[key as ConfigSource];
-    configs[key as ConfigSource] = await (typeof value === "function"
-      ? value({ configs, rawConfigs })
-      : value);
+    const config = await (typeof value === "function" ? value({ configs, rawConfigs }) : value);
+    configs[key as ConfigSource] = key === "overrides" ? applyEnvConfig(config, options) : config;
   }
 
   if (Array.isArray(configs.main)) {
@@ -451,17 +450,7 @@ async function resolveConfig<
   }
 
   // Extend env specific config
-  // Later names in the list have higher priority
-  const envNames = (Array.isArray(options.envName) ? options.envName : [options.envName])
-    .filter(Boolean)
-    .reverse() as string[];
-  const envConfigs = envNames
-    .flatMap((envName) => [res.config!.$env?.[envName], res.config!["$" + envName]])
-    .filter((c) => c && Object.keys(c).length > 0);
-  if (envConfigs.length > 0) {
-    const _envMerger = options.envMerger || _merger;
-    res.config = _envMerger({} as T, ...envConfigs, res.config) as T;
-  }
+  res.config = applyEnvConfig(res.config, options);
 
   // Meta
   res.meta = defu(res.sourceOptions!.meta, res.config!.$meta) as MT;
@@ -480,6 +469,27 @@ async function resolveConfig<
 }
 
 // --- internal ---
+
+function applyEnvConfig<T extends UserInputConfig | null | undefined>(
+  config: T,
+  options: LoadConfigOptions<any, any>,
+): T {
+  if (!config) {
+    return config;
+  }
+  // Later names in the list have higher priority
+  const envNames = (Array.isArray(options.envName) ? options.envName : [options.envName])
+    .filter(Boolean)
+    .reverse() as string[];
+  const envConfigs = envNames
+    .flatMap((envName) => [config.$env?.[envName], config["$" + envName]])
+    .filter((c) => c && Object.keys(c).length > 0);
+  if (envConfigs.length === 0) {
+    return config;
+  }
+  const _envMerger = options.envMerger || options.merger || defu;
+  return _envMerger({} as T, ...envConfigs, config) as T;
+}
 
 async function validateConfig(config: unknown, schema: StandardSchemaV1) {
   if (typeof schema?.["~standard"]?.validate !== "function") {

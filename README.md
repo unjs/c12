@@ -228,6 +228,8 @@ Specify default configuration. It is applied **before** extending config.
 
 Specify override configuration. It has the **highest** priority and is applied **before extending** config.
 
+[Environment specific configuration](#environment-specific-configuration) keys in `overrides` are applied the same way as in config files.
+
 ### `omit$Keys`
 
 Exclude environment-specific and built-in keys start with `$` in the resolved config. The default is `false`.
@@ -289,7 +291,7 @@ Custom options merger function. Default is [defu](https://github.com/unjs/defu).
 
 Custom merger used to apply [environment specific configuration](#environment-specific-configuration) (`$<envName>` and `$env.<envName>` keys) onto the config. Defaults to [`merger`](#merger) (or [defu](https://github.com/unjs/defu)).
 
-**Note:** It only applies when merging a layer's env keys onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
+**Note:** It only applies when merging the env keys of a layer (or of `overrides`) onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
 
 Useful when an environment override should replace a value instead of being merged into it. For example, to replace arrays instead of concatenating them:
 
@@ -494,7 +496,7 @@ Users can define environment-specific configuration using these config keys:
 
 c12 tries to match [`envName`](#envname) and override environment config if specified.
 
-**Note:** Environment will be applied when extending each configuration layer. This way layers can provide environment-specific configuration.
+**Note:** Environment will be applied when extending each configuration layer and to [`overrides`](#overrides). This way layers can provide environment-specific configuration.
 
 **Example:**
 
