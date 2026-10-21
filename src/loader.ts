@@ -393,7 +393,7 @@ async function resolveConfig<
   };
 
   res.configFile =
-    tryResolve(resolve(cwd, source), options) ||
+    tryResolve(isDir ? resolve(cwd, source) : resolvedPath, options) ||
     tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, "")), options) ||
     tryResolve(resolve(cwd, ".config", source), options) ||
     source;
