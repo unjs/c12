@@ -64,4 +64,18 @@ describe("update config file", () => {
       };"
     `);
   });
+  it("update existing in .config folder with dotted name", async () => {
+    await mkdir(r("./.tmp/.config"), { recursive: true });
+    await writeFile(r("./.tmp/.config/foo.bar.ts"), "export default { test: true }");
+    const res = await updateConfig({
+      cwd: tmpDir,
+      configFile: "foo.bar.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    expect(res.created).toBe(false);
+    expect(res.configFile).toBe(r("./.tmp/.config/foo.bar.ts"));
+    expect(existsSync(r("./.tmp/foo.bar.config.ts"))).toBe(false);
+  });
 });
