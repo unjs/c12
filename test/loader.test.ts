@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, vi } from "vitest";
 import { createDefu } from "defu";
 import { normalize } from "pathe";
 import type {
@@ -326,6 +326,10 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prod",
+          "base",
+        ],
       }
     `);
     expect(await load(["production", "prerender"])).toMatchInlineSnapshot(`
@@ -336,6 +340,11 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prerender",
+          "prod",
+          "base",
+        ],
       }
     `);
     expect(await load(["prerender", "production"])).toMatchInlineSnapshot(`
@@ -346,6 +355,35 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prod",
+          "prerender",
+          "base",
+        ],
+      }
+    `);
+  });
+
+  it("dedupes repeated env names (last occurrence wins)", async () => {
+    const load = (envName: string | string[]) =>
+      loadConfig({ name: "test", cwd: r("./fixture/env-names"), envName, omit$Keys: true }).then(
+        (r) => r.config,
+      );
+
+    expect(await load(["production", "production"])).toEqual(await load("production"));
+    expect(await load(["production", "prerender", "production"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+        "plugins": [
+          "prod",
+          "prerender",
+          "base",
+        ],
       }
     `);
   });
@@ -373,6 +411,10 @@ describe("loader", () => {
             "c": 2,
             "d": 2,
           },
+          "plugins": [
+            "prod",
+            "base",
+          ],
         }
       `);
     });
@@ -427,15 +469,15 @@ describe("loader", () => {
           return true;
         }
       });
-      const overrides = { plugins: ["base"], $production: { plugins: ["production"] } };
+      const overrides = { modules: ["base"], $production: { modules: ["production"] } };
       const { config: defaultConfig } = await load({ envName: "production", overrides });
-      expect(defaultConfig.plugins).toEqual(["production", "base"]);
+      expect(defaultConfig.modules).toEqual(["production", "base"]);
       const { config } = await load({
         envName: "production",
         overrides,
         envMerger: (...sources) => replaceArrays({}, ...sources),
       });
-      expect(config.plugins).toEqual(["production"]);
+      expect(config.modules).toEqual(["production"]);
     });
 
     it("exposes env-applied overrides as a layer", async () => {
@@ -503,6 +545,67 @@ describe("loader", () => {
     });
   });
 
+  it.each([false, "production"] as const)(
+    "skips extended layers resolving to null or undefined (envName: %s)",
+    async (envName) => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const { config, layers } = await loadConfig({
+          name: "test",
+          cwd: r("./fixture/null-layer"),
+          envName,
+        });
+        expect(config).toEqual({ app: true });
+        expect(transformPaths(layers!)).toMatchInlineSnapshot(`
+          [
+            {
+              "config": {
+                "app": true,
+                "extends": [
+                  "./null-base",
+                  "./undefined-base",
+                ],
+              },
+              "configFile": "test.config",
+              "cwd": "<path>/fixture/null-layer",
+            },
+            {
+              "config": {},
+              "configFile": ".testrc",
+            },
+          ]
+        `);
+        expect(warn.mock.calls.map((c) => c[0])).toEqual([
+          `Cannot extend config from \`./null-base\` in ${r("./fixture/null-layer")}`,
+          `Cannot extend config from \`./undefined-base\` in ${r("./fixture/null-layer")}`,
+        ]);
+      } finally {
+        warn.mockRestore();
+      }
+    },
+  );
+
+  it.each([false, "production"] as const)(
+    "treats a main config resolving to null as empty (envName: %s)",
+    async (envName) => {
+      const { config, layers, meta } = await loadConfig({
+        name: "test",
+        cwd: r("./fixture/null-main"),
+        envName,
+      });
+      expect(config).toEqual({});
+      expect(transformPaths(layers!)).toMatchInlineSnapshot(`
+        [
+          {
+            "config": {},
+            "configFile": ".testrc",
+          },
+        ]
+      `);
+      expect(meta).toBeUndefined();
+    },
+  );
+
   it("no config loaded and configFileRequired is default setting", async () => {
     await expect(
       loadConfig({
@@ -548,6 +651,26 @@ describe("loader", () => {
     });
     expect(config).toEqual([{ a: 1 }, { b: 2 }]);
   });
+
+  it.each([
+    { configFile: "null.config", ext: ".json", envName: false as const },
+    { configFile: "null.config", ext: ".json", envName: "production" },
+    { configFile: "function.config", ext: ".mjs", envName: false as const },
+    { configFile: "function.config", ext: ".mjs", envName: "production" },
+  ])(
+    "treats $configFile ($ext) as empty config (envName: $envName)",
+    async ({ configFile, ext, envName }) => {
+      const { config, _configFile } = await loadConfig({
+        configFile,
+        envName,
+        rcFile: false,
+        cwd: r("./fixture/empty"),
+        defaults: { fromDefaults: true },
+      });
+      expect(_configFile).toBe(r(`./fixture/empty/${configFile}${ext}`));
+      expect(config).toEqual({ fromDefaults: true });
+    },
+  );
 
   it("loads .json configs without jiti", async () => {
     const { config, configFile } = await loadConfig({

@@ -365,6 +365,8 @@ If it starts with either `github:`, `gitlab:`, `bitbucket:`, or `https:`, c12 au
 
 For custom merging strategies, you can directly access each layer with `layers` property.
 
+When the same layer is reached more than once (for example, two layers both extend a shared base), it is only loaded once and the first occurrence is kept. Local layers are compared by the real path of their config file, remote sources by their source string, and layers returned by a custom `resolve` hook by their `configFile` (or `cwd`). Options passed to a repeated reference (such as `meta` or `overrides`) are ignored. Set `extend: { dedupe: false }` to disable this.
+
 **Example:**
 
 ```js
@@ -682,9 +684,9 @@ c12 install size is now down to [380kB](https://packagephobia.com/result?p=c12@4
 
 Loading TypeScript files is significantly faster (on cold cache) — simple TS config loads ~2.5x faster ([bench](https://github.com/unjs/c12/tree/main/test/bench)).
 
-- If you need extends feature with remote/git source, install giget as a peer dependency (docs)
+- If you need extends feature with remote/git source, install giget as a peer dependency ([docs](#extending-config-layer-from-remote-sources)).
 - `watchConfig` now uses native `node:fs` watching. The `chokidar` peer dependency and `chokidarOptions` option are removed (#260).
-- If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a custom import config (docs).
+- If you need legacy TypeScript support (mixed ESM/CJS, no import extensions, etc.), install jiti as a peer dependency (c12 automatically falls back) or provide a [custom import config](#import).
 - Dotenv parsing now uses native runtime features (see #296). You might need to add dotenv as a peer dependency only for legacy/Deno support.
 
 ## Contribution

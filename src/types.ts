@@ -167,6 +167,12 @@ export interface LoadConfigOptions<
     | false
     | {
         extendKey?: string | string[];
+        /**
+         * Load each extended layer only once, keeping the first occurrence.
+         *
+         * @default true
+         */
+        dedupe?: boolean;
       };
 
   configFileRequired?: boolean;

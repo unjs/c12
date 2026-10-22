@@ -40,6 +40,7 @@ Two build entry points: `./dist/index.mjs` (main) and `./dist/update.mjs` (updat
 - **Deep merge** via `defu` — Layers are merged bottom-up with `defu`
 - **Environment overrides** — `$test`, `$development`, `$production` keys auto-applied based on env
 - **Remote extends** — Config can extend from GitHub/GitLab/npm via `giget`
+- **Layer dedupe** — Each extended layer is loaded once per `loadConfig` call (first occurrence wins), keyed by config file real path, giget source string, or resolver `configFile`/`cwd`; opt out with `extend: { dedupe: false }`
 - **Dynamic config** — Supports `export default (ctx) => ({ ... })` functions
 - **Schema validation** — Optional `schema` ([Standard Schema](https://standardschema.dev)) validates the final merged config once; output replaces `config`
 - **ESM cache busting** — Native `import()` with incrementing query string `_${++counter}`
