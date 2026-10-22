@@ -267,7 +267,7 @@ const { config } = await loadConfig({
 
 ### `resolveModule`
 
-Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod`.
+Custom resolver for picking which export to use from the loaded module. Default: `mod.default` if the module has a `default` export (even when it is `null` or `undefined`), otherwise `mod`.
 
 **Example:** Using a named export:
 

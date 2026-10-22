@@ -657,6 +657,10 @@ describe("loader", () => {
     { configFile: "null.config", ext: ".json", envName: "production" },
     { configFile: "function.config", ext: ".mjs", envName: false as const },
     { configFile: "function.config", ext: ".mjs", envName: "production" },
+    { configFile: "null-export.config", ext: ".mjs", envName: false as const },
+    { configFile: "null-export.config", ext: ".mjs", envName: "production" },
+    { configFile: "undefined-export.config", ext: ".mjs", envName: false as const },
+    { configFile: "undefined-export.config", ext: ".mjs", envName: "production" },
   ])(
     "treats $configFile ($ext) as empty config (envName: $envName)",
     async ({ configFile, ext, envName }) => {
