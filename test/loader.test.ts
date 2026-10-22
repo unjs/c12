@@ -326,6 +326,10 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prod",
+          "base",
+        ],
       }
     `);
     expect(await load(["production", "prerender"])).toMatchInlineSnapshot(`
@@ -336,6 +340,11 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prerender",
+          "prod",
+          "base",
+        ],
       }
     `);
     expect(await load(["prerender", "production"])).toMatchInlineSnapshot(`
@@ -346,6 +355,35 @@ describe("loader", () => {
           "b": 2,
           "c": 2,
         },
+        "plugins": [
+          "prod",
+          "prerender",
+          "base",
+        ],
+      }
+    `);
+  });
+
+  it("dedupes repeated env names (last occurrence wins)", async () => {
+    const load = (envName: string | string[]) =>
+      loadConfig({ name: "test", cwd: r("./fixture/env-names"), envName, omit$Keys: true }).then(
+        (r) => r.config,
+      );
+
+    expect(await load(["production", "production"])).toEqual(await load("production"));
+    expect(await load(["production", "prerender", "production"])).toMatchInlineSnapshot(`
+      {
+        "logLevel": "error",
+        "nested": {
+          "a": 3,
+          "b": 2,
+          "c": 2,
+        },
+        "plugins": [
+          "prod",
+          "prerender",
+          "base",
+        ],
       }
     `);
   });
