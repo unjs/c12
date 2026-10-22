@@ -441,21 +441,25 @@ describe("loader", () => {
     expect(config).toEqual([{ a: 1 }, { b: 2 }]);
   });
 
-  it("treats a null config or a config function returning nothing as empty", async () => {
-    for (const configFile of ["null.config", "function.config"]) {
-      for (const envName of [false, "production"] as const) {
-        const { config, _configFile } = await loadConfig({
-          configFile,
-          envName,
-          rcFile: false,
-          cwd: r("./fixture/empty"),
-          defaults: { fromDefaults: true },
-        });
-        expect(_configFile).toBeDefined();
-        expect(config).toEqual({ fromDefaults: true });
-      }
-    }
-  });
+  it.each([
+    { configFile: "null.config", ext: ".json", envName: false as const },
+    { configFile: "null.config", ext: ".json", envName: "production" },
+    { configFile: "function.config", ext: ".mjs", envName: false as const },
+    { configFile: "function.config", ext: ".mjs", envName: "production" },
+  ])(
+    "treats $configFile$ext as empty config (envName: $envName)",
+    async ({ configFile, ext, envName }) => {
+      const { config, _configFile } = await loadConfig({
+        configFile,
+        envName,
+        rcFile: false,
+        cwd: r("./fixture/empty"),
+        defaults: { fromDefaults: true },
+      });
+      expect(_configFile).toBe(r(`./fixture/empty/${configFile}${ext}`));
+      expect(config).toEqual({ fromDefaults: true });
+    },
+  );
 
   it("loads .json configs without jiti", async () => {
     const { config, configFile } = await loadConfig({
