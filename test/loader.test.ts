@@ -447,7 +447,7 @@ describe("loader", () => {
     { configFile: "function.config", ext: ".mjs", envName: false as const },
     { configFile: "function.config", ext: ".mjs", envName: "production" },
   ])(
-    "treats $configFile$ext as empty config (envName: $envName)",
+    "treats $configFile ($ext) as empty config (envName: $envName)",
     async ({ configFile, ext, envName }) => {
       const { config, _configFile } = await loadConfig({
         configFile,
