@@ -16,7 +16,11 @@ export async function updateConfig(opts: UpdateConfigOptions): Promise<UpdateCon
   let configFile =
     tryResolve(`./${opts.configFile}`, opts.cwd, SUPPORTED_EXTENSIONS) ||
     tryResolve(`./.config/${opts.configFile}`, opts.cwd, SUPPORTED_EXTENSIONS) ||
-    tryResolve(`./.config/${opts.configFile.split(".")[0]}`, opts.cwd, SUPPORTED_EXTENSIONS);
+    tryResolve(
+      `./.config/${opts.configFile.replace(/\.config$/, "")}`,
+      opts.cwd,
+      SUPPORTED_EXTENSIONS,
+    );
 
   // If not found
   let created = false;
