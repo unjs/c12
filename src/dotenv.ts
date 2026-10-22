@@ -207,6 +207,8 @@ function interpolate(
   // already interpolated would expand escaped `\${VAR}` literals a second time,
   // making the result depend on key order.
   const raw = { ...target };
+  // Final values of already processed keys, reused as-is (never interpolated again)
+  const resolvedValues = new Map<string, any>();
 
   function getValue(key: string) {
     // Source value 'wins' over target value
@@ -255,7 +257,9 @@ function interpolate(
       }
 
       // Resolve recursive interpolations
-      let resolved = interpolate(getValue(ref.key), [...parents, ref.key]);
+      let resolved = resolvedValues.has(ref.key)
+        ? resolvedValues.get(ref.key)
+        : interpolate(getValue(ref.key), [...parents, ref.key]);
 
       // Fallback to the default value (`${VAR:-default}` or `${VAR-default}`)
       if (
@@ -275,6 +279,7 @@ function interpolate(
 
   for (const key in target) {
     target[key] = interpolate(getValue(key));
+    resolvedValues.set(key, target[key]);
   }
 }
 
