@@ -34,7 +34,7 @@ export interface SourceOptions<
   meta?: MT;
 
   /** Layer config overrides */
-  overrides?: T;
+  overrides?: InputConfig<T, MT>;
 
   [key: string]: any;
 
@@ -129,7 +129,7 @@ export interface LoadConfigOptions<
   defaults?: T;
 
   defaultConfig?: ResolvableConfig<T>;
-  overrides?: ResolvableConfig<T>;
+  overrides?: ResolvableConfig<T | InputConfig<NoInfer<T>, MT>>;
 
   omit$Keys?: boolean;
 
@@ -157,7 +157,7 @@ export interface LoadConfigOptions<
   /**
    * Custom merger used to apply environment-specific overrides (`$<envName>` and `$env.<envName>`) onto the config.
    *
-   * Only applies when merging a layer's env keys onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
+   * Only applies when merging the env keys of a layer (or of `overrides`) onto that same layer. Layers (`extends`), `overrides`, RC, `package.json` and `defaults` are still combined with `merger`.
    *
    * Defaults to `merger` (or `defu`).
    */

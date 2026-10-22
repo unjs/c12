@@ -388,6 +388,118 @@ describe("loader", () => {
     `);
   });
 
+  describe("env config in overrides", () => {
+    const load = (options: Parameters<typeof loadConfig>[0]) =>
+      loadConfig({ name: "test", cwd: r("./fixture/env-names"), omit$Keys: true, ...options });
+
+    it("applies env config with a string envName", async () => {
+      const { config } = await load({
+        envName: "production",
+        overrides: {
+          logLevel: "warn",
+          nested: { d: 1 },
+          $production: { logLevel: "debug", nested: { d: 2 } },
+          $development: { logLevel: "verbose" },
+        },
+      });
+      expect(config).toMatchInlineSnapshot(`
+        {
+          "logLevel": "debug",
+          "nested": {
+            "a": 1,
+            "b": 2,
+            "c": 2,
+            "d": 2,
+          },
+          "plugins": [
+            "prod",
+            "base",
+          ],
+        }
+      `);
+    });
+
+    it("applies env config with an array envName", async () => {
+      const overrides = {
+        $production: { logLevel: "debug", extra: "production" },
+        $prerender: { extra: "prerender" },
+      };
+      const { config } = await load({ envName: ["production", "prerender"], overrides });
+      expect(config).toMatchObject({ logLevel: "debug", extra: "prerender" });
+      const { config: reversed } = await load({ envName: ["prerender", "production"], overrides });
+      expect(reversed).toMatchObject({ logLevel: "debug", extra: "production" });
+    });
+
+    it("applies `$env.<name>` config", async () => {
+      const { config } = await load({
+        envName: "staging",
+        overrides: {
+          logLevel: "warn",
+          $staging: { logLevel: "verbose", extra: true },
+          $env: { staging: { logLevel: "debug" } },
+        },
+      });
+      expect(config).toMatchObject({ logLevel: "debug", extra: true });
+    });
+
+    it("applies env config to function overrides", async () => {
+      const { config } = await load({
+        envName: "production",
+        overrides: () => ({ $production: { logLevel: "debug" } }),
+      });
+      expect(config.logLevel).toBe("debug");
+    });
+
+    it("does not apply env config when envName is false", async () => {
+      const { config } = await load({
+        envName: false,
+        overrides: {
+          logLevel: "warn",
+          $test: { logLevel: "debug" },
+          $production: { logLevel: "debug" },
+        },
+      });
+      expect(config.logLevel).toBe("warn");
+    });
+
+    it("uses envMerger", async () => {
+      const replaceArrays = createDefu((obj, key, value) => {
+        if (Array.isArray(value)) {
+          obj[key] = value;
+          return true;
+        }
+      });
+      const overrides = { modules: ["base"], $production: { modules: ["production"] } };
+      const { config: defaultConfig } = await load({ envName: "production", overrides });
+      expect(defaultConfig.modules).toEqual(["production", "base"]);
+      const { config } = await load({
+        envName: "production",
+        overrides,
+        envMerger: (...sources) => replaceArrays({}, ...sources),
+      });
+      expect(config.modules).toEqual(["production"]);
+    });
+
+    it("exposes env-applied overrides as a layer", async () => {
+      const overrides = { logLevel: "warn", $production: { logLevel: "debug" } };
+      const { layers } = await load({ envName: "production", overrides });
+      expect(layers![0]).toEqual({
+        config: { logLevel: "debug", $production: { logLevel: "debug" } },
+        configFile: undefined,
+        cwd: undefined,
+      });
+      expect(overrides.logLevel).toBe("warn");
+    });
+
+    it("applies env config to per-layer overrides", async () => {
+      const { config } = await load({
+        cwd: r("./fixture/env-layer-overrides"),
+        envName: "production",
+      });
+      expect(config).toMatchObject({ logLevel: "debug", fromBase: true });
+    });
+  });
+
   it("omit$Keys", async () => {
     const { config, layers } = await loadConfig({
       name: "test",
