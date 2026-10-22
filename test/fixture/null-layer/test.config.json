@@ -1,0 +1,4 @@
+{
+  "extends": ["./null-base", "./undefined-base"],
+  "app": true
+}
