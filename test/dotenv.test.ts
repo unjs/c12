@@ -172,6 +172,14 @@ describe("dotenv interpolation", () => {
     `);
   });
 
+  it("keeps an escaped value literal when it is referenced", async () => {
+    const lines = ["BASE_DIR=/test", String.raw`ESCAPED=\${BASE_DIR}`, "REF=${ESCAPED}"];
+    const expected = { BASE_DIR: "/test", ESCAPED: "${BASE_DIR}", REF: "${BASE_DIR}" };
+    expect(await loadEnv(lines.join("\n"))).toEqual(expected);
+    // The result must not depend on whether the reference comes first
+    expect(await loadEnv([lines[2], lines[0], lines[1]].join("\n"))).toEqual(expected);
+  });
+
   it("supports `${VAR:-default}` (unset or empty)", async () => {
     expect(
       await loadEnv(
