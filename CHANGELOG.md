@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-rc.3
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-rc.2...v4.0.0-rc.3)
+
+### 🚀 Enhancements
+
+- Dedupe extended layers ([#345](https://github.com/unjs/c12/pull/345))
+
+### 🩹 Fixes
+
+- Dedupe repeated `envName` entries ([da5a9f3](https://github.com/unjs/c12/commit/da5a9f3))
+- **updateConfig:** Resolve dotted config names in `.config` dir like the loader ([#352](https://github.com/unjs/c12/pull/352))
+- **loader:** Treat a null config or a config function returning nothing as empty ([#349](https://github.com/unjs/c12/pull/349))
+- Handle layers resolving to `null` or `undefined` ([#355](https://github.com/unjs/c12/pull/355))
+- **loader:** Keep null configs null so empty layers are skipped ([e6ad3ad](https://github.com/unjs/c12/commit/e6ad3ad))
+- Apply env-specific config to `overrides` ([#353](https://github.com/unjs/c12/pull/353))
+- **dotenv:** Resolve references against raw values so escaped literals stay literal ([#348](https://github.com/unjs/c12/pull/348))
+- **loader:** Resolve `export default null` to an empty config instead of the module namespace ([#357](https://github.com/unjs/c12/pull/357))
+
+### 📖 Documentation
+
+- Link documentation references in v4 migration guide ([#350](https://github.com/unjs/c12/pull/350))
+
+### ✅ Tests
+
+- **watch:** Skip parent dir rename test on windows ([9f8e54c](https://github.com/unjs/c12/commit/9f8e54c))
+
+### ❤️ Contributors
+
+- Pi0x <x@pi0.io>
+- Kevin ([@kevin9327](https://github.com/kevin9327))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Alperen ([@lprnmns](https://github.com/lprnmns))
+- Raphael Fakhri <rjf11@mail.aub.edu>
+- Mawonekev <mawonekev@gmail.com>
+
 ## v4.0.0-rc.2
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-rc.1...v4.0.0-rc.2)
