@@ -363,6 +363,8 @@ If it starts with either `github:`, `gitlab:`, `bitbucket:`, or `https:`, c12 au
 
 For custom merging strategies, you can directly access each layer with `layers` property.
 
+When the same layer is reached more than once (for example, two layers both extend a shared base), it is only loaded once and the first occurrence is kept. Local layers are compared by the real path of their config file, remote sources by their source string, and layers returned by a custom `resolve` hook by their `configFile` (or `cwd`). Options passed to a repeated reference (such as `meta` or `overrides`) are ignored. Set `extend: { dedupe: false }` to disable this.
+
 **Example:**
 
 ```js

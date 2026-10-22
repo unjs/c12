@@ -176,8 +176,30 @@ describe("extends dedupe", () => {
     expect(layerItems(layers)).toEqual(["root", "auth", "bare"]);
   });
 
+  it("dedupes layers returned by a custom resolver with a relative cwd", async () => {
+    const { layers } = await loadConfig<Config>({
+      cwd: join(root, "diamond"),
+      name: "test",
+      resolve: (id) =>
+        id.startsWith("rel")
+          ? { config: { items: [id] }, cwd: id.endsWith("2") ? join(root, "diamond/a") : "./a/" }
+          : null,
+      overrides: { extends: ["rel", "rel2"] },
+    });
+    expect(layerItems(layers)).toEqual(["root", "rel", "a", "c", "b"]);
+  });
+
   it("can be disabled", async () => {
     const { config } = await load("diamond", false);
     expect(config.items).toEqual(["root", "a", "c", "b", "c"]);
+  });
+
+  it("stays enabled when dedupe is explicitly undefined", async () => {
+    const { config } = await loadConfig<Config>({
+      cwd: join(root, "diamond"),
+      name: "test",
+      extend: { extendKey: "extends", dedupe: undefined },
+    });
+    expect(config.items).toEqual(["root", "a", "c", "b"]);
   });
 });
