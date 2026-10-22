@@ -471,6 +471,15 @@ async function resolveConfig<
     res.config = { ...res.config };
   }
 
+  // Always windows paths
+  res.configFile = _normalize(res.configFile);
+  res.source = _normalize(res.source);
+
+  // Nothing to apply on a config resolving to `null` or `undefined`
+  if (res.config == null) {
+    return res;
+  }
+
   // Extend env specific config
   // Later names in the list have higher priority (deduped, last occurrence wins)
   const envNames = [
@@ -496,10 +505,6 @@ async function resolveConfig<
   if (res.sourceOptions!.overrides) {
     res.config = _merger(res.sourceOptions!.overrides, res.config) as T;
   }
-
-  // Always windows paths
-  res.configFile = _normalize(res.configFile);
-  res.source = _normalize(res.source);
 
   return res;
 }

@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, vi } from "vitest";
 import { createDefu } from "defu";
 import { normalize } from "pathe";
 import type {
@@ -432,6 +432,67 @@ describe("loader", () => {
       shared: "base",
     });
   });
+
+  it.each([false, "production"] as const)(
+    "skips extended layers resolving to null or undefined (envName: %s)",
+    async (envName) => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const { config, layers } = await loadConfig({
+          name: "test",
+          cwd: r("./fixture/null-layer"),
+          envName,
+        });
+        expect(config).toEqual({ app: true });
+        expect(transformPaths(layers!)).toMatchInlineSnapshot(`
+          [
+            {
+              "config": {
+                "app": true,
+                "extends": [
+                  "./null-base",
+                  "./undefined-base",
+                ],
+              },
+              "configFile": "test.config",
+              "cwd": "<path>/fixture/null-layer",
+            },
+            {
+              "config": {},
+              "configFile": ".testrc",
+            },
+          ]
+        `);
+        expect(warn.mock.calls.map((c) => c[0])).toEqual([
+          `Cannot extend config from \`./null-base\` in ${r("./fixture/null-layer")}`,
+          `Cannot extend config from \`./undefined-base\` in ${r("./fixture/null-layer")}`,
+        ]);
+      } finally {
+        warn.mockRestore();
+      }
+    },
+  );
+
+  it.each([false, "production"] as const)(
+    "treats a main config resolving to null as empty (envName: %s)",
+    async (envName) => {
+      const { config, layers, meta } = await loadConfig({
+        name: "test",
+        cwd: r("./fixture/null-main"),
+        envName,
+      });
+      expect(config).toEqual({});
+      expect(transformPaths(layers!)).toMatchInlineSnapshot(`
+        [
+          {
+            "config": {},
+            "configFile": ".testrc",
+          },
+        ]
+      `);
+      expect(meta).toBeUndefined();
+    },
+  );
 
   it("no config loaded and configFileRequired is default setting", async () => {
     await expect(
