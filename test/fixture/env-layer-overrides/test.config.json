@@ -1,0 +1,13 @@
+{
+  "extends": [
+    [
+      "./base",
+      {
+        "overrides": {
+          "logLevel": "warn",
+          "$production": { "logLevel": "debug" }
+        }
+      }
+    ]
+  ]
+}

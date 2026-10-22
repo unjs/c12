@@ -34,7 +34,7 @@ export interface SourceOptions<
   meta?: MT;
 
   /** Layer config overrides */
-  overrides?: T;
+  overrides?: InputConfig<T, MT>;
 
   [key: string]: any;
 
@@ -129,7 +129,7 @@ export interface LoadConfigOptions<
   defaults?: T;
 
   defaultConfig?: ResolvableConfig<T>;
-  overrides?: ResolvableConfig<T>;
+  overrides?: ResolvableConfig<T | InputConfig<NoInfer<T>, MT>>;
 
   omit$Keys?: boolean;
 

@@ -458,7 +458,7 @@ async function resolveConfig<
 
   // Overrides
   if (res.sourceOptions!.overrides) {
-    res.config = _merger(res.sourceOptions!.overrides, res.config) as T;
+    res.config = _merger(applyEnvConfig(res.sourceOptions!.overrides, options), res.config) as T;
   }
 
   // Always windows paths

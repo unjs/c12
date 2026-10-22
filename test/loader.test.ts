@@ -448,6 +448,14 @@ describe("loader", () => {
       });
       expect(overrides.logLevel).toBe("warn");
     });
+
+    it("applies env config to per-layer overrides", async () => {
+      const { config } = await load({
+        cwd: r("./fixture/env-layer-overrides"),
+        envName: "production",
+      });
+      expect(config).toMatchObject({ logLevel: "debug", fromBase: true });
+    });
   });
 
   it("omit$Keys", async () => {

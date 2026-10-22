@@ -496,7 +496,7 @@ Users can define environment-specific configuration using these config keys:
 
 c12 tries to match [`envName`](#envname) and override environment config if specified.
 
-**Note:** Environment will be applied when extending each configuration layer and to [`overrides`](#overrides). This way layers can provide environment-specific configuration.
+**Note:** Environment will be applied when extending each configuration layer and to [`overrides`](#overrides) (including per-layer `extends` overrides). This way layers can provide environment-specific configuration. RC files, `package.json`, `defaultConfig` and `defaults` do not support environment-specific keys.
 
 **Example:**
 
