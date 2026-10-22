@@ -144,7 +144,7 @@ export interface LoadConfigOptions<
   /** Custom import function used to load configuration files */
   import?: (id: string) => Promise<unknown>;
 
-  /** Custom resolver for picking which export to use from the loaded module. Default: `(mod) => mod.default || mod` */
+  /** Custom resolver for picking which export to use from the loaded module. Default: `mod.default` if the module has a `default` export, otherwise `mod` */
   resolveModule?: (mod: any) => any;
 
   /** Options to override defaults when c12 falls back to [jiti](https://github.com/unjs/jiti) for loading config files. */

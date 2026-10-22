@@ -427,7 +427,7 @@ async function resolveConfig<
     const contents = await readFile(res.configFile!, "utf8");
     res.config = asyncLoader(contents);
   } else {
-    const _resolveModule = options.resolveModule || ((mod: any) => mod.default || mod);
+    const _resolveModule = options.resolveModule || _resolveDefaultExport;
     if (options.import) {
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
@@ -573,6 +573,16 @@ function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
     cache: false,
   });
   return res ? normalize(res) : undefined;
+}
+
+/**
+ * Picks the `default` export, falling back to the module itself only when there is none,
+ * so `export default null` resolves to an empty config instead of the module namespace (#356).
+ * jiti interop may return non-namespace values (e.g. `null` for CJS `module.exports = null`).
+ */
+function _resolveDefaultExport(mod: any) {
+  const isObject = mod !== null && (typeof mod === "object" || typeof mod === "function");
+  return isObject && "default" in mod ? mod.default : mod;
 }
 
 /** Returns `true`/`false` if the path exists, `null` if it doesn't. */
