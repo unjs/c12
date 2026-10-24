@@ -8,7 +8,7 @@ import type {
   ResolvedConfig,
   LoadConfigOptions,
 } from "./types.ts";
-import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader.ts";
+import { SUPPORTED_EXTENSIONS, configFileBasename, loadConfig } from "./loader.ts";
 
 type DiffEntries = ReturnType<typeof diff>;
 
@@ -50,19 +50,21 @@ export async function watchConfig<
   let config = await loadConfig<T, MT>(options);
 
   const configName = options.name || "config";
-  const configFileName =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
+  const configFileName = configFileBasename(options);
+  const skipRootConfig = options.configFile === false;
   const watchingFiles = [
     ...new Set(
       // Always include root cwd so config files created later are detected
-      [{ cwd: config.cwd, source: undefined }, ...(config.layers || [])]
+      [{ cwd: config.cwd, source: undefined, _root: true as const }, ...(config.layers || [])]
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
-            resolve(l.cwd!, configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
-          ]),
+          ...(skipRootConfig && "_root" in l
+            ? []
+            : SUPPORTED_EXTENSIONS.flatMap((ext) => [
+                resolve(l.cwd!, configFileName + ext),
+                resolve(l.cwd!, ".config", configFileName + ext),
+                resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
+              ])),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
           options.rcFile &&

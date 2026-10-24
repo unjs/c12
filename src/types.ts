@@ -108,7 +108,11 @@ export interface LoadConfigOptions<
   name?: string;
   cwd?: string;
 
-  configFile?: string;
+  /**
+   * Main config file name, or `false` to skip loading it.
+   * Directory `extends` still resolve `{name}.config`.
+   */
+  configFile?: false | string;
 
   rcFile?: false | string;
   globalRc?: boolean;
