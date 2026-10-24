@@ -56,6 +56,17 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
   ".toml",
 ]) as unknown as string[];
 
+export function configFileBasename(options: {
+  name?: string;
+  configFile?: string | false;
+}): string {
+  if (typeof options.configFile === "string") {
+    return options.configFile;
+  }
+  const name = options.name || "config";
+  return name === "config" ? "config" : `${name}.config`;
+}
+
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
@@ -66,6 +77,7 @@ export async function loadConfig<
   options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
     options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
+  const mainConfigFile = options.configFile === false ? undefined : options.configFile;
   options.rcFile = options.rcFile ?? `.${options.name}rc`;
   if (options.extend !== false) {
     options.extend = {
@@ -82,7 +94,7 @@ export async function loadConfig<
   const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
-    configFile: resolve(options.cwd, options.configFile),
+    configFile: mainConfigFile && resolve(options.cwd, mainConfigFile),
     layers: [],
     _configFile: undefined,
   };
@@ -109,16 +121,18 @@ export async function loadConfig<
 
   // Load main config file
   const seen = options.extend && options.extend.dedupe !== false ? new Set<string>() : undefined;
-  // `seen` is empty here, so the main config can never be a duplicate
-  const _mainConfig = (await resolveConfig(".", options, {}, seen)) as ResolvedConfig<T, MT>;
-  if (_mainConfig.configFile) {
-    rawConfigs.main = _mainConfig.config;
-    r.configFile = _mainConfig.configFile;
-    r._configFile = _mainConfig._configFile;
-  }
+  if (mainConfigFile) {
+    // `seen` is empty here, so the main config can never be a duplicate
+    const _mainConfig = (await resolveConfig(".", options, {}, seen)) as ResolvedConfig<T, MT>;
+    if (_mainConfig.configFile) {
+      rawConfigs.main = _mainConfig.config;
+      r.configFile = _mainConfig.configFile;
+      r._configFile = _mainConfig._configFile;
+    }
 
-  if (_mainConfig.meta) {
-    r.meta = _mainConfig.meta;
+    if (_mainConfig.meta) {
+      r.meta = _mainConfig.meta;
+    }
   }
 
   // Load rc files
@@ -192,7 +206,7 @@ export async function loadConfig<
       configFile: undefined,
       cwd: undefined,
     },
-    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
+    { config: configs.main, configFile: mainConfigFile, cwd: options.cwd },
     configs.rc && { config: configs.rc, configFile: options.rcFile },
     configs.packageJson && {
       config: configs.packageJson,
@@ -395,7 +409,7 @@ async function resolveConfig<
   const isDir = _isDirectory(resolvedPath) ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
   if (isDir) {
-    source = options.configFile!;
+    source = configFileBasename(options);
   }
   const res: ResolvedConfig<T, MT> = {
     config: undefined as unknown as T,
