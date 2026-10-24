@@ -55,10 +55,10 @@ export async function watchConfig<
   const watchingFiles = [
     ...new Set(
       // Always include root cwd so config files created later are detected
-      [{ cwd: config.cwd, source: undefined }, ...(config.layers || [])]
+      [{ cwd: config.cwd, source: undefined, _root: true as const }, ...(config.layers || [])]
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...(skipRootConfig && !l.source
+          ...(skipRootConfig && "_root" in l
             ? []
             : SUPPORTED_EXTENSIONS.flatMap((ext) => [
                 resolve(l.cwd!, configFileName + ext),
