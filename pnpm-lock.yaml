@@ -64,7 +64,7 @@ importers:
         specifier: ^2.0.12
         version: 2.0.12
       oxfmt:
-        specifier: '>=0.73.0'
+        specifier: '>=0.74.0'
         version: 0.74.0
       oxlint:
         specifier: ^1.89.0

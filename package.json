@@ -44,7 +44,7 @@
     "magicast": "^0.5.5",
     "obuild": "^0.4.45",
     "ohash": "^2.0.12",
-    "oxfmt": ">=0.73.0",
+    "oxfmt": ">=0.74.0",
     "oxlint": "^1.89.0",
     "perfect-debounce": "^2.1.0",
     "typescript": "^7.0.2",
@@ -70,5 +70,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.28.6"
+  "packageManager": "pnpm@11.28.7"
 }
