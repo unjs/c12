@@ -36,7 +36,7 @@
     "@vitest/coverage-v8": "^5.0.5",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
-    "dotenv": "^18.0.8",
+    "dotenv": "^18.0.9",
     "eslint-config-unjs": "^0.6.2",
     "expect-type": "^1.4.0",
     "giget": "^3.3.1",
@@ -44,7 +44,7 @@
     "magicast": "^0.5.5",
     "obuild": "^0.4.45",
     "ohash": "^2.0.12",
-    "oxfmt": ">=0.73.0",
+    "oxfmt": ">=0.74.0",
     "oxlint": "^1.89.0",
     "perfect-debounce": "^2.1.0",
     "typescript": "^7.0.2",
@@ -70,5 +70,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.28.6"
+  "packageManager": "pnpm@11.28.8"
 }
