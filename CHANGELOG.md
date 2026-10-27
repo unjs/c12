@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v4.0.0-rc.4
+
+[compare changes](https://github.com/unjs/c12/compare/v4.0.0-rc.3...v4.0.0-rc.4)
+
+### 🩹 Fixes
+
+- **loader:** Reload changed config files on Bun ([d0d2129](https://github.com/unjs/c12/commit/d0d2129))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v4.0.0-rc.3
 
 [compare changes](https://github.com/unjs/c12/compare/v4.0.0-rc.2...v4.0.0-rc.3)
