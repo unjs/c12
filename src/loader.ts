@@ -1,6 +1,7 @@
 import { existsSync, realpathSync, statSync } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { homedir } from "node:os";
 import { resolve, extname, dirname, basename, join, normalize } from "pathe";
 import { resolveModulePath } from "exsolve";
@@ -432,6 +433,10 @@ async function resolveConfig<
       res.config = _resolveModule(await options.import(res.configFile!)) as T;
     } else {
       const _configURL = pathToFileURL(res.configFile!);
+      // Bun caches modules by path and ignores the query string (#362)
+      if ("Bun" in globalThis) {
+        delete createRequire(import.meta.url).cache[fileURLToPath(_configURL)];
+      }
       _configURL.search = `_${++importCounter}`;
       res.config = (await import(_configURL.href).then(_resolveModule, async (error) => {
         const { createJiti } = await import("jiti").catch(() => {

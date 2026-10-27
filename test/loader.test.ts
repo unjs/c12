@@ -1,4 +1,7 @@
-import { execFile } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { expect, it, describe, vi } from "vitest";
@@ -822,6 +825,41 @@ describe("loader", () => {
     expect(result.sameRef).toBe(false);
     expect(result.key).toBe("original");
   });
+
+  // Bun caches modules by path and ignores the ?_N cache buster (#362)
+  const bunPath = spawnSync("bun", ["--version"]).status === 0 ? "bun" : undefined;
+  for (const [runtime, bin] of [
+    ["node", process.execPath],
+    ["bun", bunPath],
+  ] as const) {
+    it.skipIf(!bin)(`reloads changed config files (${runtime})`, async () => {
+      const cwd = await mkdtemp(join(tmpdir(), "c12-reload-"));
+      try {
+        const script = join(cwd, "run.mjs");
+        await writeFile(
+          script,
+          [
+            `import { writeFileSync } from "node:fs";`,
+            `import { loadConfig } from ${JSON.stringify(pathToFileURL(r("../src/index.ts")).href)};`,
+            `const loaded = [];`,
+            `for (const greeting of ["hello", "hola"]) {`,
+            `  writeFileSync(${JSON.stringify(join(cwd, "app.config.ts"))}, \`export default { greeting: "\${greeting}" };\`);`,
+            `  const { config } = await loadConfig({ name: "app", cwd: ${JSON.stringify(cwd)} });`,
+            `  loaded.push(config.greeting);`,
+            `}`,
+            `console.log(JSON.stringify(loaded));`,
+          ].join("\n"),
+        );
+        const { stdout } = await execFileAsync(bin!, [script], {
+          env: { ...process.env, NODE_OPTIONS: "" },
+        });
+        expect(JSON.parse(stdout.trim())).toEqual(["hello", "hola"]);
+      } finally {
+        await rm(cwd, { recursive: true, force: true });
+      }
+    });
+  }
+
   describe("schema", () => {
     const schema: StandardSchemaV1 = {
       "~standard": {
