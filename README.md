@@ -102,6 +102,8 @@ Resolve configuration from this working directory. The default is `process.cwd()
 
 Configuration base name. The default is `config`.
 
+Can be overridden at runtime via the `<NAME>_APPNAME` environment variable (non-word characters in `name` normalized to `_` and uppercased, e.g. `MY_APP_APPNAME=my-app-next` for `name: "my-app"`), following Neovim's [`NVIM_APPNAME`](https://neovim.io/doc/user/starting.html#%24NVIM_APPNAME) convention.
+
 ### `configFile`
 
 Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).

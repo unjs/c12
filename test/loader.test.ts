@@ -749,6 +749,44 @@ describe("loader", () => {
     expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
   });
 
+  it("overrides config, rc, and package.json names via `<NAME>_APPNAME` without mutating options (#299)", async () => {
+    const prevAppName = process.env.MY_APP_APPNAME;
+    const sharedOptions = {
+      name: "my-app",
+      cwd: r("./fixture/appname"),
+      packageJson: true,
+    };
+
+    try {
+      process.env.MY_APP_APPNAME = "custom";
+      const overridden = await loadConfig(sharedOptions);
+      expect(overridden.config).toMatchObject({
+        appName: "custom",
+        fromRc: true,
+        fromPkg: true,
+      });
+      expect(overridden.configFile).toContain("custom.config.json");
+      expect(sharedOptions).toEqual({
+        name: "my-app",
+        cwd: r("./fixture/appname"),
+        packageJson: true,
+      });
+
+      delete process.env.MY_APP_APPNAME;
+      const fallback = await loadConfig(sharedOptions);
+      expect(fallback.config).toMatchObject({ appName: "default" });
+      expect(fallback.config.fromRc).toBeUndefined();
+      expect(fallback.config.fromPkg).toBeUndefined();
+      expect(fallback.configFile).toContain("my-app.config.json");
+    } finally {
+      if (prevAppName === undefined) {
+        delete process.env.MY_APP_APPNAME;
+      } else {
+        process.env.MY_APP_APPNAME = prevAppName;
+      }
+    }
+  });
+
   it("falls back to jiti when native import fails", async () => {
     // Fixture uses a TS enum, which Node's strip-only mode rejects, so the
     // native dynamic import() throws and c12 must fall back to jiti.

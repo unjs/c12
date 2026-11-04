@@ -8,7 +8,7 @@ import type {
   ResolvedConfig,
   LoadConfigOptions,
 } from "./types.ts";
-import { SUPPORTED_EXTENSIONS, loadConfig } from "./loader.ts";
+import { SUPPORTED_EXTENSIONS, _resolveConfigName, loadConfig } from "./loader.ts";
 
 type DiffEntries = ReturnType<typeof diff>;
 
@@ -49,9 +49,15 @@ export async function watchConfig<
 >(options: WatchConfigOptions<T, MT>): Promise<ConfigWatcher<T, MT>> {
   let config = await loadConfig<T, MT>(options);
 
-  const configName = options.name || "config";
+  const configName = _resolveConfigName(options.name);
   const configFileName =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
+    options.configFile ?? (configName === "config" ? "config" : `${configName}.config`);
+  const rcFileName =
+    options.rcFile === false
+      ? undefined
+      : typeof options.rcFile === "string"
+        ? options.rcFile
+        : `.${configName}rc`;
   const watchingFiles = [
     ...new Set(
       // Always include root cwd so config files created later are detected
@@ -65,11 +71,7 @@ export async function watchConfig<
           ]),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
-          options.rcFile &&
-            resolve(
-              l.cwd!,
-              typeof options.rcFile === "string" ? options.rcFile : `.${configName}rc`,
-            ),
+          rcFileName && resolve(l.cwd!, rcFileName),
           options.packageJson && resolve(l.cwd!, "package.json"),
         ])
         .filter(Boolean),
