@@ -71,6 +71,15 @@ export async function loadConfig<
 
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
+
+  // Load dotenv before deriving configName so environment variables (including <NAME>_APPNAME) are loaded
+  if (options.dotenv) {
+    await setupDotenv({
+      cwd: options.cwd,
+      ...(options.dotenv === true ? {} : options.dotenv),
+    });
+  }
+
   options.name = options.name || "config";
   const configName = _resolveConfigName(options.name);
   options.envName = options.envName ?? process.env.NODE_ENV;
@@ -108,14 +117,6 @@ export async function loadConfig<
     packageJson: undefined,
     defaultConfig: options.defaultConfig,
   };
-
-  // Load dotenv
-  if (options.dotenv) {
-    await setupDotenv({
-      cwd: options.cwd,
-      ...(options.dotenv === true ? {} : options.dotenv),
-    });
-  }
 
   // Load main config file
   const seen = options.extend && options.extend.dedupe !== false ? new Set<string>() : undefined;

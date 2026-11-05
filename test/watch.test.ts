@@ -37,6 +37,16 @@ describe("watchConfig", () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
 
+  it("normalizes empty name to config when determining watchingFiles (#299)", async () => {
+    await writeFile(r("config.json"), JSON.stringify({ emptyName: true }));
+    watcher = await watchConfig({
+      cwd: tmpDir,
+      name: "",
+    });
+    expect(watcher.config.emptyName).toBe(true);
+    expect(watcher.watchingFiles).toContain(r("config.json"));
+  });
+
   it("reloads on update", async () => {
     await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
     const config = await setup();

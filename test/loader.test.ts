@@ -787,6 +787,27 @@ describe("loader", () => {
     }
   });
 
+  it("resolves `<NAME>_APPNAME` loaded from dotenv on the first call (#299)", async () => {
+    const prevAppName = process.env.MY_APP_APPNAME;
+    delete process.env.MY_APP_APPNAME;
+
+    try {
+      const result = await loadConfig({
+        name: "my-app",
+        cwd: r("./fixture/appname-dotenv"),
+        dotenv: true,
+      });
+      expect(result.config).toMatchObject({ appName: "custom" });
+      expect(result.configFile).toContain("custom.config.json");
+    } finally {
+      if (prevAppName === undefined) {
+        delete process.env.MY_APP_APPNAME;
+      } else {
+        process.env.MY_APP_APPNAME = prevAppName;
+      }
+    }
+  });
+
   it("falls back to jiti when native import fails", async () => {
     // Fixture uses a TS enum, which Node's strip-only mode rejects, so the
     // native dynamic import() throws and c12 must fall back to jiti.

@@ -49,7 +49,7 @@ export async function watchConfig<
 >(options: WatchConfigOptions<T, MT>): Promise<ConfigWatcher<T, MT>> {
   let config = await loadConfig<T, MT>(options);
 
-  const configName = _resolveConfigName(options.name);
+  const configName = _resolveConfigName(options.name || "config");
   const configFileName =
     options.configFile ?? (configName === "config" ? "config" : `${configName}.config`);
   const rcFileName =
