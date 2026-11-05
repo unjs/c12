@@ -57,17 +57,35 @@ export const SUPPORTED_EXTENSIONS = Object.freeze([
   ".toml",
 ]) as unknown as string[];
 
+export function _resolveConfigName(name = "config"): string {
+  const envKey = `${name.toUpperCase().replace(/\W+/g, "_")}_APPNAME`;
+  return process.env[envKey]?.trim() || name;
+}
+
 export async function loadConfig<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
->(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
+>(inputOptions: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
+  // Clone caller options so runtime defaults and env overrides do not mutate input
+  const options: LoadConfigOptions<T, MT> = { ...inputOptions };
+
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
+
+  // Load dotenv before deriving configName so environment variables (including <NAME>_APPNAME) are loaded
+  if (options.dotenv) {
+    await setupDotenv({
+      cwd: options.cwd,
+      ...(options.dotenv === true ? {} : options.dotenv),
+    });
+  }
+
   options.name = options.name || "config";
+  const configName = _resolveConfigName(options.name);
   options.envName = options.envName ?? process.env.NODE_ENV;
   options.configFile =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
-  options.rcFile = options.rcFile ?? `.${options.name}rc`;
+    options.configFile ?? (configName === "config" ? "config" : `${configName}.config`);
+  options.rcFile = options.rcFile ?? `.${configName}rc`;
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
@@ -99,14 +117,6 @@ export async function loadConfig<
     packageJson: undefined,
     defaultConfig: options.defaultConfig,
   };
-
-  // Load dotenv
-  if (options.dotenv) {
-    await setupDotenv({
-      cwd: options.cwd,
-      ...(options.dotenv === true ? {} : options.dotenv),
-    });
-  }
 
   // Load main config file
   const seen = options.extend && options.extend.dedupe !== false ? new Set<string>() : undefined;
@@ -147,7 +157,7 @@ export async function loadConfig<
     const keys = (
       Array.isArray(options.packageJson)
         ? options.packageJson
-        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
+        : [typeof options.packageJson === "string" ? options.packageJson : configName]
     ).filter((t) => t && typeof t === "string");
     const { readPackageJSON } = await import("pkg-types");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});

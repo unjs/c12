@@ -1,0 +1,6 @@
+{
+  "name": "appname-fixture",
+  "custom": {
+    "fromPkg": true
+  }
+}
