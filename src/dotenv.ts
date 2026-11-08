@@ -57,6 +57,9 @@ export interface DotenvOptions {
    * This is useful for container secrets (e.g. Docker, Kubernetes) where
    * sensitive values are mounted as files.
    *
+   * With `interpolate`, the file path can reference other variables, and the
+   * file content is used verbatim (it is not interpolated).
+   *
    * @default false
    *
    * @example
@@ -151,15 +154,23 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Support _FILE environment variables
+  // File contents are used as-is: they are never interpolated, so secrets
+  // containing `$` or `\$` are kept intact. The file paths are interpolated.
+  const fileValues = new Map<string, string>();
   if (options.expandFileReferences) {
+    const resolvedPaths: Record<string, any> = { ...environment };
+    if (options.interpolate) {
+      interpolate(resolvedPaths);
+    }
     for (const key in environment) {
       if (key.endsWith("_FILE")) {
         const targetKey = key.slice(0, -5);
         if (environment[targetKey] === undefined) {
-          const filePath = environment[key];
+          const filePath = resolvedPaths[key];
           if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
             const value = readFileSync(filePath, "utf8");
             environment[targetKey] = value.trim();
+            fileValues.set(targetKey, environment[targetKey]);
             dotenvVars.add(targetKey);
           }
         }
@@ -169,7 +180,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   // Interpolate env
   if (options.interpolate) {
-    interpolate(environment);
+    interpolate(environment, undefined, undefined, fileValues);
   }
 
   return environment;
@@ -202,13 +213,15 @@ function interpolate(
   target: Record<string, any>,
   source: Record<string, any> = {},
   parse = (v: any) => v,
+  literals: Map<string, any> = new Map(),
 ) {
   // Resolve references against the raw values. Reading back values that were
   // already interpolated would expand escaped `\${VAR}` literals a second time,
   // making the result depend on key order.
   const raw = { ...target };
-  // Final values of already processed keys, reused as-is (never interpolated again)
-  const resolvedValues = new Map<string, any>();
+  // Final values of already processed keys, reused as-is (never interpolated again).
+  // Literal values (read from `_FILE` references) are final from the start.
+  const resolvedValues = new Map<string, any>(literals);
 
   function getValue(key: string) {
     // Source value 'wins' over target value
@@ -278,6 +291,9 @@ function interpolate(
   }
 
   for (const key in target) {
+    if (literals.has(key)) {
+      continue;
+    }
     target[key] = interpolate(getValue(key));
     resolvedValues.set(key, target[key]);
   }

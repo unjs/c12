@@ -76,6 +76,38 @@ describe("update config file", () => {
     delete process.env.TEST_SECRET_FILE;
   });
 
+  it("should not interpolate the content of _FILE references", async () => {
+    await writeFile(r(".secret"), "pa\\$s${HOME}word$USER");
+    await writeFile(
+      r(".env"),
+      `DB_PASSWORD_FILE=${r(".secret")}\nDATABASE_URL=postgres://u:\${DB_PASSWORD}@db`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: { HOME: "/home/me" },
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.DB_PASSWORD).toBe("pa\\$s${HOME}word$USER");
+    expect(env.DATABASE_URL).toBe("postgres://u:pa\\$s${HOME}word$USER@db");
+  });
+
+  it("should interpolate the path of _FILE references", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "my-api-key");
+    await writeFile(r(".env"), `SECRETS_DIR=${r("secrets")}\nAPI_KEY_FILE=\${SECRETS_DIR}/api_key`);
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("my-api-key");
+    expect(env.API_KEY_FILE).toBe(r("secrets/api_key"));
+  });
+
   it("should not expand _FILE env vars by default", async () => {
     const secretPath = r(".secret");
     await writeFile(secretPath, "my-secret-value");

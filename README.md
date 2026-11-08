@@ -176,7 +176,7 @@ UNRESOLVED="${UNKNOWN}"
 
 #### `expandFileReferences`
 
-Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable.
+Disabled by default. Environment variables ending with `_FILE` are resolved by reading the file at the specified path and assigning its trimmed content to the base key (without the `_FILE` suffix). This is useful for container secrets (e.g. Docker, Kubernetes) where sensitive values are mounted as files. Set to `true` to enable. With `interpolate`, the file path can reference other variables (`${SECRETS_DIR}/db_password`), and the file content is used verbatim.
 
 ```ini
 # .env
