@@ -158,28 +158,54 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // containing `$` or `\$` are kept intact. The file paths are interpolated.
   const fileValues = new Map<string, string>();
   if (options.expandFileReferences) {
+    // Targets whose _FILE file was not found with a stable path; excluded from
+    // pendingTargets so that dependent paths can fall through to their defaults.
+    const unloadableTargets = new Set<string>();
     // Repeat while new values get loaded, since a path can reference a
     // variable that is itself read from another `_FILE`.
     let loaded = true;
     while (loaded) {
       loaded = false;
+      // Targets still expected to be supplied by a _FILE in a future pass.
+      const pendingTargets = new Set<string>();
+      for (const key in environment) {
+        if (key.endsWith("_FILE")) {
+          const t = key.slice(0, -5);
+          if (environment[t] === undefined && !unloadableTargets.has(t)) {
+            pendingTargets.add(t);
+          }
+        }
+      }
       const resolvedPaths: Record<string, any> = { ...environment };
       if (options.interpolate) {
         interpolate(resolvedPaths, undefined, undefined, fileValues);
       }
       for (const key in environment) {
-        if (key.endsWith("_FILE")) {
-          const targetKey = key.slice(0, -5);
-          if (environment[targetKey] === undefined) {
-            const filePath = resolvedPaths[key];
-            if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
-              const value = readFileSync(filePath, "utf8");
-              environment[targetKey] = value.trim();
-              fileValues.set(targetKey, environment[targetKey]);
-              dotenvVars.add(targetKey);
-              loaded = true;
-            }
-          }
+        if (!key.endsWith("_FILE")) continue;
+        const targetKey = key.slice(0, -5);
+        if (environment[targetKey] !== undefined) continue;
+        // If the raw path template references a not-yet-loaded _FILE target,
+        // the resolved path may use a default fallback prematurely. Defer
+        // until that dependency is settled.
+        const rawPath = environment[key];
+        if (
+          typeof rawPath === "string" &&
+          [...pendingTargets].some((t) => t !== targetKey && rawPath.includes(t))
+        ) {
+          continue;
+        }
+        const filePath = resolvedPaths[key];
+        if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
+          const value = readFileSync(filePath, "utf8");
+          environment[targetKey] = value.trim();
+          fileValues.set(targetKey, environment[targetKey]);
+          dotenvVars.add(targetKey);
+          loaded = true;
+        } else if (!unloadableTargets.has(targetKey)) {
+          // Path is stable but file is absent; mark so dependents can use
+          // their own defaults in the next pass.
+          unloadableTargets.add(targetKey);
+          loaded = true;
         }
       }
     }

@@ -127,6 +127,43 @@ describe("update config file", () => {
     expect(env.API_KEY).toBe("my-api-key");
   });
 
+  it("should use correct _FILE path after dependency resolves, not fallback", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await mkdir(r("fallback"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "correct-secret");
+    await writeFile(r("fallback/api_key"), "wrong-secret");
+    await writeFile(r(".secrets_dir"), r("secrets"));
+    await writeFile(
+      r(".env"),
+      `SECRETS_DIR_FILE=${r(".secrets_dir")}\nAPI_KEY_FILE=\${SECRETS_DIR:-${r("fallback")}}/api_key`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("correct-secret");
+  });
+
+  it("should fall back to default path when _FILE dependency cannot load", async () => {
+    await mkdir(r("fallback"), { recursive: true });
+    await writeFile(r("fallback/api_key"), "fallback-secret");
+    await writeFile(
+      r(".env"),
+      `SECRETS_DIR_FILE=${r(".nonexistent")}\nAPI_KEY_FILE=\${SECRETS_DIR:-${r("fallback")}}/api_key`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("fallback-secret");
+  });
+
   it("should not expand _FILE env vars by default", async () => {
     const secretPath = r(".secret");
     await writeFile(secretPath, "my-secret-value");
