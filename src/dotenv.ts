@@ -158,20 +158,27 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   // containing `$` or `\$` are kept intact. The file paths are interpolated.
   const fileValues = new Map<string, string>();
   if (options.expandFileReferences) {
-    const resolvedPaths: Record<string, any> = { ...environment };
-    if (options.interpolate) {
-      interpolate(resolvedPaths);
-    }
-    for (const key in environment) {
-      if (key.endsWith("_FILE")) {
-        const targetKey = key.slice(0, -5);
-        if (environment[targetKey] === undefined) {
-          const filePath = resolvedPaths[key];
-          if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
-            const value = readFileSync(filePath, "utf8");
-            environment[targetKey] = value.trim();
-            fileValues.set(targetKey, environment[targetKey]);
-            dotenvVars.add(targetKey);
+    // Repeat while new values get loaded, since a path can reference a
+    // variable that is itself read from another `_FILE`.
+    let loaded = true;
+    while (loaded) {
+      loaded = false;
+      const resolvedPaths: Record<string, any> = { ...environment };
+      if (options.interpolate) {
+        interpolate(resolvedPaths, undefined, undefined, fileValues);
+      }
+      for (const key in environment) {
+        if (key.endsWith("_FILE")) {
+          const targetKey = key.slice(0, -5);
+          if (environment[targetKey] === undefined) {
+            const filePath = resolvedPaths[key];
+            if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
+              const value = readFileSync(filePath, "utf8");
+              environment[targetKey] = value.trim();
+              fileValues.set(targetKey, environment[targetKey]);
+              dotenvVars.add(targetKey);
+              loaded = true;
+            }
           }
         }
       }

@@ -108,6 +108,25 @@ describe("update config file", () => {
     expect(env.API_KEY_FILE).toBe(r("secrets/api_key"));
   });
 
+  it("should resolve _FILE paths that reference other _FILE values", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "my-api-key");
+    await writeFile(r(".secrets_dir"), r("secrets"));
+    await writeFile(
+      r(".env"),
+      `API_KEY_FILE=\${SECRETS_DIR}/api_key\nSECRETS_DIR_FILE=${r(".secrets_dir")}`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.SECRETS_DIR).toBe(r("secrets"));
+    expect(env.API_KEY).toBe("my-api-key");
+  });
+
   it("should not expand _FILE env vars by default", async () => {
     const secretPath = r(".secret");
     await writeFile(secretPath, "my-secret-value");
