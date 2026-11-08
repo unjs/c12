@@ -188,10 +188,7 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
         // the resolved path may use a default fallback prematurely. Defer
         // until that dependency is settled.
         const rawPath = environment[key];
-        if (
-          typeof rawPath === "string" &&
-          [...pendingTargets].some((t) => t !== targetKey && rawPath.includes(t))
-        ) {
+        if (typeof rawPath === "string" && dependsOnPending(rawPath, environment, pendingTargets, targetKey)) {
           continue;
         }
         const filePath = resolvedPaths[key];
@@ -217,6 +214,30 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   return environment;
+}
+
+function dependsOnPending(
+  value: string,
+  environment: Record<string, any>,
+  pending: Set<string>,
+  self: string,
+  seen = new Set<string>(),
+): boolean {
+  for (const match of value.matchAll(/\$\{?(\w+)/g)) {
+    const name = match[1]!;
+    if (name !== self && pending.has(name)) {
+      return true;
+    }
+    if (seen.has(name)) {
+      continue;
+    }
+    seen.add(name);
+    const next = environment[name];
+    if (typeof next === "string" && dependsOnPending(next, environment, pending, self, seen)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // --- readEnvFile ---
