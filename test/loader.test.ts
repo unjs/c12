@@ -609,6 +609,38 @@ describe("loader", () => {
     },
   );
 
+  it("configFile: false skips main config file", async () => {
+    const { config, configFile } = await loadConfig({
+      cwd: r("./fixture"),
+      name: "test",
+      configFile: false,
+      packageJson: "c12",
+    });
+
+    expect(configFile).toBeUndefined();
+    expect(config.configFile).toBeUndefined();
+    expect(config.rcFile).toBe(true);
+    expect(config.packageJSON).toBe(true);
+  });
+
+  it("configFile: false still resolves directory extends via {name}.config", async () => {
+    const { config, configFile } = await loadConfig<{
+      configFile?: boolean;
+      loadedFromJSON?: boolean;
+      extends?: string[];
+    }>({
+      cwd: r("./fixture"),
+      name: "test",
+      configFile: false,
+      rcFile: false,
+      overrides: { extends: ["./json"] },
+    });
+
+    expect(configFile).toBeUndefined();
+    expect(config.configFile).toBeUndefined();
+    expect(config.loadedFromJSON).toBe(true);
+  });
+
   it("no config loaded and configFileRequired is default setting", async () => {
     await expect(
       loadConfig({
