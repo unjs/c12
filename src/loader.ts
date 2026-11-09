@@ -28,7 +28,8 @@ const _normalize = (p?: string) => p?.replace(/\\/g, "/");
 let importCounter = 0;
 
 const ASYNC_LOADERS = {
-  ".json": () => JSON.parse,
+  // Strip the UTF-8 BOM like the confbox parsers below do (`JSON.parse` rejects it)
+  ".json": () => (source: string) => JSON.parse(source.replace(/^\uFEFF/, "")),
   ".yaml": () => import("confbox/yaml").then((r) => r.parseYAML),
   ".yml": () => import("confbox/yaml").then((r) => r.parseYAML),
   // `allowTrailingComma` defaults to false since confbox v0.3 (jsonc-parser -> strip-json-comments)

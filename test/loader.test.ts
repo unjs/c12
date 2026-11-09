@@ -688,6 +688,17 @@ describe("loader", () => {
     expect(config).toMatchObject({ loadedFromJSON: true, baseKey: true });
   });
 
+  it("loads .json configs starting with a UTF-8 BOM", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "c12-json-bom-"));
+    try {
+      await writeFile(join(cwd, "test.config.json"), '\uFEFF{ "bom": true }');
+      const { config } = await loadConfig({ name: "test", cwd });
+      expect(config).toEqual({ bom: true });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("envMerger", async () => {
     const baseOptions = {
       name: "test",
