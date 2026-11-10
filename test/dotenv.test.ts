@@ -76,6 +76,114 @@ describe("update config file", () => {
     delete process.env.TEST_SECRET_FILE;
   });
 
+  it("should not interpolate the content of _FILE references", async () => {
+    await writeFile(r(".secret"), "pa\\$s${HOME}word$USER");
+    await writeFile(
+      r(".env"),
+      `DB_PASSWORD_FILE=${r(".secret")}\nDATABASE_URL=postgres://u:\${DB_PASSWORD}@db`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: { HOME: "/home/me" },
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.DB_PASSWORD).toBe("pa\\$s${HOME}word$USER");
+    expect(env.DATABASE_URL).toBe("postgres://u:pa\\$s${HOME}word$USER@db");
+  });
+
+  it("should interpolate the path of _FILE references", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "my-api-key");
+    await writeFile(r(".env"), `SECRETS_DIR=${r("secrets")}\nAPI_KEY_FILE=\${SECRETS_DIR}/api_key`);
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("my-api-key");
+    expect(env.API_KEY_FILE).toBe(r("secrets/api_key"));
+  });
+
+  it("should resolve _FILE paths that reference other _FILE values", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "my-api-key");
+    await writeFile(r(".secrets_dir"), r("secrets"));
+    await writeFile(
+      r(".env"),
+      `API_KEY_FILE=\${SECRETS_DIR}/api_key\nSECRETS_DIR_FILE=${r(".secrets_dir")}`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.SECRETS_DIR).toBe(r("secrets"));
+    expect(env.API_KEY).toBe("my-api-key");
+  });
+
+  it("should use correct _FILE path after dependency resolves, not fallback", async () => {
+    await mkdir(r("secrets"), { recursive: true });
+    await mkdir(r("fallback"), { recursive: true });
+    await writeFile(r("secrets/api_key"), "correct-secret");
+    await writeFile(r("fallback/api_key"), "wrong-secret");
+    await writeFile(r(".secrets_dir"), r("secrets"));
+    await writeFile(
+      r(".env"),
+      `SECRETS_DIR_FILE=${r(".secrets_dir")}\nAPI_KEY_FILE=\${SECRETS_DIR:-${r("fallback")}}/api_key`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("correct-secret");
+  });
+
+  it("should resolve _FILE path that depends on a pending target through an intermediate variable", async () => {
+    await mkdir(r("secrets/subpath"), { recursive: true });
+    await mkdir(r("fallback/subpath"), { recursive: true });
+    await writeFile(r("secrets/subpath/api_key"), "correct-secret");
+    await writeFile(r("fallback/subpath/api_key"), "wrong-secret");
+    await writeFile(r(".secrets_dir"), r("secrets"));
+    await writeFile(
+      r(".env"),
+      `SECRETS_DIR_FILE=${r(".secrets_dir")}\nSECRET_PATH=\${SECRETS_DIR}/subpath\nAPI_KEY_FILE=\${SECRET_PATH:-${r("fallback/subpath")}}/api_key`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("correct-secret");
+  });
+
+  it("should fall back to default path when _FILE dependency cannot load", async () => {
+    await mkdir(r("fallback"), { recursive: true });
+    await writeFile(r("fallback/api_key"), "fallback-secret");
+    await writeFile(
+      r(".env"),
+      `SECRETS_DIR_FILE=${r(".nonexistent")}\nAPI_KEY_FILE=\${SECRETS_DIR:-${r("fallback")}}/api_key`,
+    );
+
+    const env = await loadDotenv({
+      cwd: tmpDir,
+      env: {},
+      interpolate: true,
+      expandFileReferences: true,
+    });
+    expect(env.API_KEY).toBe("fallback-secret");
+  });
+
   it("should not expand _FILE env vars by default", async () => {
     const secretPath = r(".secret");
     await writeFile(secretPath, "my-secret-value");

@@ -57,6 +57,9 @@ export interface DotenvOptions {
    * This is useful for container secrets (e.g. Docker, Kubernetes) where
    * sensitive values are mounted as files.
    *
+   * With `interpolate`, the file path can reference other variables, and the
+   * file content is used verbatim (it is not interpolated).
+   *
    * @default false
    *
    * @example
@@ -151,17 +154,55 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
   }
 
   // Support _FILE environment variables
+  // File contents are used as-is: they are never interpolated, so secrets
+  // containing `$` or `\$` are kept intact. The file paths are interpolated.
+  const fileValues = new Map<string, string>();
   if (options.expandFileReferences) {
-    for (const key in environment) {
-      if (key.endsWith("_FILE")) {
-        const targetKey = key.slice(0, -5);
-        if (environment[targetKey] === undefined) {
-          const filePath = environment[key];
-          if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
-            const value = readFileSync(filePath, "utf8");
-            environment[targetKey] = value.trim();
-            dotenvVars.add(targetKey);
+    // Targets whose _FILE file was not found with a stable path; excluded from
+    // pendingTargets so that dependent paths can fall through to their defaults.
+    const unloadableTargets = new Set<string>();
+    // Repeat while new values get loaded, since a path can reference a
+    // variable that is itself read from another `_FILE`.
+    let loaded = true;
+    while (loaded) {
+      loaded = false;
+      // Targets still expected to be supplied by a _FILE in a future pass.
+      const pendingTargets = new Set<string>();
+      for (const key in environment) {
+        if (key.endsWith("_FILE")) {
+          const t = key.slice(0, -5);
+          if (environment[t] === undefined && !unloadableTargets.has(t)) {
+            pendingTargets.add(t);
           }
+        }
+      }
+      const resolvedPaths: Record<string, any> = { ...environment };
+      if (options.interpolate) {
+        interpolate(resolvedPaths, undefined, undefined, fileValues);
+      }
+      for (const key in environment) {
+        if (!key.endsWith("_FILE")) continue;
+        const targetKey = key.slice(0, -5);
+        if (environment[targetKey] !== undefined) continue;
+        // If the raw path template references a not-yet-loaded _FILE target,
+        // the resolved path may use a default fallback prematurely. Defer
+        // until that dependency is settled.
+        const rawPath = environment[key];
+        if (typeof rawPath === "string" && dependsOnPending(rawPath, environment, pendingTargets, targetKey)) {
+          continue;
+        }
+        const filePath = resolvedPaths[key];
+        if (filePath && statSync(filePath, { throwIfNoEntry: false })?.isFile()) {
+          const value = readFileSync(filePath, "utf8");
+          environment[targetKey] = value.trim();
+          fileValues.set(targetKey, environment[targetKey]);
+          dotenvVars.add(targetKey);
+          loaded = true;
+        } else if (!unloadableTargets.has(targetKey)) {
+          // Path is stable but file is absent; mark so dependents can use
+          // their own defaults in the next pass.
+          unloadableTargets.add(targetKey);
+          loaded = true;
         }
       }
     }
@@ -169,10 +210,34 @@ export async function loadDotenv(options: DotenvOptions): Promise<Env> {
 
   // Interpolate env
   if (options.interpolate) {
-    interpolate(environment);
+    interpolate(environment, undefined, undefined, fileValues);
   }
 
   return environment;
+}
+
+function dependsOnPending(
+  value: string,
+  environment: Record<string, any>,
+  pending: Set<string>,
+  self: string,
+  seen = new Set<string>(),
+): boolean {
+  for (const match of value.matchAll(/\$\{?(\w+)/g)) {
+    const name = match[1]!;
+    if (name !== self && pending.has(name)) {
+      return true;
+    }
+    if (seen.has(name)) {
+      continue;
+    }
+    seen.add(name);
+    const next = environment[name];
+    if (typeof next === "string" && dependsOnPending(next, environment, pending, self, seen)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // --- readEnvFile ---
@@ -202,13 +267,15 @@ function interpolate(
   target: Record<string, any>,
   source: Record<string, any> = {},
   parse = (v: any) => v,
+  literals: Map<string, any> = new Map(),
 ) {
   // Resolve references against the raw values. Reading back values that were
   // already interpolated would expand escaped `\${VAR}` literals a second time,
   // making the result depend on key order.
   const raw = { ...target };
-  // Final values of already processed keys, reused as-is (never interpolated again)
-  const resolvedValues = new Map<string, any>();
+  // Final values of already processed keys, reused as-is (never interpolated again).
+  // Literal values (read from `_FILE` references) are final from the start.
+  const resolvedValues = new Map<string, any>(literals);
 
   function getValue(key: string) {
     // Source value 'wins' over target value
@@ -278,6 +345,9 @@ function interpolate(
   }
 
   for (const key in target) {
+    if (literals.has(key)) {
+      continue;
+    }
     target[key] = interpolate(getValue(key));
     resolvedValues.set(key, target[key]);
   }
