@@ -3,7 +3,7 @@ import { renameSync, rmSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { join, normalize } from "pathe";
 import { mkdir, rename, rm, symlink, writeFile } from "node:fs/promises";
-import { watchConfig, type ConfigWatcher } from "../src/index.ts";
+import { watchConfig, type ConfigWatcher, type ResolvedConfig } from "../src/index.ts";
 
 const tmpDir = normalize(fileURLToPath(new URL(".tmp-watch", import.meta.url)));
 const r = (path: string) => join(tmpDir, path);
@@ -160,6 +160,75 @@ describe("watchConfig", () => {
     await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
     await vi.waitFor(() => expect(config.config.foo).toBe(2));
     expect(events).toEqual([{ type: "created", path: "<tmp>/test.config.json" }]);
+  });
+
+  it("skips `onUpdate` when `acceptHMR` handles the change", async () => {
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    const acceptHMR = vi.fn(() => true);
+    const onUpdate = vi.fn();
+    watcher = await watchConfig({
+      cwd: tmpDir,
+      name: "test",
+      debounce: 10,
+      acceptHMR,
+      onUpdate,
+    });
+
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() => expect(acceptHMR).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onUpdate).not.toHaveBeenCalled();
+    // The config is still reloaded when the change is handled
+    expect(watcher.config.foo).toBe(2);
+  });
+
+  it("calls `onUpdate` when `acceptHMR` does not handle the change", async () => {
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1 }));
+    const acceptHMR = vi.fn(() => false);
+    const onUpdate = vi.fn();
+    watcher = await watchConfig({
+      cwd: tmpDir,
+      name: "test",
+      debounce: 10,
+      acceptHMR,
+      onUpdate,
+    });
+
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2 }));
+    await vi.waitFor(() => expect(onUpdate).toHaveBeenCalled());
+    expect(acceptHMR).toHaveBeenCalledTimes(1);
+    expect(watcher.config.foo).toBe(2);
+  });
+
+  it("provides old/new configs and diff to `acceptHMR`", async () => {
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 1, bar: "x" }));
+    const contexts: {
+      oldConfig: ResolvedConfig;
+      newConfig: ResolvedConfig;
+      getDiff: () => unknown[];
+    }[] = [];
+    watcher = await watchConfig({
+      cwd: tmpDir,
+      name: "test",
+      debounce: 10,
+      acceptHMR: (ctx) => {
+        contexts.push(ctx);
+        return false;
+      },
+      onUpdate: (ctx) => {
+        contexts.push(ctx);
+      },
+    });
+
+    await writeFile(r("test.config.json"), JSON.stringify({ foo: 2, bar: "x" }));
+    await vi.waitFor(() => expect(contexts.length).toBe(2));
+    // Both hooks receive the same context with old/new config snapshots
+    for (const ctx of contexts) {
+      expect(ctx.oldConfig.config).toEqual({ foo: 1, bar: "x" });
+      expect(ctx.newConfig.config).toEqual({ foo: 2, bar: "x" });
+      expect(ctx.getDiff()).toMatchObject([{ key: "foo", type: "changed" }]);
+    }
+    expect(watcher.config.foo).toBe(2);
   });
 
   it("does not throw unhandled errors from hooks", async () => {
