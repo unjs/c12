@@ -78,4 +78,59 @@ describe("update config file", () => {
     expect(res.configFile).toBe(r("./.tmp/.config/foo.bar.ts"));
     expect(existsSync(r("./.tmp/foo.bar.config.ts"))).toBe(false);
   });
+  it("update config returned by an arrow function", async () => {
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(r("./.tmp/arrow.config.ts"), "export default () => ({ test: true })");
+    await writeFile(
+      r("./.tmp/define-arrow.config.ts"),
+      "export default defineConfig((ctx) => ({ test: true }))",
+    );
+    for (const name of ["arrow", "define-arrow"]) {
+      await updateConfig({
+        cwd: tmpDir,
+        configFile: `${name}.config`,
+        onUpdate: (config) => {
+          config.test2 = false;
+        },
+      });
+    }
+    expect(await readFile(r("./.tmp/arrow.config.ts"), "utf8")).toMatchInlineSnapshot(`
+      "export default () => ({
+        test: true,
+        test2: false
+      })"
+    `);
+    expect(await readFile(r("./.tmp/define-arrow.config.ts"), "utf8")).toMatchInlineSnapshot(`
+      "export default defineConfig((ctx) => ({
+        test: true,
+        test2: false
+      }))"
+    `);
+  });
+  it("throw for a default export that is not an object", async () => {
+    const sources = {
+      "block-arrow": "export default () => { return { test: true } }",
+      identifier: "const config = { test: true }\nexport default config",
+    };
+    await mkdir(tmpDir, { recursive: true });
+    for (const [name, source] of Object.entries(sources)) {
+      await writeFile(r(`./.tmp/${name}.config.ts`), source);
+      let onUpdateCalled = false;
+      await expect(
+        updateConfig({
+          cwd: tmpDir,
+          configFile: `${name}.config`,
+          onUpdate: () => {
+            onUpdateCalled = true;
+          },
+        }),
+      ).rejects.toThrow("Unsupported default export");
+      expect(onUpdateCalled).toBe(false);
+      expect(await readFile(r(`./.tmp/${name}.config.ts`), "utf8")).toBe(source);
+      // Without `onUpdate` nothing is edited, so any default export is accepted
+      await expect(
+        updateConfig({ cwd: tmpDir, configFile: `${name}.config` }),
+      ).resolves.toMatchObject({ created: false });
+    }
+  });
 });
