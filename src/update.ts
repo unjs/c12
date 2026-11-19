@@ -51,8 +51,16 @@ export async function updateConfig(opts: UpdateConfigOptions): Promise<UpdateCon
   if (!defaultExport) {
     throw new Error("Default export is missing in the config file!");
   }
-  const configObj =
-    defaultExport.$type === "function-call" ? defaultExport.$args[0] : defaultExport;
+  let configObj = defaultExport.$type === "function-call" ? defaultExport.$args[0] : defaultExport;
+  // `(ctx) => ({ ... })`, optionally wrapped in `defineConfig()`
+  if (configObj?.$type === "arrow-function-expression") {
+    configObj = configObj.$body;
+  }
+  if (opts.onUpdate && configObj?.$type !== "object") {
+    throw new Error(
+      `Unsupported default export in ${configFile}: expected an object literal or \`(ctx) => ({ ... })\`, optionally wrapped in \`defineConfig()\`.`,
+    );
+  }
 
   await opts.onUpdate?.(configObj);
 

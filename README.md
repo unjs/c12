@@ -654,6 +654,8 @@ const { configFile, created } = await updateConfig({
 console.log(`Config file ${created ? "created" : "updated"} in ${configFile}`);
 ```
 
+The default export can be an object literal, `defineConfig({ ... })` or a function returning an object literal (`(ctx) => ({ ... })`, optionally wrapped in `defineConfig()`). With `onUpdate`, other shapes throw an error.
+
 ## Configuration functions
 
 You can use a function to define your configuration dynamically based on context.
