@@ -63,11 +63,25 @@ export async function loadConfig<
 >(options: LoadConfigOptions<T, MT>): Promise<ResolvedConfig<T, MT>> {
   // Normalize options
   options.cwd = resolve(process.cwd(), options.cwd || ".");
-  options.name = options.name || "config";
+  if (Array.isArray(options.name) && options.name.length === 0) {
+    options.name = "config";
+  } else {
+    options.name = options.name || "config";
+  }
   options.envName = options.envName ?? process.env.NODE_ENV;
+  if (Array.isArray(options.configFile) && options.configFile.length === 0) {
+    options.configFile = undefined;
+  }
   options.configFile =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
-  options.rcFile = options.rcFile ?? `.${options.name}rc`;
+    options.configFile ??
+    (Array.isArray(options.name)
+      ? options.name.map((n) => (n === "config" ? "config" : `${n}.config`))
+      : options.name === "config"
+        ? "config"
+        : `${options.name}.config`);
+  options.rcFile =
+    options.rcFile ??
+    (Array.isArray(options.name) ? options.name.map((n) => `.${n}rc`) : `.${options.name}rc`);
   if (options.extend !== false) {
     options.extend = {
       extendKey: "extends",
@@ -80,10 +94,13 @@ export async function loadConfig<
   const _merger = options.merger || defu;
 
   // Create context
+  const initialConfigFile = Array.isArray(options.configFile)
+    ? options.configFile[0] || "config"
+    : options.configFile || "config";
   const r: ResolvedConfig<T, MT> = {
     config: {} as any,
     cwd: options.cwd,
-    configFile: resolve(options.cwd, options.configFile),
+    configFile: resolve(options.cwd, initialConfigFile),
     layers: [],
     _configFile: undefined,
   };
@@ -124,20 +141,31 @@ export async function loadConfig<
 
   // Load rc files
   if (options.rcFile) {
+    const rcFiles = (Array.isArray(options.rcFile) ? options.rcFile : [options.rcFile]).filter(
+      Boolean,
+    ) as string[];
     const rcSources: T[] = [];
     // 1. cwd
-    rcSources.push(rc9.read({ name: options.rcFile, dir: options.cwd }));
+    for (const file of rcFiles) {
+      rcSources.push(rc9.read({ name: file, dir: options.cwd }));
+    }
     if (options.globalRc) {
       // 2. workspace
       const { findWorkspaceDir } = await import("pkg-types");
       const workspaceDir = await findWorkspaceDir(options.cwd).catch(() => {});
       if (workspaceDir) {
-        rcSources.push(rc9.read({ name: options.rcFile, dir: workspaceDir }));
+        for (const file of rcFiles) {
+          rcSources.push(rc9.read({ name: file, dir: workspaceDir }));
+        }
       }
       // 3. user config dir ($XDG_CONFIG_HOME or ~/.config)
-      rcSources.push(rc9.readUserConfig({ name: options.rcFile }));
+      for (const file of rcFiles) {
+        rcSources.push(rc9.readUserConfig({ name: file }));
+      }
       // 4. user home (legacy)
-      rcSources.push(rc9.read({ name: options.rcFile, dir: homedir() }));
+      for (const file of rcFiles) {
+        rcSources.push(rc9.read({ name: file, dir: homedir() }));
+      }
     }
     rawConfigs.rc = _merger({} as T, ...rcSources);
   }
@@ -147,8 +175,12 @@ export async function loadConfig<
     const keys = (
       Array.isArray(options.packageJson)
         ? options.packageJson
-        : [typeof options.packageJson === "string" ? options.packageJson : options.name]
-    ).filter((t) => t && typeof t === "string");
+        : typeof options.packageJson === "string"
+          ? [options.packageJson]
+          : Array.isArray(options.name)
+            ? options.name
+            : [options.name]
+    ).filter((t): t is string => Boolean(t && typeof t === "string"));
     const { readPackageJSON } = await import("pkg-types");
     const pkgJsonFile = await readPackageJSON(options.cwd).catch(() => {});
     const values = keys.map((key) => pkgJsonFile?.[key]);
@@ -193,8 +225,17 @@ export async function loadConfig<
       configFile: undefined,
       cwd: undefined,
     },
-    { config: configs.main, configFile: options.configFile, cwd: options.cwd },
-    configs.rc && { config: configs.rc, configFile: options.rcFile },
+    {
+      config: configs.main,
+      configFile:
+        _mainConfig.source ||
+        (Array.isArray(options.configFile) ? options.configFile[0] : options.configFile),
+      cwd: options.cwd,
+    },
+    configs.rc && {
+      config: configs.rc,
+      configFile: Array.isArray(options.rcFile) ? options.rcFile[0] : options.rcFile,
+    },
     configs.packageJson && {
       config: configs.packageJson,
       configFile: "package.json",
@@ -395,22 +436,38 @@ async function resolveConfig<
   const resolvedPath = resolve(options.cwd!, source);
   const isDir = _isDirectory(resolvedPath) ?? (!ext || ext === basename(source)); /* #71 */
   const cwd = resolve(options.cwd!, isDir ? source : dirname(source));
-  if (isDir) {
-    source = options.configFile!;
+  const configFiles = isDir
+    ? (Array.isArray(options.configFile) ? options.configFile : [options.configFile!]).filter(
+        Boolean,
+      )
+    : [source];
+
+  let resolvedFile: string | undefined;
+  let matchedSource: string = configFiles[0] || source;
+
+  for (const file of configFiles) {
+    const resolved =
+      tryResolve(resolve(cwd, file), options) ||
+      tryResolve(resolve(cwd, ".config", file.replace(/\.config$/, "")), options) ||
+      tryResolve(resolve(cwd, ".config", file), options);
+    if (resolved && existsSync(resolved)) {
+      resolvedFile = resolved;
+      matchedSource = file;
+      break;
+    }
   }
+
   const res: ResolvedConfig<T, MT> = {
     config: undefined as unknown as T,
     configFile: undefined,
     cwd,
-    source,
+    source: matchedSource,
     sourceOptions,
   };
 
   res.configFile =
-    tryResolve(resolve(cwd, source), options) ||
-    tryResolve(resolve(cwd, ".config", source.replace(/\.config$/, "")), options) ||
-    tryResolve(resolve(cwd, ".config", source), options) ||
-    source;
+    resolvedFile ||
+    (Array.isArray(options.configFile) && isDir ? options.configFile.join(", ") : matchedSource);
 
   if (!existsSync(res.configFile!)) {
     return res;
@@ -445,7 +502,10 @@ async function resolveConfig<
             { cause: error },
           );
         });
-        const jiti = createJiti(join(options.cwd || ".", options.configFile || "/"), {
+        const configFile = Array.isArray(options.configFile)
+          ? options.configFile[0]
+          : options.configFile;
+        const jiti = createJiti(join(options.cwd || ".", configFile || "/"), {
           interopDefault: true,
           moduleCache: false,
           extensions: [...SUPPORTED_EXTENSIONS],
@@ -570,9 +630,10 @@ function _isDuplicateLayer(seen: Set<string> | undefined, configFile?: string, c
 }
 
 function tryResolve(id: string, options: LoadConfigOptions<any, any>) {
+  const configFile = Array.isArray(options.configFile) ? options.configFile[0] : options.configFile;
   const res = resolveModulePath(id, {
     try: true,
-    from: pathToFileURL(join(options.cwd || ".", options.configFile || "/")),
+    from: pathToFileURL(join(options.cwd || ".", configFile || "/")),
     suffixes: ["", "/index"],
     extensions: SUPPORTED_EXTENSIONS,
     cache: false,

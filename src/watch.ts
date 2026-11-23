@@ -49,27 +49,40 @@ export async function watchConfig<
 >(options: WatchConfigOptions<T, MT>): Promise<ConfigWatcher<T, MT>> {
   let config = await loadConfig<T, MT>(options);
 
-  const configName = options.name || "config";
-  const configFileName =
-    options.configFile ?? (options.name === "config" ? "config" : `${options.name}.config`);
+  const configFileNames = Array.isArray(options.configFile)
+    ? options.configFile
+    : options.configFile
+      ? [options.configFile]
+      : Array.isArray(options.name)
+        ? options.name.map((n) => (n === "config" ? "config" : `${n}.config`))
+        : [options.name === "config" || !options.name ? "config" : `${options.name}.config`];
+  const rcFiles = options.rcFile
+    ? Array.isArray(options.rcFile)
+      ? options.rcFile
+      : [
+          typeof options.rcFile === "string"
+            ? options.rcFile
+            : Array.isArray(options.name)
+              ? `.${options.name[0]}rc`
+              : `.${options.name || "config"}rc`,
+        ]
+    : [];
   const watchingFiles = [
     ...new Set(
       // Always include root cwd so config files created later are detected
       [{ cwd: config.cwd, source: undefined }, ...(config.layers || [])]
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
-            resolve(l.cwd!, configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName + ext),
-            resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
-          ]),
+          ...configFileNames.flatMap((configFileName) =>
+            SUPPORTED_EXTENSIONS.flatMap((ext) => [
+              resolve(l.cwd!, configFileName + ext),
+              resolve(l.cwd!, ".config", configFileName + ext),
+              resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
+            ]),
+          ),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
-          options.rcFile &&
-            resolve(
-              l.cwd!,
-              typeof options.rcFile === "string" ? options.rcFile : `.${configName}rc`,
-            ),
+          ...rcFiles.map((rc) => resolve(l.cwd!, rc)),
           options.packageJson && resolve(l.cwd!, "package.json"),
         ])
         .filter(Boolean),

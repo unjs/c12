@@ -1,0 +1,6 @@
+{
+  "name": "pkg-test",
+  "components-vue": {
+    "pkgLoaded": "components-vue"
+  }
+}

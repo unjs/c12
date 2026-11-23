@@ -749,6 +749,77 @@ describe("loader", () => {
     expect(config).toMatchObject({ baseKey: true, multiDotLayer: true });
   });
 
+  describe("multiple config names (#157)", () => {
+    it("resolves config when matching second configFile candidate", async () => {
+      const { config, configFile } = await loadConfig({
+        configFile: ["components", "components-vue"],
+        cwd: r("./fixture/multi-name/second"),
+      });
+      expect(config).toEqual({ name: "second-components-vue" });
+      expect(configFile).toBe(r("./fixture/multi-name/second/components-vue.json"));
+    });
+
+    it("resolves earlier configFile candidate when multiple exist", async () => {
+      const { config, configFile } = await loadConfig({
+        configFile: ["components", "components-vue"],
+        cwd: r("./fixture/multi-name/both"),
+      });
+      expect(config).toEqual({ name: "both-components", priority: 1 });
+      expect(configFile).toBe(r("./fixture/multi-name/both/components.json"));
+
+      const { config: configRev, configFile: configFileRev } = await loadConfig({
+        configFile: ["components-vue", "components"],
+        cwd: r("./fixture/multi-name/both"),
+      });
+      expect(configRev).toEqual({ name: "both-components-vue", priority: 2 });
+      expect(configFileRev).toBe(r("./fixture/multi-name/both/components-vue.json"));
+    });
+
+    it("resolves config using multiple names", async () => {
+      const { config, configFile } = await loadConfig({
+        name: ["components", "components-vue"],
+        cwd: r("./fixture/multi-name/named"),
+      });
+      expect(config).toEqual({ name: "named-components-vue" });
+      expect(configFile).toBe(r("./fixture/multi-name/named/components-vue.config.ts"));
+    });
+
+    it("rejects with all candidates when configFileRequired is true and none found", async () => {
+      await expect(
+        loadConfig({
+          configFile: ["components", "components-vue"],
+          cwd: r("./fixture/multi-name/first"),
+          configFileRequired: true,
+        }),
+      ).resolves.not.toThrowError();
+
+      await expect(
+        loadConfig({
+          configFile: ["nonexistent1", "nonexistent2"],
+          cwd: r("./fixture/multi-name/first"),
+          configFileRequired: true,
+        }),
+      ).rejects.toThrowError("Required config (nonexistent1, nonexistent2) cannot be resolved.");
+    });
+
+    it("loads rc file for array of names", async () => {
+      const { config } = await loadConfig({
+        name: ["components", "components-vue"],
+        cwd: r("./fixture/multi-name/rc"),
+      });
+      expect(config).toEqual({ rcLoaded: "components-vue" });
+    });
+
+    it("loads package.json for array of names", async () => {
+      const { config } = await loadConfig({
+        name: ["components", "components-vue"],
+        packageJson: true,
+        cwd: r("./fixture/multi-name/pkg"),
+      });
+      expect(config).toEqual({ pkgLoaded: "components-vue" });
+    });
+  });
+
   it("falls back to jiti when native import fails", async () => {
     // Fixture uses a TS enum, which Node's strip-only mode rejects, so the
     // native dynamic import() throws and c12 must fall back to jiti.

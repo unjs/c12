@@ -105,12 +105,12 @@ export interface LoadConfigOptions<
   T extends UserInputConfig = UserInputConfig,
   MT extends ConfigLayerMeta = ConfigLayerMeta,
 > {
-  name?: string;
+  name?: string | string[];
   cwd?: string;
 
-  configFile?: string;
+  configFile?: string | string[];
 
-  rcFile?: false | string;
+  rcFile?: false | string | string[];
   globalRc?: boolean;
 
   dotenv?: boolean | DotenvOptions;

@@ -212,4 +212,15 @@ describe("watchConfig", () => {
     expect(config.config.foo).toBe(1);
     expect(events).toEqual([]);
   });
+
+  it("watches multiple candidate config files", async () => {
+    const config = await watchConfig({
+      cwd: tmpDir,
+      configFile: ["components", "components-vue"],
+      debounce: 10,
+    });
+    expect(config.watchingFiles).toContain(r("components.json"));
+    expect(config.watchingFiles).toContain(r("components-vue.json"));
+    await config.unwatch();
+  });
 });

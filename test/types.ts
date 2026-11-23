@@ -29,4 +29,11 @@ async function main() {
   const config = await loadConfig<MyConfig, MyMeta>({});
   expectTypeOf(config.config!.foo).toEqualTypeOf<string>();
   expectTypeOf(config.meta!.metaFoo).toEqualTypeOf<string>();
+
+  const multiConfig = await loadConfig<MyConfig>({
+    name: ["components", "components-vue"],
+    configFile: ["components", "components-vue"],
+    rcFile: [".componentsrc", ".components-vuerc"],
+  });
+  expectTypeOf(multiConfig.config!.foo).toEqualTypeOf<string>();
 }
