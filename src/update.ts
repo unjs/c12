@@ -51,15 +51,19 @@ export async function updateConfig(opts: UpdateConfigOptions): Promise<UpdateCon
   if (!defaultExport) {
     throw new Error("Default export is missing in the config file!");
   }
-  const configTarget = resolveConfigTarget(defaultExport, _module, magicast);
-  if (!configTarget) {
+  const configTarget = opts.onUpdate
+    ? resolveConfigTarget(defaultExport, _module, magicast)
+    : undefined;
+  if (opts.onUpdate && !configTarget) {
     throw new Error(
-      "Default export in the config file is not a statically analyzable object, so it cannot be updated.",
+      `Default export in ${configFile} is not a statically analyzable object, so it cannot be updated.`,
     );
   }
 
-  await opts.onUpdate?.(configTarget.proxy);
-  configTarget.commit?.();
+  if (configTarget) {
+    await opts.onUpdate?.(configTarget.proxy);
+    configTarget.commit?.();
+  }
 
   await writeFile(configFile, _module.generate().code);
 

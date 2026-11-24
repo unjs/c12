@@ -149,5 +149,9 @@ describe("update config file", () => {
         },
       }),
     ).rejects.toThrow("not a statically analyzable object");
+    // Without an update callback nothing is edited, so the file is still accepted
+    await expect(
+      updateConfig({ cwd: tmpDir, configFile: "dynamic.config" }),
+    ).resolves.toMatchObject({ created: false });
   });
 });
