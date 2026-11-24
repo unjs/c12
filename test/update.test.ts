@@ -78,4 +78,76 @@ describe("update config file", () => {
     expect(res.configFile).toBe(r("./.tmp/.config/foo.bar.ts"));
     expect(existsSync(r("./.tmp/foo.bar.config.ts"))).toBe(false);
   });
+  it("update config exported as an arrow function", async () => {
+    await mkdir(tmpDir, { recursive: true });
+    await writeFile(r("./.tmp/arrow.config.ts"), "export default () => ({ test: true })");
+    const res = await updateConfig({
+      cwd: tmpDir,
+      configFile: "arrow.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    expect(res.created).toBe(false);
+    const contents = await readFile(r("./.tmp/arrow.config.ts"), "utf8");
+    expect(contents).toContain("() => ({");
+    expect(contents).toContain("test2: false");
+  });
+  it("update config wrapped in defineConfig with an arrow function", async () => {
+    await writeFile(
+      r("./.tmp/define.config.ts"),
+      "import { defineConfig } from 'c12'\nexport default defineConfig(() => ({ test: true }))",
+    );
+    await updateConfig({
+      cwd: tmpDir,
+      configFile: "define.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    const contents = await readFile(r("./.tmp/define.config.ts"), "utf8");
+    expect(contents).toContain("defineConfig(() => ({");
+    expect(contents).toContain("test2: false");
+  });
+  it("update config returned from an arrow function with a block body", async () => {
+    await writeFile(r("./.tmp/block.config.ts"), "export default () => { return { test: true } }");
+    await updateConfig({
+      cwd: tmpDir,
+      configFile: "block.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    const contents = await readFile(r("./.tmp/block.config.ts"), "utf8");
+    expect(contents).toContain("return {");
+    expect(contents).toContain("test2: false");
+  });
+  it("update config exported as a variable reference", async () => {
+    await writeFile(
+      r("./.tmp/variable.config.ts"),
+      "const config = { test: true }\nexport default config",
+    );
+    await updateConfig({
+      cwd: tmpDir,
+      configFile: "variable.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    const contents = await readFile(r("./.tmp/variable.config.ts"), "utf8");
+    expect(contents).toContain("const config = {");
+    expect(contents).toContain("test2: false");
+  });
+  it("reject a config that cannot be statically resolved", async () => {
+    await writeFile(r("./.tmp/dynamic.config.ts"), "export default () => makeConfig()");
+    await expect(
+      updateConfig({
+        cwd: tmpDir,
+        configFile: "dynamic.config",
+        onUpdate: (config) => {
+          config.test2 = false;
+        },
+      }),
+    ).rejects.toThrow("not a statically analyzable object");
+  });
 });
