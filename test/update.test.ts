@@ -11,6 +11,7 @@ describe("update config file", () => {
   const tmpDir = r("./.tmp");
   beforeAll(async () => {
     await rm(tmpDir, { recursive: true }).catch(() => {});
+    await mkdir(tmpDir, { recursive: true });
   });
   it("create new config", async () => {
     let onCreateFile;
@@ -137,6 +138,56 @@ describe("update config file", () => {
     const contents = await readFile(r("./.tmp/variable.config.ts"), "utf8");
     expect(contents).toContain("const config = {");
     expect(contents).toContain("test2: false");
+  });
+  it("update a config exported as a named variable", async () => {
+    await writeFile(
+      r("./.tmp/named-variable.config.ts"),
+      "export const config = { test: true }\nexport default config",
+    );
+    await updateConfig({
+      cwd: tmpDir,
+      configFile: "named-variable.config",
+      onUpdate: (config) => {
+        config.test2 = false;
+      },
+    });
+    const contents = await readFile(r("./.tmp/named-variable.config.ts"), "utf8");
+    expect(contents).toContain("export const config = {");
+    expect(contents).toContain("test2: false");
+  });
+  it("reject a config function with alternative return paths", async () => {
+    await writeFile(
+      r("./.tmp/branches.config.ts"),
+      "export default (ctx) => {\n  if (ctx.dev) {\n    return { test: true }\n  }\n  return { test: false }\n}",
+    );
+    await expect(
+      updateConfig({
+        cwd: tmpDir,
+        configFile: "branches.config",
+        onUpdate: (config) => {
+          config.test2 = false;
+        },
+      }),
+    ).rejects.toThrow("not a statically analyzable object");
+    const contents = await readFile(r("./.tmp/branches.config.ts"), "utf8");
+    expect(contents).not.toContain("test2");
+  });
+  it("reject a config variable that is written after its declaration", async () => {
+    await writeFile(
+      r("./.tmp/overridden.config.ts"),
+      "const config = {}\nconfig.test2 = true\nexport default config",
+    );
+    await expect(
+      updateConfig({
+        cwd: tmpDir,
+        configFile: "overridden.config",
+        onUpdate: (config) => {
+          config.test2 = false;
+        },
+      }),
+    ).rejects.toThrow("not a statically analyzable object");
+    const contents = await readFile(r("./.tmp/overridden.config.ts"), "utf8");
+    expect(contents).toContain("config.test2 = true");
   });
   it("reject a config that cannot be statically resolved", async () => {
     await writeFile(r("./.tmp/dynamic.config.ts"), "export default () => makeConfig()");

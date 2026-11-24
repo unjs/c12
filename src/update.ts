@@ -106,8 +106,12 @@ function resolveConfigTarget(
       return undefined;
     }
     case "identifier": {
-      const init = findVariableInit(mod.$ast, exportValue.$name);
-      return init?.type === "ObjectExpression" ? detachedConfigTarget(init, magicast) : undefined;
+      const name = exportValue.$name;
+      const init = findVariableInit(mod.$ast, name);
+      if (init?.type !== "ObjectExpression" || hasOverridingWrite(mod.$ast, name)) {
+        return undefined;
+      }
+      return detachedConfigTarget(init, magicast);
     }
     default: {
       return undefined;
@@ -116,25 +120,124 @@ function resolveConfigTarget(
 }
 
 function findReturnedObject(block: ConfigObjectNode): ConfigObjectNode | undefined {
-  const returns = block.body.filter((node: ConfigObjectNode) => node.type === "ReturnStatement");
-  if (returns.length !== 1) {
+  const returns: ConfigObjectNode[] = [];
+  collectReturns(block, returns);
+  // A single top-level return is the only shape where editing the returned
+  // object is guaranteed to affect every invocation of the config function.
+  // Extra returns, or a return nested in a branch, can leave another config
+  // value live, so those bodies are rejected instead of partially updated.
+  const [returnStatement] = returns;
+  if (!returnStatement || returns.length !== 1 || !block.body.includes(returnStatement)) {
     return undefined;
   }
-  const argument = unwrapExpression(returns[0].argument);
+  const argument = unwrapExpression(returnStatement.argument);
   return argument?.type === "ObjectExpression" ? argument : undefined;
 }
 
-function findVariableInit(program: ConfigObjectNode, name: string): ConfigObjectNode | undefined {
-  for (const node of program.body) {
-    if (node.type !== "VariableDeclaration") {
+const FUNCTION_NODE_TYPES = new Set([
+  "FunctionDeclaration",
+  "FunctionExpression",
+  "ArrowFunctionExpression",
+  "ClassMethod",
+  "ClassPrivateMethod",
+  "ObjectMethod",
+]);
+
+function collectReturns(node: ConfigObjectNode | undefined, returns: ConfigObjectNode[]): void {
+  if (!node || typeof node !== "object") {
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      collectReturns(child, returns);
+    }
+    return;
+  }
+  if (typeof node.type !== "string" || FUNCTION_NODE_TYPES.has(node.type)) {
+    return;
+  }
+  if (node.type === "ReturnStatement") {
+    returns.push(node);
+    return;
+  }
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "loc" || key === "range" || key === "start" || key === "end" || key === "parent") {
       continue;
     }
-    for (const declaration of node.declarations) {
-      if (declaration.id?.type === "Identifier" && declaration.id.name === name) {
-        return unwrapExpression(declaration.init);
+    if (value && typeof value === "object") {
+      collectReturns(value as ConfigObjectNode, returns);
+    }
+  }
+}
+
+function findVariableInit(program: ConfigObjectNode, name: string): ConfigObjectNode | undefined {
+  let found = false;
+  let init: ConfigObjectNode | undefined;
+  for (const node of program.body) {
+    const declaration = node.type === "ExportNamedDeclaration" ? node.declaration : node;
+    if (declaration?.type !== "VariableDeclaration") {
+      continue;
+    }
+    for (const declarator of declaration.declarations) {
+      if (declarator.id?.type === "Identifier" && declarator.id.name === name) {
+        if (found) {
+          // The effective value of a redeclared binding is ambiguous.
+          return undefined;
+        }
+        found = true;
+        init = unwrapExpression(declarator.init);
       }
     }
   }
+  return init;
+}
+
+/**
+ * Detect statements that write to the config binding after its declaration
+ * (`config.foo = 1`, `config = {}`, `Object.assign(config, ...)`). Editing the
+ * initializer would not be the effective value in those files.
+ */
+function hasOverridingWrite(program: ConfigObjectNode, name: string): boolean {
+  return program.body.some(
+    (node: ConfigObjectNode) =>
+      node.type === "ExpressionStatement" && writesTo(node.expression, name),
+  );
+}
+
+function writesTo(node: ConfigObjectNode | undefined, name: string): boolean {
+  if (!node) {
+    return false;
+  }
+  if (node.type === "SequenceExpression") {
+    return node.expressions.some((expression: ConfigObjectNode) => writesTo(expression, name));
+  }
+  if (node.type === "AssignmentExpression") {
+    return isBindingTarget(node.left, name);
+  }
+  if (
+    node.type === "UpdateExpression" &&
+    node.argument?.type === "Identifier" &&
+    node.argument.name === name
+  ) {
+    return true;
+  }
+  return (
+    node.type === "CallExpression" &&
+    node.callee?.type === "MemberExpression" &&
+    node.callee.object?.type === "Identifier" &&
+    node.callee.object.name === "Object" &&
+    node.callee.property?.name === "assign" &&
+    node.arguments?.[0]?.type === "Identifier" &&
+    node.arguments[0].name === name
+  );
+}
+
+function isBindingTarget(node: ConfigObjectNode | undefined, name: string): boolean {
+  let target = node;
+  while (target?.type === "MemberExpression") {
+    target = target.object;
+  }
+  return target?.type === "Identifier" && target.name === name;
 }
 
 function unwrapExpression(node: ConfigObjectNode | undefined): ConfigObjectNode | undefined {
