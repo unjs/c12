@@ -818,6 +818,25 @@ describe("loader", () => {
       });
       expect(config).toEqual({ pkgLoaded: "components-vue" });
     });
+
+    it("resolves relative file extends from options.cwd", async () => {
+      const { config, layers } = await loadConfig({
+        configFile: "components-vue",
+        cwd: r("./fixture/multi-name/second"),
+        overrides: {
+          extends: "../first/components.json",
+        },
+      });
+      expect(config).toEqual({ name: "second-components-vue" });
+      expect(layers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            config: { name: "first-components" },
+            configFile: r("./fixture/multi-name/first/components.json"),
+          }),
+        ]),
+      );
+    });
   });
 
   it("falls back to jiti when native import fails", async () => {

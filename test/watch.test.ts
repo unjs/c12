@@ -216,7 +216,7 @@ describe("watchConfig", () => {
   it("watches multiple candidate config files", async () => {
     const config = await watchConfig({
       cwd: tmpDir,
-      configFile: ["components", "components-vue"],
+      configFile: ["components", "components-vue.json"],
       debounce: 10,
     });
     expect(config.watchingFiles).toContain(r("components.json"));

@@ -73,13 +73,15 @@ export async function watchConfig<
       [{ cwd: config.cwd, source: undefined }, ...(config.layers || [])]
         .filter((l) => l.cwd)
         .flatMap((l) => [
-          ...configFileNames.flatMap((configFileName) =>
-            SUPPORTED_EXTENSIONS.flatMap((ext) => [
+          ...configFileNames.flatMap((configFileName) => [
+            resolve(l.cwd!, configFileName),
+            resolve(l.cwd!, ".config", configFileName),
+            ...SUPPORTED_EXTENSIONS.flatMap((ext) => [
               resolve(l.cwd!, configFileName + ext),
               resolve(l.cwd!, ".config", configFileName + ext),
               resolve(l.cwd!, ".config", configFileName.replace(/\.config$/, "") + ext),
             ]),
-          ),
+          ]),
           l.source && resolve(l.cwd!, l.source),
           // TODO: Support watching rc from home and workspace
           ...rcFiles.map((rc) => resolve(l.cwd!, rc)),

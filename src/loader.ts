@@ -440,19 +440,19 @@ async function resolveConfig<
     ? (Array.isArray(options.configFile) ? options.configFile : [options.configFile!]).filter(
         Boolean,
       )
-    : [source];
+    : [basename(source)];
 
   let resolvedFile: string | undefined;
-  let matchedSource: string = configFiles[0] || source;
+  let matchedSource: string = isDir ? configFiles[0] || source : source;
 
   for (const file of configFiles) {
     const resolved =
-      tryResolve(resolve(cwd, file), options) ||
+      tryResolve(isDir ? resolve(cwd, file) : resolvedPath, options) ||
       tryResolve(resolve(cwd, ".config", file.replace(/\.config$/, "")), options) ||
       tryResolve(resolve(cwd, ".config", file), options);
     if (resolved && existsSync(resolved)) {
       resolvedFile = resolved;
-      matchedSource = file;
+      matchedSource = isDir ? file : source;
       break;
     }
   }
@@ -467,7 +467,11 @@ async function resolveConfig<
 
   res.configFile =
     resolvedFile ||
-    (Array.isArray(options.configFile) && isDir ? options.configFile.join(", ") : matchedSource);
+    (Array.isArray(options.configFile) && isDir
+      ? options.configFile.join(", ")
+      : isDir
+        ? matchedSource
+        : resolvedPath);
 
   if (!existsSync(res.configFile!)) {
     return res;
