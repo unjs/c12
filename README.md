@@ -100,15 +100,15 @@ Resolve configuration from this working directory. The default is `process.cwd()
 
 ### `name`
 
-Configuration base name. The default is `config`.
+Configuration base name. The default is `config`. Can also be an array of names to search from (e.g. `['components', 'components-vue']`).
 
 ### `configFile`
 
-Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`).
+Configuration file name without extension. Default is generated from `name` (f.e., if `name` is `foo`, the config file will be => `foo.config`). Can also be an array of config file names to search from.
 
 ### `rcFile`
 
-RC Config file name. Default is generated from `name` (name=foo => `.foorc`).
+RC Config file name. Default is generated from `name` (name=foo => `.foorc`). Can also be an array of RC config file names.
 
 Set to `false` to disable loading RC config.
 
