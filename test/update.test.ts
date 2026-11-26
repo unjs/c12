@@ -189,6 +189,23 @@ describe("update config file", () => {
     const contents = await readFile(r("./.tmp/overridden.config.ts"), "utf8");
     expect(contents).toContain("config.test2 = true");
   });
+  it("reject a config variable updated in place after its declaration", async () => {
+    await writeFile(
+      r("./.tmp/incremented.config.ts"),
+      "const config = { test2: 0 }\nconfig.test2++\nexport default config",
+    );
+    await expect(
+      updateConfig({
+        cwd: tmpDir,
+        configFile: "incremented.config",
+        onUpdate: (config) => {
+          config.test2 = 10;
+        },
+      }),
+    ).rejects.toThrow("not a statically analyzable object");
+    const contents = await readFile(r("./.tmp/incremented.config.ts"), "utf8");
+    expect(contents).toContain("config.test2++");
+  });
   it("reject a config that cannot be statically resolved", async () => {
     await writeFile(r("./.tmp/dynamic.config.ts"), "export default () => makeConfig()");
     await expect(

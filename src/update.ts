@@ -214,12 +214,8 @@ function writesTo(node: ConfigObjectNode | undefined, name: string): boolean {
   if (node.type === "AssignmentExpression") {
     return isBindingTarget(node.left, name);
   }
-  if (
-    node.type === "UpdateExpression" &&
-    node.argument?.type === "Identifier" &&
-    node.argument.name === name
-  ) {
-    return true;
+  if (node.type === "UpdateExpression") {
+    return isBindingTarget(node.argument, name);
   }
   return (
     node.type === "CallExpression" &&
